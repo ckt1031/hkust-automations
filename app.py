@@ -1,111 +1,86 @@
-import email
-import imaplib
-import os
-from datetime import datetime, timedelta
-from email.header import decode_header
+from datetime import datetime
 
-import dotenv
+from langchain_text_splitters import (MarkdownHeaderTextSplitter,
+                                      RecursiveCharacterTextSplitter)
 
-from utils import (check_email_date, check_email_sender, clean_html,
-                   get_sender_email, remove_css_and_scripts)
-
-# Load environment variables from .env file
-dotenv.load_dotenv()
-
-# Access environment variables
-IMAP_USERNAME = os.getenv("IMAP_USERNAME")
-IMAP_PASSWORD = os.getenv("IMAP_PASSWORD")
-IMAP_URL = os.getenv("IMAP_URL")
-IMAP_PORT = 993
-
-# Configurations
-CHECK_PAST_HOURS = 12
-
-# Create an IMAP session
-mail = imaplib.IMAP4_SSL(IMAP_URL, IMAP_PORT)
-
-# Login to the server
-mail.login(IMAP_USERNAME, IMAP_PASSWORD)
-
-# Select the mailbox you want to fetch emails from
-# Options: "INBOX", but you can select other folders too
-mail.select("inbox")
-
-# Calculate the date string for the past 48 hours since it does not support time directly
-date_last = (datetime.now() - timedelta(days=2)).strftime("%d-%b-%Y")
-
-# Search for all emails
-status, messages = mail.search(None, f"SINCE {date_last}")
-
-# Messages is a list of email IDs
-email_ids = messages[0].split()
+import db
+from email_extractor import EmailExtractor
+from llm import LLM
+from notification import send_discord
 
 
-# Iterate over the last 5 emails
-for email_id in email_ids[-5:]:
-    # Fetch the email by ID
-    status, msg_data = mail.fetch(email_id, "(RFC822)")
+def read_email_system_prompt():
+    with open("prompts/email-summarize.txt", "r") as f:
+        return f.read()
 
-    # Check if the email is properly fetched
-    if status != "OK":
-        print("Error fetching the email", email_id)
-        continue
 
-    if msg_data[0] is None:
-        print("No email data found", email_id)
-        continue
+if __name__ == "__main__":
+    print("Starting the email summarizer")
 
-    data: tuple = msg_data[0]
+    # Initialize the email client
+    extractor = EmailExtractor()
 
-    # msg_data contains the raw email data
-    raw_email = data[1]
+    emails = extractor.extract_emails()
 
-    # Parse the email raw data into a message object
-    msg = email.message_from_bytes(raw_email)
+    # YYYY-MM-DD
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    email_user_prompt = f"""
+    Date: {today_date}
+    
+    Emails:
+    """
 
-    # Continue if email is older than EARLIEST_DATE
-    if not check_email_date(msg["Date"], CHECK_PAST_HOURS):
-        print(f"Email is older than {CHECK_PAST_HOURS} hours")
-        continue
+    # Check if some email is checked
+    for email in emails:
+        checked = db.is_email_checked(email["subject"])
 
-    # Print email headers and subject
-    subject, encoding = decode_header(msg["Subject"])[0]
-    if isinstance(subject, bytes):
-        # Decode if it’s in byte format
-        subject = subject.decode(encoding if encoding else "utf-8")
+        if checked:
+            print(f"Email with subject {email['subject']} is already checked")
 
-    body = ""
+            # Remove the email from the list
+            emails.remove(email)
+            continue
 
-    # Check
+        email_user_prompt += f"\n\n\nSubject: {email['subject']}\nFrom: {email['from']}\nBody: {email['body']}"
 
-    # print("Date:", msg["Date"])
-    if not check_email_sender(msg["From"]):
-        print(f"Not from the expected sender ({msg['From']})")
-        continue
+    # print(emails)
 
-    # Check if the email is multipart, which is the case for most emails
-    if msg.is_multipart():
-        for part in msg.walk():
-            # Get the email body
-            content_type = part.get_content_type()
-            content_disposition = str(part.get("Content-Disposition"))
+    # Write email_user_prompt into output.txt file
+    # with open("output.txt", "w") as f:
+    #     f.write(email_user_prompt)
 
-            if "attachment" not in content_disposition and content_type == "text/plain":
-                # Fetch the plain text body
-                body = part.get_payload(decode=True).decode("utf-8")
-            elif (
-                "attachment" not in content_disposition and content_type == "text/html"
-            ):
-                # If it's HTML, clean it
-                html_body = part.get_payload(decode=True).decode("utf-8")
-                cleaned_html = remove_css_and_scripts(html_body)
-                body = clean_html(cleaned_html)
-    else:
-        # If it's a single part email
-        body = msg.get_payload(decode=True).decode("utf-8")
+    # Call the LLM model to summarize the emails
+    llm = LLM()
 
-    # Print the cleaned body
-    print("Body:", body)
+    system_prompt = read_email_system_prompt()
 
-# Logout from the server to end the session
-mail.logout()
+    result = llm.complete(system_prompt, email_user_prompt)
+
+    headers_to_split_on = [
+        ("#", "Header 1"),
+        ("##", "Header 2"),
+        ("###", "Header 3"),
+    ]
+
+    markdown_splitter = MarkdownHeaderTextSplitter(
+        headers_to_split_on=headers_to_split_on, strip_headers=False
+    )
+
+    result = markdown_splitter.split_text(result)
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1024,
+    )
+
+    splits = text_splitter.split_documents(result)
+
+    for split in splits:
+        send_discord(split.page_content)
+
+    # print(result)
+
+    # Mark and save database after all actions to prevent missing emails if the program crashes
+
+    # Mark the emails as checked
+    for email in emails:
+        db.mark_email_as_checked(email["subject"])

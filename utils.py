@@ -1,6 +1,11 @@
-import email
 import re
-from datetime import datetime
+from datetime import datetime, timezone
+
+from dateutil import parser
+
+
+def remove_massive_space(text):
+    return re.sub(r"\s+", " ", text)
 
 
 def clean_html(raw_html: str) -> str:
@@ -53,15 +58,25 @@ def get_sender_email(msg_from: str) -> str:
     return email[0] if email else msg_from
 
 
+def parse_date(date_string):
+    try:
+        return parser.parse(date_string)
+    except ValueError:
+        raise ValueError(f"Unable to parse date string: {date_string}")
+
+
 def check_email_date(date: str, hours: int) -> bool:
     """
     Check if the email is newer than the specified hours
     """
-    # Parse the email date: Tue, 27 Aug 2024 06:22:46 GMT
-    email_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %Z")
-    # Get the current time
-    current_time = datetime.now()
-    # Calculate the difference in hours
-    time_diff = current_time - email_date
+    parsed_date = parser.parse(date)
 
-    return time_diff.total_seconds() / 3600 < hours
+    # Ensure parsed_date is timezone-aware
+    if parsed_date.tzinfo is None:
+        parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+
+    # Get current time as timezone-aware
+    current_date = datetime.now(timezone.utc)
+
+    difference = current_date - parsed_date
+    return difference.total_seconds() / 3600 < hours
