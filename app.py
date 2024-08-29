@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from langchain_text_splitters import (MarkdownHeaderTextSplitter,
@@ -7,6 +8,7 @@ import db
 from email_extractor import EmailExtractor
 from llm import LLM
 from notification import send_discord
+from rss import RSS
 
 
 def read_email_system_prompt():
@@ -15,6 +17,9 @@ def read_email_system_prompt():
 
 
 if __name__ == "__main__":
+    print("Starting the RSS summarizer")
+    asyncio.run(RSS().check_all())
+
     print("Starting the email summarizer")
 
     # Initialize the email client
@@ -23,16 +28,21 @@ if __name__ == "__main__":
     emails = extractor.extract_emails()
 
     # YYYY-MM-DD
-    today_date = datetime.now().strftime("%Y-%m-%d")
+    today_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    today_day = datetime.now().strftime("%A")  # Monday, Tuesday, etc.
+
     email_user_prompt = f"""
     Date: {today_date}
+    Day: {today_day}
     
     Emails:
     """
 
+    unchecked_email_amount = 0
+
     # Check if some email is checked
     for email in emails:
-        checked = db.is_email_checked(email["subject"])
+        checked = db.is_email_checked(email["subject"], email["date"])
 
         if checked:
             print(f"Email with subject {email['subject']} is already checked")
@@ -42,12 +52,12 @@ if __name__ == "__main__":
             continue
 
         email_user_prompt += f"\n\n\nSubject: {email['subject']}\nFrom: {email['from']}\nBody: {email['body']}"
+        unchecked_email_amount += 1
 
-    # print(emails)
-
-    # Write email_user_prompt into output.txt file
-    # with open("output.txt", "w") as f:
-    #     f.write(email_user_prompt)
+    # If there are no unchecked emails, exit the program
+    if unchecked_email_amount == 0:
+        print("No unchecked emails found")
+        exit()
 
     # Call the LLM model to summarize the emails
     llm = LLM()
@@ -75,12 +85,8 @@ if __name__ == "__main__":
     splits = text_splitter.split_documents(result)
 
     for split in splits:
-        send_discord(split.page_content)
-
-    # print(result)
+        send_discord(split.page_content, "HKUST Email")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
-
-    # Mark the emails as checked
     for email in emails:
-        db.mark_email_as_checked(email["subject"])
+        db.mark_email_as_checked(email["subject"], email["date"])

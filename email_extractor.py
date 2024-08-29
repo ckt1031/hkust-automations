@@ -132,7 +132,14 @@ class EmailExtractor:
             # Print the cleaned body
             # print("Email", subject, body)
 
-            emails.append({"subject": subject, "body": body, "from": msg["From"]})
+            emails.append(
+                {
+                    "subject": subject,
+                    "body": body,
+                    "from": msg["From"],
+                    "date": msg["Date"],
+                }
+            )
 
         # Logout from the server to end the session
         self.mail.logout()
