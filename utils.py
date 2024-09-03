@@ -44,7 +44,7 @@ def check_email_sender(sender: str) -> bool:
         return False
 
     # If email includes ust.hk, then it's from the university
-    if "ust.hk" in sender_email:
+    if "ust" in sender_email or "instruct" in sender_email:
         return True
 
     return False

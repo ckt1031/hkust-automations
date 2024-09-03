@@ -29,23 +29,42 @@ async def scrape_body(url):
         browser = await p.webkit.launch()
         page = await browser.new_page()
 
+        text_content = ""
+
         # Navigate to the specified URL
         await page.goto(url)
 
-        # Wait for the element with class 'body' to be visible
-        await page.wait_for_selector(".body")
-
-        # Get the text content of the element
-        body_content = await page.query_selector(".body")
-        text_content = ""
-
-        if body_content:
-            text_content = await body_content.inner_text()
+        try:
+            # Check if the page has an event wrapper
+            text_content = await fetch_event_body(page, text_content)
+        except:
+            # If the page does not have an event wrapper, try to get the body
+            text_content = await fetch_event_body(page, text_content)
 
         # Close the browser
         await browser.close()
 
         return text_content
+
+
+async def fetch_body(page, text_content):
+    # Wait for the element with class 'body' to be visible
+    await page.wait_for_selector(".body")
+    # Get the text content of the element
+    body_content = await page.query_selector(".body")
+    if body_content:
+        text_content = await body_content.inner_text()
+    return text_content
+
+
+async def fetch_event_body(page, text_content):
+    # Wait for the element with class 'body' to be visible
+    await page.wait_for_selector(".event-wrapper")
+    # Get the text content of the element
+    body_content = await page.query_selector(".event-wrapper")
+    if body_content:
+        text_content = await body_content.inner_text()
+    return text_content
 
 
 def get_feed(url):
