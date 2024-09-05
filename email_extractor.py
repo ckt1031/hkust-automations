@@ -7,8 +7,13 @@ from email.header import decode_header
 
 import dotenv
 
-from utils import (check_email_date, check_email_sender, clean_html,
-                   remove_css_and_scripts, remove_massive_space)
+from utils import (
+    check_email_date,
+    check_email_sender,
+    clean_html,
+    remove_css_and_scripts,
+    remove_massive_space,
+)
 
 # Load environment variables from .env file
 dotenv.load_dotenv()
@@ -21,6 +26,10 @@ class EmailExtractor:
         self.IMAP_URL = os.getenv("IMAP_URL")
         self.IMAP_PORT = 993
         self.CHECK_PAST_HOURS = 12
+
+        # Reject if self.IMAP_USERNAME, IMAP_PASSWORD, or IMAP_URL is None
+        if not self.IMAP_URL or not self.IMAP_USERNAME or not self.IMAP_PASSWORD:
+            raise ValueError("IMAP credentials not found in the environment variables")
 
         self.mail = imaplib.IMAP4_SSL(self.IMAP_URL, self.IMAP_PORT)
 
@@ -128,9 +137,6 @@ class EmailExtractor:
             else:
                 # If it's a single part email
                 body = msg.get_payload(decode=True).decode("utf-8", errors="replace")
-
-            # Print the cleaned body
-            # print("Email", subject, body)
 
             emails.append(
                 {
