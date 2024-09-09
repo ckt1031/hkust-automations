@@ -1,0 +1,26 @@
+name: Checking
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+jobs:
+  Lint:
+    name: Lint Project
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Packages
+        run: pip install -r requirements.txt
+
+      - name: Lint Project
+        run: ruff check .

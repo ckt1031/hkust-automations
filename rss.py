@@ -1,9 +1,5 @@
-import asyncio
-import os
-
 import dotenv
 import feedparser
-import requests
 from playwright.async_api import async_playwright
 
 from db import get_ms, hash_string_sha256, is_record_exist, save_record
@@ -37,7 +33,9 @@ async def scrape_body(url):
         try:
             # Check if the page has an event wrapper
             text_content = await fetch_event_body(page, text_content)
-        except:
+        except Exception as e:
+            print(e)
+
             # If the page does not have an event wrapper, try to get the body
             text_content = await fetch_event_body(page, text_content)
 

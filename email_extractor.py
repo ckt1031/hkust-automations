@@ -7,13 +7,8 @@ from email.header import decode_header
 
 import dotenv
 
-from utils import (
-    check_email_date,
-    check_email_sender,
-    clean_html,
-    remove_css_and_scripts,
-    remove_massive_space,
-)
+from utils import (check_email_date, check_email_sender, clean_html,
+                   remove_css_and_scripts, remove_massive_space)
 
 # Load environment variables from .env file
 dotenv.load_dotenv()
