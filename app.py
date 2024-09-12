@@ -1,8 +1,10 @@
 import asyncio
 from datetime import datetime
 
-from langchain_text_splitters import (MarkdownHeaderTextSplitter,
-                                      RecursiveCharacterTextSplitter)
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 
 import db
 from email_extractor import EmailExtractor
@@ -17,7 +19,6 @@ def read_email_system_prompt():
 
 
 def email_summarize():
-    global llm, split
     # Initialize the email client
     extractor = EmailExtractor()
     emails = extractor.extract_emails()

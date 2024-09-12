@@ -4,3 +4,4 @@
 !.env.example
 *.db
 __pycache__
+unexpected_sender.txt
