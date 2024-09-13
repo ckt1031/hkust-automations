@@ -1,10 +1,8 @@
 import asyncio
 from datetime import datetime
 
-from langchain_text_splitters import (
-    MarkdownHeaderTextSplitter,
-    RecursiveCharacterTextSplitter,
-)
+from langchain_text_splitters import (MarkdownHeaderTextSplitter,
+                                      RecursiveCharacterTextSplitter)
 
 import db
 from email_extractor import EmailExtractor

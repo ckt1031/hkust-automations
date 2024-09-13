@@ -35,3 +35,5 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
           TSUN1031_API_KEY: ${{ secrets.TSUN1031_API_KEY }}
+
+          REDIS_CONNECTION_STRING: ${{ secrets.REDIS_CONNECTION_STRING }}

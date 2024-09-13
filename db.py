@@ -1,12 +1,23 @@
 import hashlib
-import shelve
+import os
+import sys
 from datetime import timezone
 
+import dotenv
+import redis
 from dateutil import parser
 
+dotenv.load_dotenv()
 
-def open_db():
-    return shelve.open("data")
+redis_client = None
+
+if not redis_client:
+    try:
+        redis_connection_string = os.environ["REDIS_CONNECTION_STRING"]
+
+        redis_client = redis.from_url(redis_connection_string)
+    except KeyError:
+        sys.exit("REDIS_CONNECTION_STRING environment variable is not set")
 
 
 def hash_string_sha256(input_string: str):
@@ -31,13 +42,12 @@ def get_ms(date: str):
 
 
 def is_record_exist(key: str):
-    with open_db() as db:
-        return key in db
+    return redis_client.exists(key)
 
 
 def save_record(key: str, value: bool):
-    with open_db() as db:
-        db[key] = value
+    # 0 for False, 1 for True
+    redis_client.set(key, int(value))
 
 
 def is_email_checked(email_subject: str, date: str):
