@@ -35,6 +35,7 @@ async def scrape_body(url):
             text_content = await fetch_event_body(page, text_content)
         except Exception as e:
             print(e)
+            print(f"Failed to fetch event body for {url}")
 
             # If the page does not have an event wrapper, try to get the body
             text_content = await fetch_event_body(page, text_content)
