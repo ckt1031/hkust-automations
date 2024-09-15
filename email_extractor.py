@@ -7,8 +7,13 @@ from email.header import decode_header
 
 import dotenv
 
-from utils import (check_email_date, check_email_sender, clean_html,
-                   remove_css_and_scripts, remove_massive_space)
+from utils import (
+    check_email_date,
+    check_email_sender,
+    clean_html,
+    remove_css_and_scripts,
+    remove_massive_space,
+)
 
 # Load environment variables from .env file
 dotenv.load_dotenv()
@@ -41,7 +46,7 @@ class EmailExtractor:
         self.IMAP_PASSWORD = os.getenv("IMAP_PASSWORD")
         self.IMAP_URL = os.getenv("IMAP_URL")
         self.IMAP_PORT = 993
-        self.CHECK_PAST_HOURS = 12
+        self.CHECK_PAST_HOURS = 24
 
         # Reject if self.IMAP_USERNAME, IMAP_PASSWORD, or IMAP_URL is None
         if not self.IMAP_URL or not self.IMAP_USERNAME or not self.IMAP_PASSWORD:
@@ -120,7 +125,7 @@ class EmailExtractor:
 
             # print("Date:", msg["Date"])
             if not check_email_sender(msg["From"]):
-                print(f"Not from the expected sender ({msg['From']})")
+                print(f"Not from the expected sender ({msg['From']}): {subject}")
                 continue
 
             # Check if the email is multipart, which is the case for most emails

@@ -1,8 +1,10 @@
 import asyncio
 from datetime import datetime
 
-from langchain_text_splitters import (MarkdownHeaderTextSplitter,
-                                      RecursiveCharacterTextSplitter)
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 
 import db
 from email_extractor import EmailExtractor
@@ -35,7 +37,7 @@ def email_summarize():
         checked = db.is_email_checked(email["subject"], email["date"])
 
         if checked:
-            print(f"Email with subject {email['subject']} is already checked")
+            print(f"Email with subject \"{email['subject']}\" is already checked")
 
             # Remove the email from the list
             emails.remove(email)
