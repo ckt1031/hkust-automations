@@ -54,7 +54,7 @@ Concise summary of the email content
 
 ...
 
-## Information
+**__Information__**
 
 1. [Brief summary of information item 1]
 2. [Brief summary of information item 2]
