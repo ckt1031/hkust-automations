@@ -45,9 +45,9 @@ def is_record_exist(key: str):
     return redis_client.exists(key)
 
 
-def save_record(key: str, value: bool):
+def save_record(key: str, value: bool, expire_time: int = -1):
     # 0 for False, 1 for True
-    redis_client.set(key, int(value))
+    redis_client.set(key, int(value), ex=None if expire_time == -1 else expire_time)
 
 
 def is_email_checked(email_subject: str, date: str):
@@ -59,4 +59,5 @@ def is_email_checked(email_subject: str, date: str):
 
 def mark_email_as_checked(email_subject: str, date: str):
     key = hash_string_sha256(f"{email_subject} - {get_ms(date)}")
-    save_record(key, True)
+    expiring_time_in_seconds = 60 * 60 * 24 * 3 # 3 days
+    save_record(key, True, expiring_time_in_seconds)
