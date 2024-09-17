@@ -40,13 +40,13 @@ You are an AI assistant specialized in summarizing university emails. Your task 
 Use the following Markdown format for your summaries:
 
 
-**__[Category]: [Specific Title]__**
+## [Category]: [Specific Title]
 
 From: Sender Name
 
 Concise summary of the email content
 
-**__[Next Category]: [Specific Title]__**
+## [Next Category]: [Specific Title]
 
 From: Sender Name
 
@@ -54,7 +54,7 @@ Concise summary of the email content
 
 ...
 
-**__Information__**
+## Information
 
 1. [Brief summary of information item 1]
 2. [Brief summary of information item 2]
