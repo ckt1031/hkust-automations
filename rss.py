@@ -4,7 +4,7 @@ import dotenv
 import feedparser
 from playwright.async_api import async_playwright
 
-from db import get_ms, hash_string_sha256, is_record_exist, save_record
+from db import get_ms, hash_string_sha256, is_record_exist, save_email_record
 from llm import LLM
 from notification import send_discord
 from utils import parse_date
@@ -122,4 +122,4 @@ class RSS:
 
             send_discord(result, "HKUST News")
 
-            save_record(hash_string_sha256(f"RSS {feed['link']}"), True)
+            save_email_record(hash_string_sha256(f"RSS {feed['link']}"), True)

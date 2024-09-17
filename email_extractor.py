@@ -7,37 +7,12 @@ from email.header import decode_header
 
 import dotenv
 
-from utils import (
-    check_email_date,
-    check_email_sender,
-    clean_html,
-    remove_css_and_scripts,
-    remove_massive_space,
-)
+from db import save_unexpected_email_sender
+from utils import (check_email_date, check_email_sender, clean_html,
+                   remove_css_and_scripts, remove_massive_space)
 
 # Load environment variables from .env file
 dotenv.load_dotenv()
-
-
-UNEXPECTED_SENDER_TXT_PATH = "unexpected_sender.txt"
-
-
-def save_sender_to_text(sender: str) -> None:
-    # If os exists, write the sender to the file
-    if os.path.exists(UNEXPECTED_SENDER_TXT_PATH):
-        # Check if the sender is already in the file
-        with open(UNEXPECTED_SENDER_TXT_PATH, "r") as f:
-            lines = f.readlines()
-            for line in lines:
-                if sender in line:
-                    return
-
-        with open(UNEXPECTED_SENDER_TXT_PATH, "a") as f:
-            # In new line
-            f.write("\n" + sender)
-    else:
-        with open(UNEXPECTED_SENDER_TXT_PATH, "w") as f:
-            f.write(sender)
 
 
 class EmailExtractor:
@@ -125,6 +100,7 @@ class EmailExtractor:
 
             # print("Date:", msg["Date"])
             if not check_email_sender(msg["From"]):
+                save_unexpected_email_sender(msg["From"])
                 print(f"Not from the expected sender ({msg['From']}): {subject}")
                 continue
 
