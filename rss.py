@@ -75,14 +75,14 @@ class RSS:
 
                 if feed.status == 200:
                     for entry in feed.entries:
-                        MAXMIUM_DAYS = 7
+                        MAXIMUM_DAYS = 7
 
                         # get date of 7 days ago
-                        date_of_max_days = date.today() - timedelta(days=MAXMIUM_DAYS)
+                        date_of_max_days = date.today() - timedelta(days=MAXIMUM_DAYS)
 
                         if parse_date(entry.published).date() < date_of_max_days:
                             logger.info(
-                                f"Skipping RSS feed {entry.link} as it is older than {MAXMIUM_DAYS} days"
+                                f"Skipping RSS feed {entry.link} as it is older than {MAXIMUM_DAYS} days"
                             )
                             continue
 

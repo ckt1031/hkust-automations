@@ -4,6 +4,7 @@ This applies to both GitHub Actions runs and local script executions.
 """
 
 import os
+import sys
 
 from loguru import logger
 
@@ -35,7 +36,7 @@ if __name__ == "__main__":
 
     if len(senders) == 0:
         logger.success("No unexpected sender found")
-        exit()
+        sys.exit(0)
 
     index = 0
 
