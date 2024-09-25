@@ -6,10 +6,16 @@ from datetime import datetime, timedelta
 from email.header import decode_header
 
 import dotenv
+from loguru import logger
 
 from db import save_unexpected_email_sender
-from utils import (check_email_date, check_email_sender, clean_html,
-                   remove_css_and_scripts, remove_massive_space)
+from utils import (
+    check_email_date,
+    check_email_sender,
+    clean_html,
+    remove_css_and_scripts,
+    remove_massive_space,
+)
 
 # Load environment variables from .env file
 dotenv.load_dotenv()
@@ -69,11 +75,11 @@ class EmailExtractor:
 
             # Check if the email is properly fetched
             if status != "OK":
-                print("Error fetching the email", email_id)
+                logger.error("Error fetching the email", email_id)
                 continue
 
             if msg_data[0] is None:
-                print("No email data found", email_id)
+                logger.error("No email data found", email_id)
                 continue
 
             data: tuple = msg_data[0]
@@ -86,7 +92,7 @@ class EmailExtractor:
 
             # Continue if email is older than EARLIEST_DATE
             if not check_email_date(msg["Date"], self.CHECK_PAST_HOURS):
-                print(f"Email is older than {self.CHECK_PAST_HOURS} hours")
+                logger.info(f"Email is older than {self.CHECK_PAST_HOURS} hours")
                 continue
 
             # Print email headers and subject
@@ -101,7 +107,7 @@ class EmailExtractor:
             # print("Date:", msg["Date"])
             if not check_email_sender(msg["From"]):
                 save_unexpected_email_sender(msg["From"])
-                print(f"Not from the expected sender ({msg['From']}): {subject}")
+                logger.info(f"Not from the expected sender ({msg['From']}): {subject}")
                 continue
 
             # Check if the email is multipart, which is the case for most emails

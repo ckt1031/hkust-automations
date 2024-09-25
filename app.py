@@ -1,14 +1,23 @@
 import asyncio
+import sys
 from datetime import datetime
 
-from langchain_text_splitters import (MarkdownHeaderTextSplitter,
-                                      RecursiveCharacterTextSplitter)
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
+from loguru import logger
 
 import db
 from email_extractor import EmailExtractor
 from llm import LLM
 from notification import send_discord
 from rss import RSS
+
+# Remove loggers time, level
+logger.remove()
+# Add back color to the logger
+logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 
 def read_email_system_prompt():
@@ -35,7 +44,7 @@ def email_summarize():
         checked = db.is_email_checked(email["subject"], email["date"])
 
         if checked:
-            print(f"Email with subject \"{email['subject']}\" is already checked")
+            logger.info(f"Email with subject \"{email['subject']}\" is already checked")
 
             # Remove the email from the list
             emails.remove(email)
@@ -45,7 +54,7 @@ def email_summarize():
         unchecked_email_amount += 1
     # If there are no unchecked emails, exit the program
     if unchecked_email_amount == 0:
-        print("No unchecked emails found")
+        logger.success("No unchecked emails found")
         exit()
     # Call the LLM model to summarize the emails
     llm = LLM()
@@ -70,14 +79,17 @@ def email_summarize():
     for email in emails:
         db.mark_email_as_checked(email["subject"], email["date"])
 
+    logger.success("All emails are checked")
+
 
 if __name__ == "__main__":
+    logger.info("Starting the RSS summarizer")
+
     try:
-        print("Starting the RSS summarizer")
         asyncio.run(RSS().check_all())
     except Exception as e:
-        print(f"Error in RSS summarizer: {e}")
+        logger.error(f"Error in RSS summarizer: {e}")
 
-    print("Starting the email summarizer")
+    logger.info("Starting the email summarizer")
 
     email_summarize()

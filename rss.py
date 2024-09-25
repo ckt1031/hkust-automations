@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from venv import logger
 
 import dotenv
 import feedparser
@@ -35,13 +36,13 @@ async def scrape_body(url):
 
         selector_list = [".body", ".content", ".block-body"]
         for selector in selector_list:
-            print(f"Fetching body for {url} with selector {selector}")
+            logger.info(f"Fetching body for {url} with selector {selector}")
             try:
                 text_content = await fetch_body(page, text_content, selector)
                 break
             except Exception as e:
-                print(e)
-                print(f"Failed to fetch body for {url} with selector {selector}")
+                logger.error(e)
+                logger.error(f"Failed to fetch body for {url} with selector {selector}")
 
         # Close the browser
         await browser.close()
@@ -80,7 +81,7 @@ class RSS:
                         date_of_max_days = date.today() - timedelta(days=MAXMIUM_DAYS)
 
                         if parse_date(entry.published).date() < date_of_max_days:
-                            print(
+                            logger.info(
                                 f"Skipping RSS feed {entry.link} as it is older than {MAXMIUM_DAYS} days"
                             )
                             continue
@@ -99,7 +100,7 @@ class RSS:
                             }
                         )
             except Exception as e:
-                print(f"Error in fetching RSS feed {rss}: {e}")
+                logger.error(f"Error in fetching RSS feed {rss}: {e}")
 
         self.feeds = feeds
 

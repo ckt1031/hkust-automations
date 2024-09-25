@@ -5,6 +5,8 @@ This applies to both GitHub Actions runs and local script executions.
 
 import os
 
+from loguru import logger
+
 from db import get_all_unexpected_sender
 
 UNEXPECTED_SENDER_TXT_PATH = "unexpected_sender.txt"
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     senders = get_all_unexpected_sender()
 
     if len(senders) == 0:
-        print("No unexpected sender found")
+        logger.success("No unexpected sender found")
         exit()
 
     index = 0
@@ -43,6 +45,6 @@ if __name__ == "__main__":
 
         if len(senders) < 20:
             index += 1
-            print(f"{index}. {email}")
+            logger.success(f"{index}. {email}")
 
         save_sender_to_text(email)
