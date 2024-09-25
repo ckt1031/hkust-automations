@@ -7,3 +7,4 @@ feedparser==6.0.11
 playwright==1.47.0
 redis==5.0.8
 loguru==0.7.2
+pyright==1.1.382

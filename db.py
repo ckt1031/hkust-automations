@@ -1,6 +1,6 @@
+import asyncio
 import hashlib
 import os
-import sys
 from datetime import timezone
 
 import dotenv
@@ -9,15 +9,10 @@ from dateutil import parser
 
 dotenv.load_dotenv()
 
-redis_client = None
 
-if not redis_client:
-    try:
-        redis_connection_string = os.environ["REDIS_CONNECTION_STRING"]
+redis_connection_string = os.environ["REDIS_CONNECTION_STRING"]
 
-        redis_client = redis.from_url(redis_connection_string)
-    except KeyError:
-        sys.exit("REDIS_CONNECTION_STRING environment variable is not set")
+redis_client = redis.from_url(redis_connection_string)
 
 
 def hash_string_sha256(input_string: str):
@@ -42,7 +37,10 @@ def get_ms(date: str):
 
 
 def is_record_exist(key: str):
-    return redis_client.exists(key)
+    # Awaitable
+    value = redis_client.exists(key)
+
+    return value
 
 
 def save_unexpected_email_sender(sender: str):
@@ -50,8 +48,14 @@ def save_unexpected_email_sender(sender: str):
     redis_client.sadd("unexpected_email_senders", sender)
 
 
-def get_all_unexpected_sender():
-    return redis_client.smembers("unexpected_email_senders")
+async def get_all_unexpected_sender():
+    data: set = set()
+    action = redis_client.smembers("unexpected_email_senders")
+
+    if asyncio.iscoroutine(action) or isinstance(action, asyncio.Task):
+        data = await action
+
+    return data
 
 
 def save_email_record(key: str, value: bool, expire_time: int = -1):

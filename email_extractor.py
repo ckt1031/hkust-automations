@@ -36,6 +36,9 @@ class EmailExtractor:
         self.mail = imaplib.IMAP4_SSL(self.IMAP_URL, self.IMAP_PORT)
 
     def login(self):
+        if not self.IMAP_USERNAME or not self.IMAP_PASSWORD:
+            raise ValueError("IMAP credentials not found in the environment variables")
+
         # Login to the server
         self.mail.login(self.IMAP_USERNAME, self.IMAP_PASSWORD)
 
@@ -82,7 +85,11 @@ class EmailExtractor:
                 logger.error("No email data found", email_id)
                 continue
 
-            data: tuple = msg_data[0]
+            data = msg_data[0]
+
+            if not isinstance(data, tuple):
+                logger.error("Email data is not in tuple format", email_id)
+                continue
 
             # msg_data contains the raw email data
             raw_email = data[1]
@@ -122,24 +129,20 @@ class EmailExtractor:
                         and content_type == "text/plain"
                     ):
                         # Fetch the plain text body
-                        body = part.get_payload(decode=True).decode(
-                            "utf-8", errors="replace"
-                        )
+                        body = part.get_payload(decode=True)
                     elif (
                         "attachment" not in content_disposition
                         and content_type == "text/html"
                     ):
                         # If it's HTML, clean it
-                        html_body = part.get_payload(decode=True).decode(
-                            "utf-8", errors="replace"
-                        )
+                        html_body = str(part.get_payload(decode=True))
                         cleaned_html = remove_css_and_scripts(html_body)
                         body = clean_html(cleaned_html)
                         body = html.unescape(body)
                         body = remove_massive_space(body)
             else:
                 # If it's a single part email
-                body = msg.get_payload(decode=True).decode("utf-8", errors="replace")
+                body = msg.get_payload(decode=True)
 
             emails.append(
                 {

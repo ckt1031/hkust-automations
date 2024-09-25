@@ -3,6 +3,7 @@ This script retrieves unexpected emails from the email list based on previous ru
 This applies to both GitHub Actions runs and local script executions.
 """
 
+import asyncio
 import os
 import sys
 
@@ -31,8 +32,8 @@ def save_sender_to_text(sender: str) -> None:
             f.write(sender)
 
 
-if __name__ == "__main__":
-    senders = get_all_unexpected_sender()
+async def run():
+    senders = await get_all_unexpected_sender()
 
     if len(senders) == 0:
         logger.success("No unexpected sender found")
@@ -49,3 +50,10 @@ if __name__ == "__main__":
             logger.success(f"{index}. {email}")
 
         save_sender_to_text(email)
+
+
+if __name__ == "__main__":
+    logger.remove()
+    logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
+
+    asyncio.run(run())

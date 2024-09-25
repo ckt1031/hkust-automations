@@ -34,4 +34,9 @@ class LLM:
             ],
         )
 
-        return chat_completion.choices[0].message.content
+        content = chat_completion.choices[0].message.content
+
+        if content is None:
+            raise ValueError("OpenAI API did not return any content")
+
+        return content
