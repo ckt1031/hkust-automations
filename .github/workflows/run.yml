@@ -13,16 +13,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          enable-cache: true
+          version: "latest"
+
+      - name: Install Python
+        run: uv install python
 
       - name: Install Packages
-        run: python -m pip install -r requirements.txt
+        run: uv sync --all-extras --dev
 
       - name: Run
-        run: python app.py
+        run: uv python app.py
         env:
           IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
           IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
