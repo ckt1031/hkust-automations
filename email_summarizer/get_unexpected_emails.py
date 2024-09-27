@@ -9,7 +9,7 @@ import sys
 
 from loguru import logger
 
-from db import get_all_unexpected_sender
+from lib.db import get_all_unexpected_sender
 
 UNEXPECTED_SENDER_TXT_PATH = "unexpected_sender.txt"
 

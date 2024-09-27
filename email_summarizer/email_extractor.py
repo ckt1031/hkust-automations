@@ -8,8 +8,8 @@ from email.header import decode_header
 import dotenv
 from loguru import logger
 
-from db import save_unexpected_email_sender
-from utils import (
+from lib.db import redis_client
+from lib.utils import (
     check_email_date,
     check_email_sender,
     clean_html,
@@ -19,6 +19,11 @@ from utils import (
 
 # Load environment variables from .env file
 dotenv.load_dotenv()
+
+
+def save_unexpected_email_sender(sender: str):
+    # Save the sender in list or create it if it doesn't exist
+    redis_client.sadd("unexpected_email_senders", sender)
 
 
 class EmailExtractor:

@@ -43,11 +43,6 @@ def is_record_exist(key: str):
     return value
 
 
-def save_unexpected_email_sender(sender: str):
-    # Save the sender in list or create it if it doesn't exist
-    redis_client.sadd("unexpected_email_senders", sender)
-
-
 async def get_all_unexpected_sender():
     data: set = set()
     action = redis_client.smembers("unexpected_email_senders")
@@ -58,19 +53,6 @@ async def get_all_unexpected_sender():
     return data
 
 
-def save_email_record(key: str, value: bool, expire_time: int = -1):
+def set_redis_boolean_value(key: str, value: bool, expire_time: int = -1):
     # 0 for False, 1 for True
     redis_client.set(key, int(value), ex=None if expire_time == -1 else expire_time)
-
-
-def is_email_checked(email_subject: str, date: str):
-    # Hash the email subject
-    key = hash_string_sha256(f"{email_subject} - {get_ms(date)}")
-
-    return is_record_exist(key)
-
-
-def mark_email_as_checked(email_subject: str, date: str):
-    key = hash_string_sha256(f"{email_subject} - {get_ms(date)}")
-    expiring_time_in_seconds = 60 * 60 * 24 * 3  # 3 days
-    save_email_record(key, True, expiring_time_in_seconds)

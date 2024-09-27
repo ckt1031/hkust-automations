@@ -1,3 +1,3 @@
-# School Email Summarize
+# HKUST Automation
 
-Summarize all the emails from school with AI model and send the summary to notification platform like Discord or Telegram.
+A set of scripts to automate the process of my life in HKUST.
