@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/school-email-summarize.iml" filepath="$PROJECT_DIR$/.idea/school-email-summarize.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/hkust-automation.iml" filepath="$PROJECT_DIR$/.idea/hkust-automation.iml" />
     </modules>
   </component>
 </project>

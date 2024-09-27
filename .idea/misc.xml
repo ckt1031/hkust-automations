@@ -2,7 +2,7 @@
 <project version="4">
   <component name="Black">
     <option name="enabledOnReformat" value="true" />
-    <option name="sdkName" value="Python 3.12 (hkust-ai-info)" />
+    <option name="sdkName" value="Python 3.12 (hkust-automation)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (hkust-ai-info)" project-jdk-type="Python SDK" />
   <component name="PyPackaging">
