@@ -79,9 +79,9 @@ def check_booking_status():
         header_style="bold magenta",
     )
 
-    table.add_column("Room ID", style="dim")
-    table.add_column("Room Name", style="dim")
-    table.add_column("Room Capacity", style="dim")
+    table.add_column("ID", style="dim")
+    table.add_column("Name", style="dim")
+    table.add_column("Capacity", style="dim")
     # table.add_column("Time", style="dim")
 
     available_rooms = []
