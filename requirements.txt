@@ -3,9 +3,8 @@ python-dateutil==2.9.0.post0
 langchain-text-splitters==0.3.0
 openai==1.46.1
 discord-webhook==1.3.1
-feedparser==6.0.11
-playwright==1.47.0
 redis==5.0.8
 loguru==0.7.2
-pyright==1.1.382
 rich==13.8.1
+requests==2.32.3
+pkce==1.0.3
