@@ -49,10 +49,10 @@ def check_booking_status():
         return
 
     # if start_time.split(":")[1] != "00" or end_time.split(":")[1] != "30":
-    start_time = f"{start_time.split(':')[0]}:{"00" if int(start_time.split(':')[1]) < 30 else "30"}"
-    end_time = (
-        f"{end_time.split(':')[0]}:{"00" if int(end_time.split(':')[1]) < 30 else "30"}"
-    )
+    start_time_last = "00" if int(start_time.split(":")[1]) < 30 else "30"
+    start_time = f"{start_time.split(':')[0]}:{start_time_last}"
+    end_time_last = "00" if int(end_time.split(":")[1]) < 30 else "30"
+    end_time = f"{end_time.split(':')[0]}:{end_time_last}"
 
     # get all time slots in 30 minutes interval, if last one xx:00, then it should not be included
     time_slots: list[str] = []
