@@ -67,4 +67,5 @@ class HingAPI:
             raise ValueError("Error when getting sessions by day!")
 
         data = response.json()
+
         return data["data"]["rooms"]

@@ -12,12 +12,8 @@ console = Console()
 
 load_dotenv()
 
-code_verifier = "mmGdpVGW3lgC92n2iY3SOE7EHUSf4JwHeoiX50HGe-AKVoZlJLsPWilNxaw9b-YImdtEjN27Bx"  # pkce.generate_code_verifier(length=74)
+code_verifier = os.getenv("MS_CODE_VERIFIER", pkce.generate_code_verifier(length=74))
 code_challenge = pkce.get_code_challenge(code_verifier)
-
-
-# print(code_verifier)
-# print(code_challenge)
 
 
 def get_login():
@@ -32,6 +28,10 @@ def get_login():
         "state": "JSziTmr3GZ",
         "scope": "openid%20offline_access",
     }
+
+    console.print("Opening browser for login", style="green")
+    console.print(f"Your Code Verifier: {code_verifier}", style="blue")
+    console.print(f"Your Code Challenge: {code_challenge}", style="blue")
 
     webbrowser.open(url + "?" + "&".join([f"{k}={v}" for k, v in querystring.items()]))
 
@@ -66,8 +66,10 @@ def get_access_token() -> str:
         return access_token
 
     url = "https://login.microsoftonline.com/c917f3e2-9322-4926-9bb3-daca730413ca/oauth2/v2.0/token"
+
     code = os.getenv("MS_CODE")
     refresh_token = os.getenv("MS_REFRESH_TOKEN")
+
     headers = {
         # ":authority": "login.microsoftonline.com",
         # ":method": "POST",

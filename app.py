@@ -8,17 +8,6 @@ from usthing.booking_availability import check_booking_status
 from usthing.my_booking import get_booking
 
 console = Console()
-console.print(
-    """
-██╗   ██╗███████╗████████╗   ██████╗ ██╗   ██╗
-██║   ██║██╔════╝╚══██╔══╝   ██╔══██╗╚██╗ ██╔╝
-██║   ██║███████╗   ██║█████╗██████╔╝ ╚████╔╝ 
-██║   ██║╚════██║   ██║╚════╝██╔═══╝   ╚██╔╝  
-╚██████╔╝███████║   ██║      ██║        ██║   
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝        ╚═╝   
-""",
-    style="green",
-)
 
 function_list = [
     ["Email Summarizer", "email_summarize", email_summarize],
@@ -38,7 +27,18 @@ if len(sys.argv) > 1:
 
     console.print("Invalid short code", style="red bold")
     console.print()
-
+else:
+    console.print(
+        """
+    ██╗   ██╗███████╗████████╗   ██████╗ ██╗   ██╗
+    ██║   ██║██╔════╝╚══██╔══╝   ██╔══██╗╚██╗ ██╔╝
+    ██║   ██║███████╗   ██║█████╗██████╔╝ ╚████╔╝ 
+    ██║   ██║╚════██║   ██║╚════╝██╔═══╝   ╚██╔╝  
+    ╚██████╔╝███████║   ██║      ██║        ██║   
+     ╚═════╝ ╚══════╝   ╚═╝      ╚═╝        ╚═╝   
+    """,
+        style="green",
+    )
 
 for i, function in enumerate(function_list):
     console.print(f"[{i}] {function[0]}")
