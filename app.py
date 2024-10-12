@@ -3,17 +3,11 @@ import sys
 from rich.console import Console
 
 from email_summarizer.app import email_summarize
-from usthing.book_library import book
-from usthing.booking_availability import check_booking_status
-from usthing.my_booking import get_booking
 
 console = Console()
 
 function_list = [
     ["Email Summarizer", "email_summarize", email_summarize],
-    ["Get Booking", "get_booking", get_booking],
-    ["Get available library booking", "check_booking_status", check_booking_status],
-    ["Book Library Room", "book_library", book],
 ]
 
 if len(sys.argv) > 1:
@@ -27,18 +21,6 @@ if len(sys.argv) > 1:
 
     console.print("Invalid short code", style="red bold")
     console.print()
-else:
-    console.print(
-        """
-    ██╗   ██╗███████╗████████╗   ██████╗ ██╗   ██╗
-    ██║   ██║██╔════╝╚══██╔══╝   ██╔══██╗╚██╗ ██╔╝
-    ██║   ██║███████╗   ██║█████╗██████╔╝ ╚████╔╝ 
-    ██║   ██║╚════██║   ██║╚════╝██╔═══╝   ╚██╔╝  
-    ╚██████╔╝███████║   ██║      ██║        ██║   
-     ╚═════╝ ╚══════╝   ╚═╝      ╚═╝        ╚═╝   
-    """,
-        style="green",
-    )
 
 for i, function in enumerate(function_list):
     console.print(f"[{i}] {function[0]}")

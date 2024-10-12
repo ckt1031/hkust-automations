@@ -56,3 +56,7 @@ async def get_all_unexpected_sender():
 def set_redis_boolean_value(key: str, value: bool, expire_time: int = -1):
     # 0 for False, 1 for True
     redis_client.set(key, int(value), ex=None if expire_time == -1 else expire_time)
+
+
+def set_redis_number_value(key: str, value: int, expire_time: int = -1):
+    redis_client.set(key, value, ex=None if expire_time == -1 else expire_time)

@@ -4,32 +4,15 @@ from datetime import datetime
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
-import lib.db as db
 from email_summarizer.email_extractor import EmailExtractor
+from email_summarizer.email_record import is_email_checked, mark_email_as_checked
 from lib.llm import LLM
 from lib.notification import send_discord
+from lib.prompt import read_email_system_prompt
 
 # Remove loggers time, level
 logger.remove()
 logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
-
-
-def read_email_system_prompt():
-    with open("prompts/email-summarize.txt", "r") as f:
-        return f.read()
-
-
-def mark_email_as_checked(email_subject: str, date: str):
-    key = db.hash_string_sha256(f"{email_subject} - {db.get_ms(date)}")
-    expiring_time_in_seconds = 60 * 60 * 24 * 3  # 3 days
-    db.set_redis_boolean_value(key, True, expiring_time_in_seconds)
-
-
-def is_email_checked(email_subject: str, date: str):
-    # Hash the email subject
-    key = db.hash_string_sha256(f"{email_subject} - {db.get_ms(date)}")
-
-    return db.is_record_exist(key)
 
 
 def email_summarize():
@@ -50,7 +33,7 @@ def email_summarize():
 
     # Check if some email is checked
     for email in emails:
-        checked = is_email_checked(email["subject"], email["date"])
+        checked = is_email_checked(email["id"])
 
         if checked:
             logger.info(f"Email with subject \"{email['subject']}\" is already checked")
@@ -82,16 +65,12 @@ def email_summarize():
     )
     result = markdown_splitter.split_text(llm_response)
 
-    # text_splitter = RecursiveCharacterTextSplitter(
-    #     chunk_size=1024,
-    # )
-    # splits = text_splitter.split_documents(result)
-
     for split in result:
         send_discord(split.page_content, "HKUST Email")
+
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in emails:
-        mark_email_as_checked(email["subject"], email["date"])
+        mark_email_as_checked(email["id"])
 
     logger.success("All emails are checked")
 

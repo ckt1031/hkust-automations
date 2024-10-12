@@ -1,3 +1,3 @@
-# HKUST Automation
+# HKUST Information Push
 
-A set of scripts to automate the process of my life in HKUST.
+A set of tools to push information to HKUST students.
