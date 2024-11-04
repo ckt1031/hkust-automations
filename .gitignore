@@ -3,6 +3,7 @@
 .env
 !.env.example
 *.db
-__pycache__
+**/__pycache__/
 unexpected_sender.txt
 access_token.json
+.idea
