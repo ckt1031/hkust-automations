@@ -4,7 +4,7 @@ from time import sleep
 import dotenv
 import requests
 
-from lib.db import redis_client
+from lib.redis import redis_client
 
 dotenv.load_dotenv()
 

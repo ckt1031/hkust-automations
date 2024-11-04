@@ -1,4 +1,17 @@
 import re
+from datetime import timezone
+
+from dateutil import parser
+
+
+def get_ms(date: str):
+    parsed_date = parser.parse(date)
+
+    # Ensure parsed_date is timezone-aware
+    if parsed_date.tzinfo is None:
+        parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+
+    return parsed_date.timestamp()
 
 
 def remove_massive_space(text):

@@ -2,8 +2,8 @@ import requests
 from loguru import logger
 
 from email_summarizer.email_record import check_email_sender
-from lib.db import redis_client
 from lib.microsoft_tokens import get_private_graph_token
+from lib.redis import redis_client
 from lib.utils import clean_html, remove_css_and_scripts, remove_massive_space
 
 
