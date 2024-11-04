@@ -1,13 +1,13 @@
-langchain_text_splitters==0.3.1
+langchain_text_splitters==0.3.2
 loguru==0.7.2
-openai==1.53.0
+openai==1.54.0
 pkce==1.0.3
 python-dotenv==1.0.1
 python_dateutil==2.9.0.post0
 redis==5.2.0
 Requests==2.32.3
-rich==13.9.3
-ruff==0.7.1
+rich==13.9.4
+ruff==0.7.2
 pur==7.3.2
 isort==5.13.2
 black==24.10.0
