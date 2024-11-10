@@ -8,6 +8,7 @@ from email_summarizer.email_extractor import EmailExtractor
 from email_summarizer.email_record import is_email_checked, mark_email_as_checked
 from lib.llm import LLM
 from lib.notification import send_discord
+from lib.onedrive_store import get_email_record, save_email_record
 from lib.prompt import read_email_system_prompt
 
 # Remove loggers time, level
@@ -26,14 +27,16 @@ def email_summarize():
     email_user_prompt = f"""
     Date: {today_date}
     Day: {today_day}
-    
+
     Emails:
     """
     unchecked_email_amount = 0
 
+    mail_records = get_email_record()
+
     # Check if some email is checked
     for email in emails:
-        checked = is_email_checked(email["id"])
+        checked = is_email_checked(mail_records, email["id"])
 
         if checked:
             logger.info(f"Email with subject \"{email['subject']}\" is already checked")
@@ -70,7 +73,10 @@ def email_summarize():
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in emails:
-        mark_email_as_checked(email["id"])
+        mark_email_as_checked(mail_records, email["id"])
+
+    # Save the email record
+    save_email_record(mail_records)
 
     logger.success("All emails are checked")
 

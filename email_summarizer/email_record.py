@@ -1,22 +1,23 @@
 import re
-
-import lib.redis as redis
-from lib.hashing import hash_string_sha256
+from datetime import datetime, timezone
 
 
-def mark_email_as_checked(_id: str):
-    key = hash_string_sha256(f"MS_EMAIL_CHECKED_{_id}")
+def mark_email_as_checked(list: list[dict[str, str]], id: str):
+    # Get current timestamp first
+    iso_time = datetime.now(timezone.utc).astimezone().isoformat()
 
-    expiring_time_in_seconds = 60 * 60 * 24 * 14  # 14 days
+    # Add the id to the list, if it doesn't exist
+    if not is_email_checked(list, id):
+        list.append({id: iso_time})
 
-    redis.set_redis_boolean_value(key, True, expiring_time_in_seconds)
 
+def is_email_checked(list: list[dict[str, str]], id: str):
+    # If id exists in the list as a key, return True
+    for email in list:
+        if email.get(id):
+            return True
 
-def is_email_checked(_id: str):
-    # Hash the email subject
-    key = hash_string_sha256(f"MS_EMAIL_CHECKED_{_id}")
-
-    return redis.is_record_exist(key)
+    return False
 
 
 def check_email_sender(sender_email: str) -> bool:

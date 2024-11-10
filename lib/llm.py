@@ -9,16 +9,17 @@ dotenv.load_dotenv()
 class LLM:
     def __init__(self):
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.api_base_url = os.getenv(
-            "OPENAI_API_BASE_URL", "https://api.openai.com/v1"
-        )
-        self.model = os.getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
         # Throw an error if the API key is not provided
         if self.api_key is None:
             raise ValueError(
-                "OpenAI API key is not provided in the environment variables"
+                "OpenAI API key (OPENAI_API_KEY) is not provided in the environment variables"
             )
+
+        self.api_base_url = os.getenv(
+            "OPENAI_API_BASE_URL", "https://api.openai.com/v1"
+        )
+        self.model = os.getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
         self.client = OpenAI(
             api_key=self.api_key,

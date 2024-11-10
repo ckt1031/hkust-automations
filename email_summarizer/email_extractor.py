@@ -3,13 +3,7 @@ from loguru import logger
 
 from email_summarizer.email_record import check_email_sender
 from lib.microsoft_tokens import get_private_graph_token
-from lib.redis import redis_client
 from lib.utils import clean_html, remove_css_and_scripts, remove_massive_space
-
-
-def save_unexpected_email_sender(sender: str):
-    # Save the sender in list or create it if it doesn't exist
-    redis_client.sadd("unexpected_email_senders", sender)
 
 
 class EmailExtractor:
@@ -40,8 +34,6 @@ class EmailExtractor:
             send_address = email["sender"]["emailAddress"]["address"]
 
             if not check_email_sender(send_address):
-                save_unexpected_email_sender(send_address)
-
                 logger.info(
                     f"Not from the expected sender ({send_address}): {email['subject']}"
                 )

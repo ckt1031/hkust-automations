@@ -4,12 +4,16 @@ from time import sleep
 import dotenv
 import requests
 
-from lib.redis import redis_client
+REMAINING = -1
+REMAINING_EXPIRY = -1
 
 dotenv.load_dotenv()
 
 
 def send_discord(message: str, username: str = "School"):
+
+    global REMAINING, REMAINING_EXPIRY
+
     url = os.getenv("DISCORD_WEBHOOK_URL")
 
     # Throw an error if the webhook URL is not provided
@@ -18,12 +22,8 @@ def send_discord(message: str, username: str = "School"):
             "Discord webhook URL is not provided in the environment variables"
         )
 
-    # Check the rate limit
-    remaining = redis_client.get("discord_rate_limit_limit")
-    remaining_expiry = redis_client.ttl("discord_rate_limit_limit")
-
-    if remaining is not None and int(remaining) == 0:
-        sleep(remaining_expiry)
+    if REMAINING_EXPIRY is not None and int(REMAINING_EXPIRY) == 0:
+        sleep(REMAINING_EXPIRY)
 
     # Send the message to the Discord webhook
     response = requests.post(url, json={"content": message, "username": username})
@@ -34,4 +34,9 @@ def send_discord(message: str, username: str = "School"):
     # Check X-RateLimit-Limit and X-RateLimit-Remaining headers
     remaining = response.headers.get("X-RateLimit-Remaining")
     reset_after = response.headers.get("X-RateLimit-Reset-After")
-    redis_client.set("discord_rate_limit_limit", int(remaining), ex=int(reset_after))
+
+    if remaining is None or reset_after is None:
+        return
+
+    REMAINING = int(remaining)
+    REMAINING_EXPIRY = int(reset_after)
