@@ -5,7 +5,11 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
 from email_summarizer.email_extractor import EmailExtractor
-from email_summarizer.email_record import is_email_checked, mark_email_as_checked
+from email_summarizer.email_record import (
+    is_email_checked,
+    mark_email_as_checked,
+    prune_email_record,
+)
 from lib.llm import LLM
 from lib.notification import send_discord
 from lib.onedrive_store import get_email_record, save_email_record
@@ -33,6 +37,9 @@ def email_summarize():
     unchecked_email_amount = 0
 
     mail_records = get_email_record()
+
+    # Prune the email record to remove emails older than 7 days
+    mail_records = prune_email_record(mail_records)
 
     # Check if some email is checked
     for email in emails:

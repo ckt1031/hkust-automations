@@ -11,7 +11,6 @@ dotenv.load_dotenv()
 
 
 def send_discord(message: str, username: str = "School"):
-
     global REMAINING, REMAINING_EXPIRY
 
     url = os.getenv("DISCORD_WEBHOOK_URL")
