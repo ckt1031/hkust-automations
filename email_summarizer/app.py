@@ -4,6 +4,7 @@ from datetime import datetime
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
+import lib.env as env
 from email_summarizer.email_extractor import EmailExtractor
 from email_summarizer.email_record import (
     is_email_checked,
@@ -12,7 +13,7 @@ from email_summarizer.email_record import (
 )
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import get_email_record, save_email_record
+from lib.onedrive_store import EMAIL_RECORD_PATH, get_record, save_record
 from lib.prompt import read_email_system_prompt
 
 # Remove loggers time, level
@@ -21,6 +22,13 @@ logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 
 def email_summarize():
+    webhook_url = env.DISCORD_WEBHOOK_URL_EMAILS
+
+    if webhook_url is None:
+        raise ValueError(
+            "Discord webhook URL is not provided in the environment variables"
+        )
+
     # Initialize the email client
     extractor = EmailExtractor()
     emails = extractor.extract_emails()
@@ -36,7 +44,7 @@ def email_summarize():
     """
     unchecked_email_amount = 0
 
-    mail_records = get_email_record()
+    mail_records = get_record(EMAIL_RECORD_PATH)
 
     # Prune the email record to remove emails older than 7 days
     mail_records = prune_email_record(mail_records)
@@ -76,14 +84,14 @@ def email_summarize():
     result = markdown_splitter.split_text(llm_response)
 
     for split in result:
-        send_discord(split.page_content, "HKUST Email")
+        send_discord(webhook_url, split.page_content, None, "HKUST Email")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in emails:
         mark_email_as_checked(mail_records, email["id"])
 
     # Save the email record
-    save_email_record(mail_records)
+    save_record(EMAIL_RECORD_PATH, mail_records)
 
     logger.success("All emails are checked")
 

@@ -2,12 +2,18 @@ import sys
 
 from rich.console import Console
 
+from canvas.assignments import check_assignments
 from email_summarizer.app import email_summarize
 
 console = Console()
 
 function_list = [
     ["Email Summarizer", "email_summarize", email_summarize],
+    [
+        "Check Assignments for All Courses",
+        "check_assignments_for_all_courses",
+        check_assignments,
+    ],
 ]
 
 if len(sys.argv) > 1:

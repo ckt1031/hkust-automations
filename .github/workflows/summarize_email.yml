@@ -1,4 +1,4 @@
-name: Summarize Emails
+name: Automation
 on:
   workflow_dispatch:
   schedule:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   Run:
-    name: Run Summarize
+    name: Run
     runs-on: self-hosted
     timeout-minutes: 10
     steps:
@@ -15,20 +15,25 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: "pip"
 
       - name: Install Packages
         run: pip install -r requirements.txt
 
       - name: Run
-        run: python app.py email_summarize
+        run: |
+          python app.py email_summarize
+          python app.py check_assignments_for_all_courses
         env:
+          CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
+
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
           OPENAI_API_MODEL: ${{ secrets.OPENAI_API_MODEL }}
 
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL_EMAILS: ${{ secrets.DISCORD_WEBHOOK_URL_EMAILS }}
+          DISCORD_WEBHOOK_URL_ASSIGNMENTS: ${{ secrets.DISCORD_WEBHOOK_URL_ASSIGNMENTS }}
 
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
           MICROSOFT_CLIENT_SECRET: ${{ secrets.MICROSOFT_CLIENT_SECRET }}

@@ -1,31 +1,23 @@
-import os
 from time import sleep
 
-import dotenv
 import requests
 
 REMAINING = -1
 REMAINING_EXPIRY = -1
 
-dotenv.load_dotenv()
 
-
-def send_discord(message: str, username: str = "School"):
+def send_discord(
+    webhook_url: str, message: str | None, embed: dict | None, username: str = "School"
+):
     global REMAINING, REMAINING_EXPIRY
-
-    url = os.getenv("DISCORD_WEBHOOK_URL")
-
-    # Throw an error if the webhook URL is not provided
-    if url is None:
-        raise ValueError(
-            "Discord webhook URL is not provided in the environment variables"
-        )
 
     if REMAINING_EXPIRY is not None and int(REMAINING_EXPIRY) == 0:
         sleep(REMAINING_EXPIRY)
 
     # Send the message to the Discord webhook
-    response = requests.post(url, json={"content": message, "username": username})
+    response = requests.post(
+        webhook_url, json={"content": message, "username": username, "embeds": [embed]}
+    )
 
     if response.status_code != 204:
         raise ValueError(f"Discord webhook returned status code {response.status_code}")

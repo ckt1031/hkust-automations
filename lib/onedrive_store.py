@@ -1,12 +1,13 @@
 import json
-import os
 
 import requests
 
+from lib import env
 from lib.microsoft_tokens import get_private_graph_token
 
-EMAIL_RECORD_FOLDER = os.getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
-EMAIL_RECORD_PATH = f"{EMAIL_RECORD_FOLDER}/email_record.json"
+STORE_FOLDER = env.ONEDRIVE_STORE_FOLDER
+EMAIL_RECORD_PATH = f"{STORE_FOLDER}/email_record.json"
+CANVAS_ASSIGNMENT_REMINDER_PATH = f"{STORE_FOLDER}/canvas_assignment_reminder.json"
 
 
 def drive_api(method="GET", path="", data=None):
@@ -23,22 +24,22 @@ def drive_api(method="GET", path="", data=None):
     return response
 
 
-def get_email_record() -> list[dict[str, str]]:
+def get_record(path: str) -> list[dict[str, str]]:
     default = []
 
-    response = drive_api(path=EMAIL_RECORD_PATH)
+    response = drive_api(method="GET", path=path)
 
     if response.status_code != 200:
-        print(f"Error getting email record: {response.text}")
+        print(f"Error getting store file: {response.text}")
         return default
 
     return response.json()
 
 
-def save_email_record(email_record: list[dict[str, str]]):
-    json_data = json.dumps(email_record)
+def save_record(path: str, record: list[dict[str, str]]):
+    json_data = json.dumps(record)
 
-    response = drive_api(method="PUT", path=EMAIL_RECORD_PATH, data=json_data)
+    response = drive_api(method="PUT", path=path, data=json_data)
 
     if response.status_code >= 300:
         raise Exception(f"Error uploading store file: {response.text}")
