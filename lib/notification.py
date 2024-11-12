@@ -14,12 +14,16 @@ def send_discord(
     if REMAINING_EXPIRY is not None and int(REMAINING_EXPIRY) == 0:
         sleep(REMAINING_EXPIRY)
 
+    data = {"content": message, "username": username}
+
+    if embed is not None:
+        data["embeds"] = [embed]
+
     # Send the message to the Discord webhook
-    response = requests.post(
-        webhook_url, json={"content": message, "username": username, "embeds": [embed]}
-    )
+    response = requests.post(webhook_url, json=data)
 
     if response.status_code != 204:
+        print(response.text)
         raise ValueError(f"Discord webhook returned status code {response.status_code}")
 
     # Check X-RateLimit-Limit and X-RateLimit-Remaining headers
