@@ -24,8 +24,8 @@ jobs:
       - name: Run
         run: |
           python app.py email_summarize
-          python app.py check_assignments_for_all_courses
-          python app.py check_inbox
+          python app.py check_canvas_assignments
+          python app.py check_canvas_inbox
         env:
           CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
 

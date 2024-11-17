@@ -11,8 +11,8 @@ console = Console()
 function_list = [
     ["Email Summarizer", "email_summarize", email_summarize],
     [
-        "Check Assignments for All Courses",
-        "check_assignments_for_all_courses",
+        "Check Canvas Assignments",
+        "check_canvas_assignments",
         check_assignments,
     ],
     [
