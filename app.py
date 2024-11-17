@@ -3,6 +3,7 @@ import sys
 from rich.console import Console
 
 from canvas.assignments import check_assignments
+from canvas.inbox import check_inbox
 from email_summarizer.app import email_summarize
 
 console = Console()
@@ -13,6 +14,11 @@ function_list = [
         "Check Assignments for All Courses",
         "check_assignments_for_all_courses",
         check_assignments,
+    ],
+    [
+        "Check Canvas inbox",
+        "check_canvas_inbox",
+        check_inbox,
     ],
 ]
 

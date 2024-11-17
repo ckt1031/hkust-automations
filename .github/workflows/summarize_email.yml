@@ -25,6 +25,7 @@ jobs:
         run: |
           python app.py email_summarize
           python app.py check_assignments_for_all_courses
+          python app.py check_inbox
         env:
           CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
 
@@ -32,6 +33,7 @@ jobs:
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
           OPENAI_API_MODEL: ${{ secrets.OPENAI_API_MODEL }}
 
+          DISCORD_WEBHOOK_URL_INBOX: ${{ secrets.DISCORD_WEBHOOK_URL_INBOX }}
           DISCORD_WEBHOOK_URL_EMAILS: ${{ secrets.DISCORD_WEBHOOK_URL_EMAILS }}
           DISCORD_WEBHOOK_URL_ASSIGNMENTS: ${{ secrets.DISCORD_WEBHOOK_URL_ASSIGNMENTS }}
 

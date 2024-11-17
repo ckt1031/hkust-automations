@@ -30,3 +30,23 @@ def get_assignments(course_id: str):
         raise Exception("Error fetching assignments")
 
     return response.json()
+
+
+def get_conversations():
+    url = f"{CANVAS_API_BASE_URL}/v1/conversations"
+    response = requests.get(url, headers=headers, timeout=5)
+
+    if response.status_code != 200:
+        raise Exception("Error fetching conversations")
+
+    return response.json()
+
+
+def get_conversation_detail(conversation_id: str):
+    url = f"{CANVAS_API_BASE_URL}/v1/conversations/{conversation_id}"
+    response = requests.get(url, headers=headers, timeout=5)
+
+    if response.status_code != 200:
+        raise Exception("Error fetching conversation messages")
+
+    return response.json()

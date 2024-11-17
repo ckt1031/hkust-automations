@@ -8,6 +8,7 @@ from lib.microsoft_tokens import get_private_graph_token
 STORE_FOLDER = env.ONEDRIVE_STORE_FOLDER
 EMAIL_RECORD_PATH = f"{STORE_FOLDER}/email_record.json"
 CANVAS_ASSIGNMENT_REMINDER_PATH = f"{STORE_FOLDER}/canvas_assignment_reminder.json"
+CANVAS_INBOX_REMINDER_PATH = f"{STORE_FOLDER}/canvas_inbox_reminder.json"
 
 
 def drive_api(method="GET", path="", data=None):
