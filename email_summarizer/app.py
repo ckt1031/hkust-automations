@@ -73,18 +73,19 @@ def email_summarize():
     system_prompt = read_email_system_prompt()
     llm_response = llm.complete(system_prompt, email_user_prompt)
 
-    headers_to_split_on = [
-        ("#", "Header 1"),
-        ("##", "Header 2"),
-        ("###", "Header 3"),
-    ]
-    markdown_splitter = MarkdownHeaderTextSplitter(
-        headers_to_split_on=headers_to_split_on, strip_headers=False
-    )
-    result = markdown_splitter.split_text(llm_response)
+    if llm_response.lower() != "no":
+        headers_to_split_on = [
+            ("#", "Header 1"),
+            ("##", "Header 2"),
+            ("###", "Header 3"),
+        ]
+        markdown_splitter = MarkdownHeaderTextSplitter(
+            headers_to_split_on=headers_to_split_on, strip_headers=False
+        )
+        result = markdown_splitter.split_text(llm_response)
 
-    for split in result:
-        send_discord(webhook_url, split.page_content, None, "HKUST Email")
+        for split in result:
+            send_discord(webhook_url, split.page_content, None, "HKUST Email")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in emails:
