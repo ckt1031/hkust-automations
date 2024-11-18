@@ -22,8 +22,12 @@ def get_courses():
     return response.json()
 
 
-def get_assignments(course_id: str):
-    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments"
+def get_assignments(course_id: str, only_show_upcoming: bool = False):
+    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments?order_by=due_at"
+
+    if only_show_upcoming:
+        url += "&bucket=upcoming"
+
     response = requests.get(url, headers=headers, timeout=5)
 
     if response.status_code != 200:

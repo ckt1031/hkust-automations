@@ -1,6 +1,8 @@
 import os
 
 import dotenv
+import tiktoken
+from loguru import logger
 from openai import OpenAI
 
 dotenv.load_dotenv()
@@ -27,7 +29,18 @@ class LLM:
             default_headers={"User-Agent": "HKUST-Push/1.0"},
         )
 
-    def complete(self, system_message: str, user_message: str) -> str:
+    def get_token(self, content: str):
+        encoding = tiktoken.get_encoding("o200k_base")
+
+        token = encoding.encode(content)
+
+        return len(token)
+
+    def run_chat_completion(self, system_message: str, user_message: str) -> str:
+        token = self.get_token(system_message + user_message)
+
+        logger.info(f"Calling LLM model: {self.model}, token: {token}")
+
         chat_completion = self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -40,5 +53,9 @@ class LLM:
 
         if content is None:
             raise ValueError("OpenAI API did not return any content")
+
+        token = self.get_token(content)
+
+        logger.success(f"LLM model returned content with token: {token}")
 
         return content

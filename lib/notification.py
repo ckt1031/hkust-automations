@@ -23,7 +23,6 @@ def send_discord(
     response = requests.post(webhook_url, json=data)
 
     if response.status_code != 204:
-        print(response.text)
         raise ValueError(f"Discord webhook returned status code {response.status_code}")
 
     # Check X-RateLimit-Limit and X-RateLimit-Remaining headers

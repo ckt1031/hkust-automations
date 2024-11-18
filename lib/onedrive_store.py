@@ -1,6 +1,7 @@
 import json
 
 import requests
+from loguru import logger
 
 from lib import env
 from lib.microsoft_tokens import get_private_graph_token
@@ -31,7 +32,7 @@ def get_record(path: str) -> list[dict[str, str]]:
     response = drive_api(method="GET", path=path)
 
     if response.status_code != 200:
-        print(f"Error getting store file: {response.text}")
+        logger.error(f"Error getting store file: {response.text}")
         return default
 
     return response.json()

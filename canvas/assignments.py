@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timezone
 
 from loguru import logger
@@ -7,10 +6,6 @@ import lib.env as env
 from canvas.api import get_assignments, get_courses
 from lib.notification import send_discord
 from lib.onedrive_store import CANVAS_ASSIGNMENT_REMINDER_PATH, get_record, save_record
-
-# Remove loggers time, level
-logger.remove()
-logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 
 def is_after_due_date(due_at: str) -> bool:
@@ -44,8 +39,11 @@ def get_assignments_for_all_courses():
 
         course_assignments = []
 
-        for assignment in get_assignments(course_id):
+        for assignment in get_assignments(course_id, only_show_upcoming=True):
             if is_after_due_date(assignment["due_at"]):
+                logger.info(
+                    f"Assignment {assignment['id']} in course {course['id']} has passed the due date, skipping"
+                )
                 continue
 
             if (
@@ -99,6 +97,7 @@ def check_assignments():
     for assignment in assignments:
         # Check if the assignment has already been recorded
         if is_assignment_checked(records, str(assignment["id"])):
+            logger.info(f"Assignment {assignment['id']} has already been recorded")
             continue
 
         message = "No expiration, but do it as soon as possible."
@@ -119,7 +118,11 @@ def check_assignments():
 
         send_discord(webhook_url, None, embed)
 
+        logger.success(f"Assignment {assignment['id']} has been sent to Discord")
+
         # Add the assignment to the records
         records.append({str(assignment["id"]): iso_time})
 
     save_record(CANVAS_ASSIGNMENT_REMINDER_PATH, records)
+
+    logger.success("All assignments have been checked")

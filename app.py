@@ -1,17 +1,27 @@
 import sys
 
+from loguru import logger
 from rich.console import Console
 
 from canvas.assignments import check_assignments
 from canvas.inbox import check_inbox
 from email_summarizer.app import email_summarize
 
+# Remove loggers time, level
+logger.remove()
+logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
+
 console = Console()
 
 function_list = [
-    ["Email Summarizer", "email_summarize", email_summarize],
     [
-        "Check Canvas Assignments",
+        "Run all below",
+        "all",
+        lambda: [check_assignments(), check_inbox(), email_summarize()],
+    ],
+    ["Summarize Outlook emails", "email_summarize", email_summarize],
+    [
+        "Check Canvas assignments",
         "check_canvas_assignments",
         check_assignments,
     ],
@@ -19,6 +29,11 @@ function_list = [
         "Check Canvas inbox",
         "check_canvas_inbox",
         check_inbox,
+    ],
+    [
+        "Exit",
+        "exit",
+        lambda: sys.exit(0),
     ],
 ]
 

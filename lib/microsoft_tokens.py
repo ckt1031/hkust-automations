@@ -3,11 +3,9 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import requests
-from rich.console import Console
+from loguru import logger
 
 import lib.env as env
-
-console = Console()
 
 TMP_ACCESS_TOKEN_PATH = "./tmp/access_token.json"
 
@@ -70,7 +68,7 @@ def get_private_graph_token():
     response = requests.post(url, data=payload)
 
     if response.status_code != 200:
-        console.print(f"Error: {response.text}")
+        logger.error(f"Error getting access token: {response.text}")
         return None
 
     jsonString = response.text

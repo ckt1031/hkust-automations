@@ -21,11 +21,8 @@ jobs:
       - name: Install Packages
         run: pip install -r requirements.txt
 
-      - name: Run
-        run: |
-          python app.py email_summarize
-          python app.py check_canvas_assignments
-          python app.py check_canvas_inbox
+      - name: Run all
+        run: python app.py all
         env:
           CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
 

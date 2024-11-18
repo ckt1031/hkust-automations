@@ -54,7 +54,7 @@ def email_summarize():
         checked = is_email_checked(mail_records, email["id"])
 
         if checked:
-            logger.info(f"Email with subject \"{email['subject']}\" is already checked")
+            logger.info(f"Email {email['id']} is already checked, skipping")
 
             # Remove the email from the list
             emails.remove(email)
@@ -71,7 +71,7 @@ def email_summarize():
     # Call the LLM model to summarize the emails
     llm = LLM()
     system_prompt = read_email_system_prompt()
-    llm_response = llm.complete(system_prompt, email_user_prompt)
+    llm_response = llm.run_chat_completion(system_prompt, email_user_prompt)
 
     if llm_response.lower() != "no":
         headers_to_split_on = [

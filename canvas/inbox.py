@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timezone
 
 from loguru import logger
@@ -7,10 +6,6 @@ import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
 from lib.notification import send_discord
 from lib.onedrive_store import CANVAS_INBOX_REMINDER_PATH, get_record, save_record
-
-# Remove loggers time, level
-logger.remove()
-logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 
 def is_conversation_checked(list: list[dict[str, str]], id: str):
@@ -45,10 +40,16 @@ def check_inbox():
             datetime.now(timezone.utc)
             - datetime.fromisoformat(conversation["last_message_at"])
         ).days > 3:
+            logger.info(
+                f"Conversation {conversation['id']} has been longer than 72 hours, skipping"
+            )
             continue
 
         # Check if the conversation has already been recorded
         if is_conversation_checked(records, str(conversation["id"])):
+            logger.info(
+                f"Conversation {conversation['id']} has already been recorded, skipping"
+            )
             continue
 
         detail = get_conversation_detail(conversation["id"])
@@ -69,7 +70,11 @@ def check_inbox():
 
         send_discord(webhook_url, None, embed)
 
+        logger.success(f"Conversation {conversation['id']} sent to Discord")
+
         # Add the conversation to the records
         records.append({str(conversation["id"]): iso_time})
 
     save_record(CANVAS_INBOX_REMINDER_PATH, records)
+
+    logger.success("Inbox checked successfully")
