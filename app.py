@@ -6,6 +6,7 @@ from rich.console import Console
 from canvas.assignments import check_assignments
 from canvas.inbox import check_inbox
 from email_summarizer.app import email_summarize
+from rss.news import check_rss_news
 
 # Remove loggers time, level
 logger.remove()
@@ -29,6 +30,11 @@ function_list = [
         "Check Canvas inbox",
         "check_canvas_inbox",
         check_inbox,
+    ],
+    [
+        "Check RSS news",
+        "check_rss_news",
+        check_rss_news,
     ],
     [
         "Exit",

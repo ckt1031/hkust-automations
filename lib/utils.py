@@ -1,7 +1,12 @@
+import hashlib
 import re
 from datetime import timezone
 
 from dateutil import parser
+
+
+def sha2_256(text: str) -> str:
+    return hashlib.sha3_256(text.encode()).hexdigest()
 
 
 def get_ms(date: str):
