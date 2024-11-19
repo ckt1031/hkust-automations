@@ -34,6 +34,8 @@ def mark_email_as_checked(list: list[dict[str, str]], id: str):
     if not is_email_checked(list, id):
         list.append({id: iso_time})
 
+    return list
+
 
 def is_email_checked(list: list[dict[str, str]], id: str):
     # If id exists in the list as a key, return True

@@ -97,7 +97,7 @@ def check_assignments():
     for assignment in assignments:
         # Check if the assignment has already been recorded
         if is_assignment_checked(records, str(assignment["id"])):
-            logger.info(f"Assignment {assignment['id']} has already been recorded")
+            logger.info(f"Assignment {assignment['id']} was recorded, skipping")
             continue
 
         message = "No expiration, but do it as soon as possible."

@@ -16,10 +16,6 @@ from lib.notification import send_discord
 from lib.onedrive_store import EMAIL_RECORD_PATH, get_record, save_record
 from lib.prompt import read_email_system_prompt
 
-# Remove loggers time, level
-logger.remove()
-logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
-
 
 def email_summarize():
     webhook_url = env.DISCORD_WEBHOOK_URL_EMAILS
@@ -54,7 +50,7 @@ def email_summarize():
         checked = is_email_checked(mail_records, email["id"])
 
         if checked:
-            logger.info(f"Email {email['id']} is already checked, skipping")
+            logger.info(f"Email {email['id']} was checked, skipping")
 
             # Remove the email from the list
             emails.remove(email)
@@ -87,9 +83,11 @@ def email_summarize():
         for split in result:
             send_discord(webhook_url, split.page_content, None, "HKUST Email")
 
+        logger.success("Email summary sent to Discord")
+
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in emails:
-        mark_email_as_checked(mail_records, email["id"])
+        mail_records = mark_email_as_checked(mail_records, email["id"])
 
     # Save the email record
     save_record(EMAIL_RECORD_PATH, mail_records)

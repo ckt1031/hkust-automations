@@ -47,9 +47,7 @@ def check_inbox():
 
         # Check if the conversation has already been recorded
         if is_conversation_checked(records, str(conversation["id"])):
-            logger.info(
-                f"Conversation {conversation['id']} has already been recorded, skipping"
-            )
+            logger.info(f"Conversation {conversation['id']} was recorded, skipping")
             continue
 
         detail = get_conversation_detail(conversation["id"])
