@@ -62,7 +62,7 @@ def email_summarize():
     # If there are no unchecked emails, exit the program
     if unchecked_email_amount == 0:
         logger.success("No unchecked emails found")
-        sys.exit(0)
+        return
 
     # Call the LLM model to summarize the emails
     llm = LLM()
@@ -93,9 +93,3 @@ def email_summarize():
     save_record(EMAIL_RECORD_PATH, mail_records)
 
     logger.success("All emails are checked")
-
-
-if __name__ == "__main__":
-    logger.info("Starting the email summarizer")
-
-    email_summarize()

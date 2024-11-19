@@ -14,15 +14,16 @@ logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 console = Console()
 
+
 function_list = [
     [
         "Run all below",
         "all",
         lambda: [
-            check_inbox(),
-            check_rss_news(),
             email_summarize(),
             check_assignments(),
+            check_inbox(),
+            check_rss_news(),
         ],
     ],
     ["Summarize Outlook emails", "email_summarize", email_summarize],
