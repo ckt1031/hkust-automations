@@ -18,7 +18,12 @@ function_list = [
     [
         "Run all below",
         "all",
-        lambda: [check_assignments(), check_inbox(), email_summarize()],
+        lambda: [
+            email_summarize(),
+            check_assignments(),
+            check_inbox(),
+            check_rss_news(),
+        ],
     ],
     ["Summarize Outlook emails", "email_summarize", email_summarize],
     [
