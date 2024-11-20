@@ -62,11 +62,18 @@ if len(sys.argv) > 1:
     console.print()
 
 for i, function in enumerate(function_list):
-    console.print(f"[{i}] {function[0]}")
+    console.print(f"[{i + 1}] {function[0]}")
 
 # Print empty line
 console.print()
 
-choice = int(input("Enter the number of the function you want to run: "))
+choice = input("Enter the number of the function you want to run: ")
+
 console.print()
-function_list[choice][2]()
+
+if not choice.isdigit() or (int(choice) - 1) >= len(function_list):
+    console.print(f"Invalid choice: {choice}", style="red bold")
+    console.print()
+    sys.exit(1)
+
+function_list[int(choice) - 1][2]()

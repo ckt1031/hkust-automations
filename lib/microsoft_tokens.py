@@ -12,7 +12,6 @@ TMP_ACCESS_TOKEN_PATH = "./tmp/access_token.json"
 
 def write_access_token_to_file(jsonString: str):
     # Make sure the tmp directory exists
-
     if not os.path.exists("./tmp"):
         os.makedirs("./tmp")
 
@@ -28,6 +27,8 @@ def write_access_token_to_file(jsonString: str):
     with open(TMP_ACCESS_TOKEN_PATH, "w") as f:
         f.write(jsonString)
 
+    logger.success("Access token written to temp file")
+
 
 def read_access_token_from_file() -> str | None:
     # Open the file, check if it exists
@@ -41,7 +42,7 @@ def read_access_token_from_file() -> str | None:
         expiry_time = datetime.fromisoformat(data["expiry_time"])
 
         # If the token has expired, return None
-        if (datetime.now(timezone.utc).astimezone() - expiry_time).seconds > 0:
+        if expiry_time < datetime.now(timezone.utc):
             return None
 
         return data["access_token"]
@@ -54,6 +55,14 @@ def get_private_graph_token():
 
     if access_token:
         return access_token
+
+    if (
+        not env.MICROSOFT_REFRESH_TOKEN
+        or not env.MICROSOFT_CLIENT_ID
+        or not env.MICROSOFT_CLIENT_SECRET
+    ):
+        logger.error("Microsoft refresh token, client ID, or client secret is not set")
+        return
 
     url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 
@@ -68,7 +77,9 @@ def get_private_graph_token():
     response = requests.post(url, data=payload)
 
     if response.status_code != 200:
-        logger.error(f"Error getting access token: {response.text}")
+        logger.error(
+            f"Error getting access token ({response.status_code}): {response.text}"
+        )
         return None
 
     jsonString = response.text

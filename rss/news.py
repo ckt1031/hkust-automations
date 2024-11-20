@@ -8,6 +8,7 @@ from email_summarizer.email_record import is_email_checked
 from lib.llm import LLM
 from lib.notification import send_discord
 from lib.onedrive_store import RSS_NEWS_RECORD_PATH, get_record, save_record
+from lib.prompt import read_news_summary_system_prompt
 from lib.utils import get_ms, sha2_256
 from rss.utils import extract_website, parse_rss_feed
 
@@ -16,11 +17,6 @@ RSS_LIST = [
 ]
 
 MAXMIUM_CHECK_DAYS = 5
-
-
-def get_prompt():
-    with open("prompts/news.txt", "r") as f:
-        return f.read()
 
 
 def exceed_maximum_check_days(date: str) -> bool:
@@ -39,7 +35,7 @@ class RSSItemStatus(Enum):
 
 def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
     link = rss_item["link"]
-    system_prompt = get_prompt()
+    system_prompt = read_news_summary_system_prompt()
 
     try:
         article = extract_website(link)
