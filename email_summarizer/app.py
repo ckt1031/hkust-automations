@@ -68,7 +68,7 @@ def email_summarize():
     system_prompt = read_email_system_prompt()
     llm_response = llm.run_chat_completion(system_prompt, email_user_prompt)
 
-    if llm_response.lower() != "no":
+    if llm_response.strip().lower() != "no":
         headers_to_split_on = [
             ("#", "Header 1"),
             ("##", "Header 2"),
