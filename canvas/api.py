@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import requests
 
 import lib.env as env
@@ -12,12 +14,27 @@ headers = {
 }
 
 
+@lru_cache
 def get_courses():
     url = f"{CANVAS_API_BASE_URL}/v1/courses"
     response = requests.get(url, headers=headers, timeout=5)
 
     if response.status_code != 200:
         raise Exception("Error fetching courses")
+
+    return response.json()
+
+
+def get_discussion_topics(course_id: str, only_announcements: bool = False):
+    params = {
+        "only_announcements": only_announcements,
+    }
+
+    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics"
+    response = requests.get(url, headers=headers, timeout=15, params=params)
+
+    if response.status_code != 200:
+        raise Exception("Error fetching discussion topics")
 
     return response.json()
 

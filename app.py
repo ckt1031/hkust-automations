@@ -3,6 +3,7 @@ import sys
 from loguru import logger
 from rich.console import Console
 
+from canvas.announcements import check_canvas_announcements
 from canvas.assignments import check_assignments
 from canvas.inbox import check_inbox
 from email_summarizer.app import email_summarize
@@ -31,6 +32,11 @@ function_list = [
         "Check Canvas assignments",
         "check_canvas_assignments",
         check_assignments,
+    ],
+    [
+        "Check Canvas announcements",
+        "check_canvas_announcements",
+        check_canvas_announcements,
     ],
     [
         "Check Canvas inbox",

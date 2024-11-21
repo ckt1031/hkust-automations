@@ -1,6 +1,7 @@
 from time import sleep
 
 import requests
+from loguru import logger
 
 REMAINING = -1
 REMAINING_EXPIRY = -1
@@ -12,6 +13,9 @@ def send_discord(
     global REMAINING, REMAINING_EXPIRY
 
     if REMAINING_EXPIRY is not None and int(REMAINING_EXPIRY) == 0:
+        logger.info(
+            f"Discord webhook rate limit reached, sleeping for {REMAINING_EXPIRY}s"
+        )
         sleep(REMAINING_EXPIRY)
 
     data = {"content": message, "username": username}

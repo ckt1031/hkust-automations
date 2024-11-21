@@ -10,6 +10,7 @@ STORE_FOLDER = env.ONEDRIVE_STORE_FOLDER
 
 # Stores
 EMAIL_RECORD_PATH = f"{STORE_FOLDER}/email_record.json"
+CANVAS_ANNOUNCEMENT_RECORD_PATH = f"{STORE_FOLDER}/canvas_announcement_record.json"
 CANVAS_ASSIGNMENT_REMINDER_PATH = f"{STORE_FOLDER}/canvas_assignment_reminder.json"
 CANVAS_INBOX_REMINDER_PATH = f"{STORE_FOLDER}/canvas_inbox_reminder.json"
 RSS_NEWS_RECORD_PATH = f"{STORE_FOLDER}/rss_news_record.json"
@@ -27,6 +28,14 @@ def drive_api(method="GET", path="", data=None):
     response = requests.request(method, url, headers=headers, data=data)
 
     return response
+
+
+def is_recorded(list: list[dict[str, str]], id: str):
+    for item in list:
+        if item.get(id):
+            return True
+
+    return False
 
 
 def get_record(path: str) -> list[dict[str, str]]:

@@ -6,7 +6,12 @@ from loguru import logger
 import lib.env as env
 from canvas.api import get_assignments, get_courses
 from lib.notification import send_discord
-from lib.onedrive_store import CANVAS_ASSIGNMENT_REMINDER_PATH, get_record, save_record
+from lib.onedrive_store import (
+    CANVAS_ASSIGNMENT_REMINDER_PATH,
+    get_record,
+    is_recorded,
+    save_record,
+)
 
 
 def is_after_due_date(due_at: str) -> bool:
@@ -69,15 +74,6 @@ def format_iso_date(date: str) -> str:
     return iso_date
 
 
-def is_assignment_checked(list: list[dict[str, str]], id: str):
-    # If id exists in the list as a key, return True
-    for item in list:
-        if item.get(id):
-            return True
-
-    return False
-
-
 def check_assignments():
     webhook_url = env.DISCORD_WEBHOOK_URL_ASSIGNMENTS
 
@@ -98,7 +94,7 @@ def check_assignments():
 
     for assignment in assignments:
         # Check if the assignment has already been recorded
-        if is_assignment_checked(records, str(assignment["id"])):
+        if is_recorded(records, str(assignment["id"])):
             logger.info(f"Assignment {assignment['id']} was recorded, skipping")
             continue
 

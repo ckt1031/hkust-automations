@@ -6,14 +6,10 @@ from loguru import logger
 
 import lib.env as env
 from email_summarizer.email_extractor import EmailExtractor
-from email_summarizer.email_record import (
-    is_email_checked,
-    mark_email_as_checked,
-    prune_email_record,
-)
+from email_summarizer.email_record import mark_email_as_checked, prune_email_record
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import EMAIL_RECORD_PATH, get_record, save_record
+from lib.onedrive_store import EMAIL_RECORD_PATH, get_record, is_recorded, save_record
 from lib.prompt import read_email_system_prompt
 
 
@@ -48,7 +44,7 @@ def email_summarize():
 
     # Check if some email is checked
     for email in emails:
-        checked = is_email_checked(mail_records, email["id"])
+        checked = is_recorded(mail_records, email["id"])
 
         if checked:
             logger.info(f"Email {email['id']} was checked, skipping")

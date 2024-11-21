@@ -1,6 +1,8 @@
 import re
 from datetime import datetime, timezone
 
+from lib.onedrive_store import is_recorded
+
 
 def prune_email_record(list: list[dict[str, str]]) -> list[dict[str, str]]:
     """
@@ -31,19 +33,10 @@ def mark_email_as_checked(list: list[dict[str, str]], id: str):
     iso_time = datetime.now(timezone.utc).astimezone().isoformat()
 
     # Add the id to the list, if it doesn't exist
-    if not is_email_checked(list, id):
+    if not is_recorded(list, id):
         list.append({id: iso_time})
 
     return list
-
-
-def is_email_checked(list: list[dict[str, str]], id: str):
-    # If id exists in the list as a key, return True
-    for email in list:
-        if email.get(id):
-            return True
-
-    return False
 
 
 def check_email_sender(sender_email: str) -> bool:

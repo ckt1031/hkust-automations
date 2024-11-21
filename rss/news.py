@@ -5,10 +5,14 @@ from enum import Enum
 from loguru import logger
 
 import lib.env as env
-from email_summarizer.email_record import is_email_checked
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import RSS_NEWS_RECORD_PATH, get_record, save_record
+from lib.onedrive_store import (
+    RSS_NEWS_RECORD_PATH,
+    get_record,
+    is_recorded,
+    save_record,
+)
 from lib.prompt import read_news_summary_system_prompt
 from lib.utils import get_ms, sha2_256
 from rss.utils import extract_website, parse_rss_feed
@@ -89,7 +93,7 @@ def check_rss_news():
         for item in data:
             key = sha2_256(item["id"])
 
-            if is_email_checked(record, key):
+            if is_recorded(record, key):
                 logger.info(f"RSS item already checked: {item['title']}")
                 continue
 

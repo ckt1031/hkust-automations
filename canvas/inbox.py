@@ -6,16 +6,12 @@ from loguru import logger
 import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
 from lib.notification import send_discord
-from lib.onedrive_store import CANVAS_INBOX_REMINDER_PATH, get_record, save_record
-
-
-def is_conversation_checked(list: list[dict[str, str]], id: str):
-    # If id exists in the list as a key, return True
-    for item in list:
-        if item.get(id):
-            return True
-
-    return False
+from lib.onedrive_store import (
+    CANVAS_INBOX_REMINDER_PATH,
+    get_record,
+    is_recorded,
+    save_record,
+)
 
 
 def check_inbox():
@@ -48,7 +44,7 @@ def check_inbox():
             continue
 
         # Check if the conversation has already been recorded
-        if is_conversation_checked(records, str(conversation["id"])):
+        if is_recorded(records, str(conversation["id"])):
             logger.info(f"Conversation {conversation['id']} was recorded, skipping")
             continue
 
