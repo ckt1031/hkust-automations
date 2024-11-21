@@ -12,6 +12,7 @@ from lib.onedrive_store import (
     is_recorded,
     save_record,
 )
+from lib.utils import get_current_iso_time
 
 
 def is_after_due_date(due_at: str) -> bool:
@@ -28,7 +29,7 @@ def is_after_due_date(due_at: str) -> bool:
     if due_date.tzinfo is None:
         due_date = due_date.replace(tzinfo=timezone.utc)
 
-    # Get the current date and time with timezone information
+    # Get the current time in UTC
     now = datetime.now(timezone.utc)
 
     # If the due date is in the past, return True
@@ -90,7 +91,7 @@ def check_assignments():
         return
 
     records = get_record(CANVAS_ASSIGNMENT_REMINDER_PATH)
-    iso_time = datetime.now(timezone.utc).astimezone().isoformat()
+    iso_time = get_current_iso_time()
 
     for assignment in assignments:
         # Check if the assignment has already been recorded

@@ -24,6 +24,7 @@ function_list = [
             email_summarize(),
             check_assignments(),
             check_inbox(),
+            check_canvas_announcements(),
             check_rss_news(),
         ],
     ],

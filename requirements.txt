@@ -12,3 +12,4 @@ black==24.10.0
 tiktoken==0.8.0
 feedparser==6.0.11
 trafilatura==1.12.2
+html2text==2024.2.26

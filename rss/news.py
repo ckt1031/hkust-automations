@@ -13,7 +13,7 @@ from lib.onedrive_store import (
     is_recorded,
     save_record,
 )
-from lib.prompt import read_news_summary_system_prompt
+from lib.prompt import read_summary_system_prompt
 from lib.utils import get_ms, sha2_256
 from rss.utils import extract_website, parse_rss_feed
 
@@ -40,7 +40,7 @@ class RSSItemStatus(Enum):
 
 def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
     link = rss_item["link"]
-    system_prompt = read_news_summary_system_prompt()
+    system_prompt = read_summary_system_prompt()
 
     try:
         article = extract_website(link)

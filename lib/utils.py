@@ -1,6 +1,7 @@
 import hashlib
+import math
 import re
-from datetime import timezone
+from datetime import datetime, timezone
 
 from dateutil import parser
 
@@ -42,3 +43,18 @@ def remove_css_and_scripts(raw_html: str) -> str:
     # Remove script tags
     raw_html = re.sub(r"<script.*?>.*?</script>", "", raw_html, flags=re.DOTALL)
     return raw_html
+
+
+def get_current_iso_time():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+
+def iso_time_from_now_second_left(t: str):
+    """
+    Return the difference in seconds between the current time and the given time
+    """
+    float_diff = (
+        datetime.fromisoformat(t).timestamp() - datetime.now(timezone.utc).timestamp()
+    )
+
+    return math.ceil(float_diff)

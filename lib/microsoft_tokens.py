@@ -6,6 +6,7 @@ import requests
 from loguru import logger
 
 import lib.env as env
+from lib.utils import iso_time_from_now_second_left
 
 TMP_ACCESS_TOKEN_PATH = "./tmp/access_token.json"
 
@@ -17,10 +18,10 @@ def write_access_token_to_file(jsonString: str):
 
     data = json.loads(jsonString)
 
+    swifted_time = datetime.now(timezone.utc) + timedelta(seconds=data["expires_in"])
+
     # Add expires_in seconds to the current time
-    data["expiry_time"] = (
-        datetime.now(timezone.utc).astimezone() + timedelta(seconds=data["expires_in"])
-    ).isoformat()
+    data["expiry_time"] = swifted_time.isoformat()
 
     jsonString = json.dumps(data)
 
@@ -39,10 +40,10 @@ def read_access_token_from_file() -> str | None:
         data = json.loads(jsonString)
 
         # Check if the token has expired
-        expiry_time = datetime.fromisoformat(data["expiry_time"])
-
-        # If the token has expired, return None
-        if expiry_time < datetime.now(timezone.utc):
+        if iso_time_from_now_second_left(data["expiry_time"]) < 120:
+            logger.warning(
+                f"Microsoft access token is about to expire, it expires in {data['expiry_time']}"
+            )
             return None
 
         return data["access_token"]
@@ -78,7 +79,7 @@ def get_private_graph_token():
 
     if response.status_code != 200:
         logger.error(
-            f"Error getting access token ({response.status_code}): {response.text}"
+            f"Error getting microsoft access token ({response.status_code}): {response.text}"
         )
         return None
 

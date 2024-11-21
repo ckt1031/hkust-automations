@@ -32,7 +32,7 @@ def drive_api(method="GET", path="", data=None):
 
 def is_recorded(list: list[dict[str, str]], id: str):
     for item in list:
-        if item.get(id):
+        if item.get(str(id)):
             return True
 
     return False

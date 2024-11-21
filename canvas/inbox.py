@@ -1,5 +1,4 @@
 import sys
-from datetime import datetime, timezone
 
 from loguru import logger
 
@@ -12,6 +11,7 @@ from lib.onedrive_store import (
     is_recorded,
     save_record,
 )
+from lib.utils import get_current_iso_time, iso_time_from_now_second_left
 
 
 def check_inbox():
@@ -30,14 +30,14 @@ def check_inbox():
         return
 
     records = get_record(CANVAS_INBOX_REMINDER_PATH)
-    iso_time = datetime.now(timezone.utc).astimezone().isoformat()
+    iso_time = get_current_iso_time()
 
     for conversation in conversations:
         # Check if the conversation has been longer than 72 hours
         if (
-            datetime.now(timezone.utc)
-            - datetime.fromisoformat(conversation["last_message_at"])
-        ).days > 3:
+            iso_time_from_now_second_left(conversation["last_message_at"])
+            < -7 * 24 * 60 * 60
+        ):
             logger.info(
                 f"Conversation {conversation['id']} has been longer than 72 hours, skipping"
             )

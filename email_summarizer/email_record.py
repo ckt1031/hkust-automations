@@ -1,7 +1,9 @@
 import re
-from datetime import datetime, timezone
+
+from loguru import logger
 
 from lib.onedrive_store import is_recorded
+from lib.utils import get_current_iso_time, iso_time_from_now_second_left
 
 
 def prune_email_record(list: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -9,17 +11,14 @@ def prune_email_record(list: list[dict[str, str]]) -> list[dict[str, str]]:
     Prune the email record to remove emails older than 7
     days
     """
-    # Get current timestamp first
-    iso_time = datetime.now(timezone.utc).astimezone()
 
     for email in list:
-        for key, value in email.items():
-            # Get the email timestamp
-            email_time = datetime.fromisoformat(value)
-
+        for _, value in email.items():
             # If the email is older than 7 days, remove it
-            if (iso_time - email_time).days > 7:
+            if iso_time_from_now_second_left(value) < -7 * 24 * 60 * 60:
                 list.remove(email)
+
+                logger.info(f"Email {email} removed from the record")
 
     return list
 
@@ -30,7 +29,7 @@ def mark_email_as_checked(list: list[dict[str, str]], id: str):
     with the current timestamp
     """
     # Get current timestamp first
-    iso_time = datetime.now(timezone.utc).astimezone().isoformat()
+    iso_time = get_current_iso_time()
 
     # Add the id to the list, if it doesn't exist
     if not is_recorded(list, id):
