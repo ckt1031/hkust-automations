@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -73,7 +74,8 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
 
 def check_rss_news():
     if env.DISCORD_WEBHOOK_URL_NEWS is None:
-        raise ValueError("DISCORD_WEBHOOK_URL_NEWS is not set")
+        logger.error("DISCORD_WEBHOOK_URL_NEWS is not set")
+        sys.exit(1)
 
     logger.info("Checking RSS news...")
 

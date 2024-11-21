@@ -23,7 +23,5 @@ def extract_website(link: str):
         raise ValueError("No content extracted from the website")
 
     # Each item
-
     # title, link, summary, published, id, author
-
     return json.loads(json_data)

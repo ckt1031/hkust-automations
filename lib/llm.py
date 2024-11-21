@@ -14,7 +14,7 @@ class LLM:
 
         # Throw an error if the API key is not provided
         if self.api_key is None:
-            raise ValueError(
+            raise EnvironmentError(
                 "OpenAI API key (OPENAI_API_KEY) is not provided in the environment variables"
             )
 

@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, timezone
 
 from loguru import logger
@@ -81,9 +82,10 @@ def check_assignments():
     webhook_url = env.DISCORD_WEBHOOK_URL_ASSIGNMENTS
 
     if webhook_url is None:
-        raise ValueError(
-            "Discord webhook URL is not provided in the environment variables"
+        logger.error(
+            "Discord webhook URL is not provided in the environment variables (DISCORD_WEBHOOK_URL_ASSIGNMENTS)"
         )
+        sys.exit(1)
 
     assignments = get_assignments_for_all_courses()
 

@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -20,9 +21,10 @@ def email_summarize():
     webhook_url = env.DISCORD_WEBHOOK_URL_EMAILS
 
     if webhook_url is None:
-        raise ValueError(
-            "Discord webhook URL is not provided in the environment variables"
+        logger.error(
+            "Discord webhook URL is not provided in the environment variables (DISCORD_WEBHOOK_URL_EMAILS)"
         )
+        sys.exit(1)
 
     # Initialize the email client
     extractor = EmailExtractor()

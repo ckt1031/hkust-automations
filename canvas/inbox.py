@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, timezone
 
 from loguru import logger
@@ -21,9 +22,10 @@ def check_inbox():
     webhook_url = env.DISCORD_WEBHOOK_URL_INBOX
 
     if webhook_url is None:
-        raise ValueError(
-            "Discord webhook URL is not provided in the environment variables"
+        logger.error(
+            "Discord webhook URL is not provided in the environment variables (DISCORD_WEBHOOK_URL_INBOX)"
         )
+        sys.exit(1)
 
     conversations = get_conversations()
 
