@@ -75,7 +75,7 @@ def format_iso_date(date: str) -> str:
     return iso_date
 
 
-def check_assignments():
+def check_canvas_assignments():
     webhook_url = env.DISCORD_WEBHOOK_URL_ASSIGNMENTS
 
     if webhook_url is None:

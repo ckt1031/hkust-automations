@@ -14,7 +14,7 @@ from lib.onedrive_store import (
 from lib.utils import get_current_iso_time, iso_time_from_now_second_left
 
 
-def check_inbox():
+def check_canvas_inbox():
     webhook_url = env.DISCORD_WEBHOOK_URL_INBOX
 
     if webhook_url is None:

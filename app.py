@@ -4,8 +4,8 @@ from loguru import logger
 from rich.console import Console
 
 from canvas.announcements import check_canvas_announcements
-from canvas.assignments import check_assignments
-from canvas.inbox import check_inbox
+from canvas.assignments import check_canvas_assignments
+from canvas.inbox import check_canvas_inbox
 from email_summarizer.app import email_summarize
 from rss.news import check_rss_news
 
@@ -21,18 +21,18 @@ function_list = [
         "Run all below",
         "all",
         lambda: [
-            email_summarize(),
-            check_assignments(),
-            check_inbox(),
-            check_canvas_announcements(),
             check_rss_news(),
+            email_summarize(),
+            check_canvas_inbox(),
+            check_canvas_assignments(),
+            check_canvas_announcements(),
         ],
     ],
     ["Summarize Outlook emails", "email_summarize", email_summarize],
     [
         "Check Canvas assignments",
         "check_canvas_assignments",
-        check_assignments,
+        check_canvas_assignments,
     ],
     [
         "Check Canvas announcements",
@@ -42,7 +42,7 @@ function_list = [
     [
         "Check Canvas inbox",
         "check_canvas_inbox",
-        check_inbox,
+        check_canvas_inbox,
     ],
     [
         "Check RSS news",
@@ -78,7 +78,11 @@ choice = input("Enter the number of the function you want to run: ")
 
 console.print()
 
-if not choice.isdigit() or (int(choice) - 1) >= len(function_list):
+if (
+    not choice.isdigit()
+    or (int(choice) - 1) >= len(function_list)
+    or (int(choice) - 1) < 0
+):
     console.print(f"Invalid choice: {choice}", style="red bold")
     console.print()
     sys.exit(1)
