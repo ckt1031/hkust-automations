@@ -6,6 +6,7 @@ import requests
 from loguru import logger
 
 import lib.env as env
+from lib.constant import HTTP_CLIENT_HEADERS
 from lib.utils import iso_time_from_now_second_left
 
 TMP_ACCESS_TOKEN_PATH = "./tmp/access_token.json"
@@ -75,7 +76,7 @@ def get_private_graph_token():
         "refresh_token": env.MICROSOFT_REFRESH_TOKEN,
     }
 
-    response = requests.post(url, data=payload)
+    response = requests.post(url, data=payload, headers=HTTP_CLIENT_HEADERS)
 
     if response.status_code != 200:
         logger.error(

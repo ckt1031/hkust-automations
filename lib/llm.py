@@ -1,16 +1,14 @@
-import os
-
-import dotenv
 import tiktoken
 from loguru import logger
 from openai import OpenAI
 
-dotenv.load_dotenv()
+from lib.constant import HTTP_CLIENT_HEADERS
+from lib.env import OPENAI_API_BASE_URL, OPENAI_API_KEY, OPENAI_API_MODEL
 
 
 class LLM:
     def __init__(self):
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = OPENAI_API_KEY
 
         # Throw an error if the API key is not provided
         if self.api_key is None:
@@ -18,15 +16,13 @@ class LLM:
                 "OpenAI API key (OPENAI_API_KEY) is not provided in the environment variables"
             )
 
-        self.api_base_url = os.getenv(
-            "OPENAI_API_BASE_URL", "https://api.openai.com/v1"
-        )
-        self.model = os.getenv("OPENAI_API_MODEL", "gpt-4o-mini")
+        self.api_base_url = OPENAI_API_BASE_URL
+        self.model = OPENAI_API_MODEL
 
         self.client = OpenAI(
             api_key=self.api_key,
             base_url=self.api_base_url,
-            default_headers={"User-Agent": "HKUST-Push/1.0"},
+            default_headers=HTTP_CLIENT_HEADERS,
         )
 
     def get_token(self, content: str):

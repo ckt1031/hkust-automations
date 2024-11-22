@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_BASE_URL = os.getenv("OPENAI_API_BASE_URL", "https://api.openai.com/v1")
+OPENAI_API_MODEL = os.getenv("OPENAI_API_MODEL", "gpt-4o-mini")
+
 CANVAS_API_KEY = os.getenv("CANVAS_API_KEY")
 
 ONEDRIVE_STORE_FOLDER = os.getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")

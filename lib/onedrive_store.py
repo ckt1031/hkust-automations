@@ -4,6 +4,7 @@ import requests
 from loguru import logger
 
 from lib import env
+from lib.constant import HTTP_CLIENT_HEADERS
 from lib.microsoft_tokens import get_private_graph_token
 
 STORE_FOLDER = env.ONEDRIVE_STORE_FOLDER
@@ -23,6 +24,7 @@ def drive_api(method="GET", path="", data=None):
         "Accept": "application/json",
         "Authorization": f"Bearer {get_private_graph_token()}",
         "Content-Type": "application/json",
+        "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
     }
 
     response = requests.request(method, url, headers=headers, data=data)

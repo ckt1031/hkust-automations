@@ -3,6 +3,8 @@ from time import sleep
 import requests
 from loguru import logger
 
+from lib.constant import HTTP_CLIENT_HEADERS
+
 REMAINING = -1
 REMAINING_EXPIRY = -1
 
@@ -24,7 +26,7 @@ def send_discord(
         data["embeds"] = [embed]
 
     # Send the message to the Discord webhook
-    response = requests.post(webhook_url, json=data)
+    response = requests.post(webhook_url, json=data, headers=HTTP_CLIENT_HEADERS)
 
     if response.status_code != 204:
         raise ValueError(f"Discord webhook returned status code {response.status_code}")

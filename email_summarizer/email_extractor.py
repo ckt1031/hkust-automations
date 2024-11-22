@@ -2,6 +2,7 @@ import requests
 from loguru import logger
 
 from email_summarizer.email_record import check_email_sender
+from lib.constant import HTTP_CLIENT_HEADERS
 from lib.microsoft_tokens import get_private_graph_token
 from lib.utils import clean_html, remove_css_and_scripts, remove_massive_space
 
@@ -12,6 +13,7 @@ class EmailExtractor:
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
+            "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
         }
         self.session = requests.Session()
         self.session.headers.update(headers)

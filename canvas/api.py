@@ -3,6 +3,7 @@ from functools import lru_cache
 import requests
 
 import lib.env as env
+from lib.constant import HTTP_CLIENT_HEADERS
 
 CANVAS_API_BASE_URL = "https://canvas.ust.hk/api"
 
@@ -11,6 +12,7 @@ headers = {
     "Authorization": f"Bearer {env.CANVAS_API_KEY}",
     "Content-Type": "application/json",
     "Accept": "application/json",
+    "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
 }
 
 
