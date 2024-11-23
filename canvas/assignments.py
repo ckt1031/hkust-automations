@@ -48,9 +48,9 @@ def get_assignments_for_all_courses():
 
         for assignment in get_assignments(course_id, only_show_upcoming=True):
             if is_after_due_date(assignment["due_at"]):
-                logger.info(
-                    f"Assignment {assignment['id']} in course {course['id']} has passed the due date, skipping"
-                )
+                # logger.info(
+                #     f"Assignment {assignment['id']} in course {course['id']} has passed the due date, skipping"
+                # )
                 continue
 
             if (
@@ -97,6 +97,11 @@ def check_canvas_assignments():
         # Check if the assignment has already been recorded
         if is_recorded(records, str(assignment["id"])):
             logger.info(f"Assignment {assignment['id']} was recorded, skipping")
+            continue
+
+        # Ignore if assignment has submissions
+        if assignment["has_submitted_submissions"]:
+            logger.info(f"Assignment {assignment['id']} has submissions, skipping")
             continue
 
         message = "No expiration, but do it as soon as possible."

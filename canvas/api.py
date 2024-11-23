@@ -27,10 +27,11 @@ def get_courses():
     return response.json()
 
 
-def get_discussion_topics(course_id: str, only_announcements: bool = False):
-    params = {
-        "only_announcements": only_announcements,
-    }
+def get_discussion_topics(course_id: str, only_announcements: bool | None = None):
+    params = {}
+
+    if only_announcements is not None:
+        params["only_announcements"] = only_announcements
 
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics"
     response = requests.get(url, headers=headers, timeout=15, params=params)
@@ -41,11 +42,23 @@ def get_discussion_topics(course_id: str, only_announcements: bool = False):
     return response.json()
 
 
-def get_assignments(course_id: str, only_show_upcoming: bool = False):
+def get_discussion_topic_view(course_id: str, topic_id: str):
+    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
+    response = requests.get(url, headers=headers, timeout=5)
+
+    if response.status_code != 200:
+        raise Exception("Error fetching discussion topic view")
+
+    return response.json()
+
+
+def get_assignments(course_id: str, only_show_upcoming: bool | None = None):
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments?order_by=due_at"
 
+    params = {}
+
     if only_show_upcoming:
-        url += "&bucket=upcoming"
+        params["bucket"] = "upcoming"
 
     response = requests.get(url, headers=headers, timeout=5)
 
