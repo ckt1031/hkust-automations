@@ -11,10 +11,13 @@ STORE_FOLDER = env.ONEDRIVE_STORE_FOLDER
 
 # Stores
 EMAIL_RECORD_PATH = f"{STORE_FOLDER}/email_record.json"
+RSS_NEWS_RECORD_PATH = f"{STORE_FOLDER}/rss_news_record.json"
+
+CANVAS_INBOX_REMINDER_PATH = f"{STORE_FOLDER}/canvas_inbox_reminder.json"
 CANVAS_ANNOUNCEMENT_RECORD_PATH = f"{STORE_FOLDER}/canvas_announcement_record.json"
 CANVAS_ASSIGNMENT_REMINDER_PATH = f"{STORE_FOLDER}/canvas_assignment_reminder.json"
-CANVAS_INBOX_REMINDER_PATH = f"{STORE_FOLDER}/canvas_inbox_reminder.json"
-RSS_NEWS_RECORD_PATH = f"{STORE_FOLDER}/rss_news_record.json"
+
+DISCORD_CHANNEL_SUMMARY_PATH = f"{STORE_FOLDER}/discord_channel_summary.json"
 
 
 def drive_api(method="GET", path="", data=None):

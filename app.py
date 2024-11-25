@@ -7,6 +7,7 @@ from canvas.announcements import check_canvas_announcements
 from canvas.assignments import check_canvas_assignments
 from canvas.discussions import check_canvas_discussions
 from canvas.inbox import check_canvas_inbox
+from discord.grab_useful_messages import get_useful_messages
 from email_summarizer.app import email_summarize
 from rss.news import check_rss_news
 
@@ -50,6 +51,11 @@ function_list = [
         "Check Canvas inbox",
         "check_canvas_inbox",
         check_canvas_inbox,
+    ],
+    [
+        "Get useful Discord messages",
+        "get_useful_discord_messages",
+        get_useful_messages,
     ],
     [
         "Check RSS news",
