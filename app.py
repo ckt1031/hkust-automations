@@ -5,6 +5,7 @@ from rich.console import Console
 
 from canvas.announcements import check_canvas_announcements
 from canvas.assignments import check_canvas_assignments
+from canvas.discussions import check_canvas_discussions
 from canvas.inbox import check_canvas_inbox
 from email_summarizer.app import email_summarize
 from rss.news import check_rss_news
@@ -24,6 +25,7 @@ function_list = [
             check_rss_news(),
             email_summarize(),
             check_canvas_inbox(),
+            check_canvas_discussions(),
             check_canvas_assignments(),
             check_canvas_announcements(),
         ],
@@ -38,6 +40,11 @@ function_list = [
         "Check Canvas announcements",
         "check_canvas_announcements",
         check_canvas_announcements,
+    ],
+    [
+        "Check Canvas discussions",
+        "check_canvas_discussions",
+        check_canvas_discussions,
     ],
     [
         "Check Canvas inbox",
