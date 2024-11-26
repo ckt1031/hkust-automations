@@ -83,7 +83,7 @@ def handle_channel(channel, messages) -> bool:
     llm = LLM()
     response = llm.run_chat_completion(system_prompts, user_prompts)
 
-    if response == "NO":
+    if response.strip().lower() == "no":
         logger.info("No valuable message to summarize and construct points.")
         return False
 
@@ -122,6 +122,10 @@ def get_useful_messages():
                     messages.remove(message)
 
             filtered_messages = filter_messages(messages)
+
+            if len(filtered_messages) == 0:
+                logger.info("No valuable message to summarize and construct points.")
+                continue
 
             status = handle_channel(channel_info, filtered_messages)
 
