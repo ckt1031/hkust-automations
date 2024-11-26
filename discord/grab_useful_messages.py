@@ -3,6 +3,7 @@ import time
 
 from loguru import logger
 
+from datetime import datetime
 from discord.api import get_channel_info, get_channel_messages
 from lib import env
 from lib.llm import LLM
@@ -10,10 +11,23 @@ from lib.notification import send_discord
 from lib.onedrive_store import (
     DISCORD_CHANNEL_SUMMARY_PATH,
     get_record,
-    is_recorded,
     save_record,
 )
 from lib.utils import get_current_iso_time
+
+system_prompts = """
+You are now a chat summarize bot, you will be given a list of messages from a channel,
+only grab useful information from Discord Server, respond with a summary of the messages in points.
+    
+1. Exclude user names, only include the most important information.
+2. Include links in markdown format, and videos in markdown format if they are important.
+3. Ensure points are clear and unstandable.
+4. Include date and time of some specific dated information.
+5. For markdown links, do not use URL as the link text, use the title of the link.
+6. Ignore all irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slangs.
+
+Return "NO" as the only output if there are no or valuable message to summarize and construct points.
+"""
 
 server_channel_list = {
     # HKUST FYS Discord Server
@@ -35,7 +49,7 @@ def purify_message_content(message: str):
     return message
 
 
-def filter_messages(messages):
+def filter_messages(messages) -> list[dict]:
     filtered_messages = []
 
     for message in messages:
@@ -51,22 +65,7 @@ def filter_messages(messages):
 
 
 def handle_channel(channel, messages) -> bool:
-    channel_id = channel["id"]
     user_prompts = ""
-    system_prompts = """
-    You are now a chat summarize bot, you will be given a list of messages from a channel,
-    only grab useful information from Discord Server, respond with a summary of the messages in points.
-    
-    Do not include user names, and only include the most important information.
-    You might include links in markdown format, and videos in markdown format if they are important.
-    Ensure points are clear and unstandable.
-
-    Ignore all irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slangs.
-    
-    For markdown links, do not use URL as the link text, use the title of the link.
-
-    Return "NO" as the only output if there are no or valuable message to summarize and construct points.
-    """
 
     for message in messages:
         _draft = f"User: {message['author']['username']}\nContent: {message['content']}"
@@ -88,8 +87,8 @@ def handle_channel(channel, messages) -> bool:
         return False
 
     embed = {
-        "title": f"<#{channel_id}>",
-        "description": response,
+        "title": f"Summary of {channel['name']}",
+        "description": f"{response}\n\n<#{channel['id']}>",
         "timestamp": get_current_iso_time(),
     }
 
@@ -104,7 +103,6 @@ def handle_channel(channel, messages) -> bool:
 
 def get_useful_messages():
     record = get_record(DISCORD_CHANNEL_SUMMARY_PATH)
-    current_iso = get_current_iso_time()
 
     for server_id, channel_ids in server_channel_list.items():
         for channel_id in channel_ids:
@@ -117,23 +115,39 @@ def get_useful_messages():
                 channel_id,
             )
 
-            for message in messages:
-                if is_recorded(record, message["id"]):
-                    messages.remove(message)
-
             filtered_messages = filter_messages(messages)
 
-            if len(filtered_messages) == 0:
+            # Timestamp checking
+            current_iso = get_current_iso_time()
+            previous_checked_iso: str = record[channel_info["id"]] if channel_info["id"] in record else None
+
+            final_checking_messages = []
+
+            for message in filtered_messages:
+                if previous_checked_iso:
+                    # Compare milliseconds
+                    previous_checked_timestamp = datetime.fromisoformat(previous_checked_iso).timestamp()
+                    current_timestamp = datetime.fromisoformat(message['timestamp']).timestamp()
+
+                    if current_timestamp > previous_checked_timestamp:
+                        final_checking_messages.append(message)
+                else:
+                    final_checking_messages.append(message)
+
+            if len(final_checking_messages) == 0:
                 logger.info("No valuable message to summarize and construct points.")
                 continue
 
-            status = handle_channel(channel_info, filtered_messages)
+            status = handle_channel(channel_info, final_checking_messages)
 
             if status:
-                for msg in filtered_messages:
-                    record.append({msg["id"]: current_iso})
+                record[channel_info["id"]] = current_iso
 
                 save_record(DISCORD_CHANNEL_SUMMARY_PATH, record)
+
+                logger.success(
+                    f"Successfully summarized and constructed points for {channel_info['name']}"
+                )
 
             logger.info(
                 "Sleeping for 5 seconds before getting messages from the next channel, wait for it..."

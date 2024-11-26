@@ -14,7 +14,7 @@ from lib.onedrive_store import (
     save_record,
 )
 from lib.prompt import read_summary_system_prompt
-from lib.utils import get_ms, sha2_256
+from lib.utils import get_current_iso_time, get_ms, sha2_256
 from rss.utils import extract_website, parse_rss_feed
 
 RSS_LIST = [
@@ -84,7 +84,7 @@ def check_rss_news():
     logger.info("Checking RSS news...")
 
     record = get_record(RSS_NEWS_RECORD_PATH)
-    iso_time = datetime.now(timezone.utc).astimezone()
+    current_iso = get_current_iso_time()
 
     for rss in RSS_LIST:
         logger.info(f"Checking RSS: {rss}")
@@ -102,7 +102,7 @@ def check_rss_news():
             if status == RSSItemStatus.FAIL:
                 continue
 
-            record.append({key: iso_time.isoformat()})
+            record.append({key: current_iso})
 
             logger.success(f"RSS item checked: {item['link']}")
 
