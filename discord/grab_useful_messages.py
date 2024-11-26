@@ -112,27 +112,27 @@ def get_useful_messages():
 
             logger.info(f"Getting messages from {channel_info['name']}")
 
-            messages = get_channel_messages(
+            messages: list[dict] = get_channel_messages(
                 server_id,
                 channel_id,
             )
 
             for message in messages:
                 if is_recorded(record, message["id"]):
-                    continue
+                    messages.remove(message)
 
             filtered_messages = filter_messages(messages)
 
             status = handle_channel(channel_info, filtered_messages)
 
+            if status:
+                for msg in filtered_messages:
+                    record.append({msg["id"]: current_iso})
+
+                save_record(DISCORD_CHANNEL_SUMMARY_PATH, record)
+
             logger.info(
                 "Sleeping for 5 seconds before getting messages from the next channel, wait for it..."
             )
-
-            if status:
-                for message in filtered_messages:
-                    record.append({message["id"]: current_iso})
-
-                save_record(DISCORD_CHANNEL_SUMMARY_PATH, record)
 
             time.sleep(5)
