@@ -1,5 +1,6 @@
-import json
+from datetime import datetime
 
+import msgspec
 import requests
 from loguru import logger
 
@@ -35,7 +36,7 @@ def drive_api(method="GET", path="", data=None):
     return response
 
 
-def is_recorded(list: list[dict[str, str]], id: str):
+def is_recorded(list: list[dict[str, datetime]], id: str):
     for item in list:
         if item.get(str(id)):
             return True
@@ -43,7 +44,7 @@ def is_recorded(list: list[dict[str, str]], id: str):
     return False
 
 
-def get_record(path: str) -> list[dict[str, str]]:
+def get_record_list(path: str) -> list[dict[str, datetime]]:
     default = []
 
     response = drive_api(method="GET", path=path)
@@ -52,11 +53,23 @@ def get_record(path: str) -> list[dict[str, str]]:
         logger.error(f"Error getting store file: {response.text}")
         return default
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=list[dict[str, datetime]])
 
 
-def save_record(path: str, record: list[dict[str, str]]):
-    json_data = json.dumps(record)
+def get_record_dict(path: str) -> dict[str, datetime]:
+    default = {}
+
+    response = drive_api(method="GET", path=path)
+
+    if response.status_code != 200:
+        logger.error(f"Error getting store file: {response.text}")
+        return default
+
+    return msgspec.json.decode(response.text, type=dict[str, datetime])
+
+
+def save_record(path: str, record):
+    json_data = msgspec.json.encode(record)
 
     response = drive_api(method="PUT", path=path, data=json_data)
 

@@ -22,7 +22,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run all
-        run: python app.py all
+        run: LOGURU_LEVEL="INFO" python app.py all
         env:
           CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
 

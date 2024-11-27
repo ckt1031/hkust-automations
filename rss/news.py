@@ -9,7 +9,7 @@ from lib.llm import LLM
 from lib.notification import send_discord
 from lib.onedrive_store import (
     RSS_NEWS_RECORD_PATH,
-    get_record,
+    get_record_list,
     is_recorded,
     save_record,
 )
@@ -83,7 +83,7 @@ def check_rss_news():
 
     logger.info("Checking RSS news...")
 
-    record = get_record(RSS_NEWS_RECORD_PATH)
+    record = get_record_list(RSS_NEWS_RECORD_PATH)
     current_iso = get_current_iso_time()
 
     for rss in RSS_LIST:

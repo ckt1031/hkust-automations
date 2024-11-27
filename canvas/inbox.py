@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime, timedelta
 
 from loguru import logger
 
@@ -7,11 +8,11 @@ from canvas.api import get_conversation_detail, get_conversations
 from lib.notification import send_discord
 from lib.onedrive_store import (
     CANVAS_INBOX_REMINDER_PATH,
-    get_record,
+    get_record_list,
     is_recorded,
     save_record,
 )
-from lib.utils import get_current_iso_time, iso_time_from_now_second_left
+from lib.utils import get_current_iso_time
 
 
 def check_canvas_inbox():
@@ -29,15 +30,12 @@ def check_canvas_inbox():
         logger.success("No conversations to check")
         return
 
-    records = get_record(CANVAS_INBOX_REMINDER_PATH)
+    records = get_record_list(CANVAS_INBOX_REMINDER_PATH)
     iso_time = get_current_iso_time()
 
     for conversation in conversations:
         # Check if the conversation has been longer than 72 hours
-        if (
-            iso_time_from_now_second_left(conversation["last_message_at"])
-            < -7 * 24 * 60 * 60
-        ):
+        if conversation.last_message_at < (datetime.now() - timedelta(hours=72)):
             logger.info(
                 f"Conversation {conversation['id']} has been longer than 72 hours, skipping"
             )

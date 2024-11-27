@@ -1,5 +1,4 @@
 import hashlib
-import math
 import re
 from datetime import datetime, timezone
 
@@ -18,10 +17,6 @@ def get_ms(date: str):
         parsed_date = parsed_date.replace(tzinfo=timezone.utc)
 
     return parsed_date.timestamp()
-
-
-def remove_massive_space(text):
-    return re.sub(r"\s+", " ", text)
 
 
 def clean_html(raw_html: str) -> str:
@@ -47,14 +42,3 @@ def remove_css_and_scripts(raw_html: str) -> str:
 
 def get_current_iso_time():
     return datetime.now(timezone.utc).astimezone().isoformat()
-
-
-def iso_time_from_now_second_left(t: str):
-    """
-    Return the difference in seconds between the current time and the given time
-    """
-    float_diff = (
-        datetime.fromisoformat(t).timestamp() - datetime.now(timezone.utc).timestamp()
-    )
-
-    return math.ceil(float_diff)

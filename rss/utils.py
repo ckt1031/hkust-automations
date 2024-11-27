@@ -3,10 +3,6 @@ import json
 import feedparser
 import trafilatura
 
-# def save_json(content):
-#     with open("data.json", "w") as f:
-#         json.dump(content, f)
-
 
 def parse_rss_feed(feed: str):
     rss_feed = feedparser.parse(feed)

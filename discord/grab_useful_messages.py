@@ -1,16 +1,17 @@
 import re
 import time
+from datetime import datetime
 
 from loguru import logger
 
-from datetime import datetime
 from discord.api import get_channel_info, get_channel_messages
+from discord.api_types import DiscordChannelInfo, DiscordChannelMessageListItem
 from lib import env
 from lib.llm import LLM
 from lib.notification import send_discord
 from lib.onedrive_store import (
     DISCORD_CHANNEL_SUMMARY_PATH,
-    get_record,
+    get_record_dict,
     save_record,
 )
 from lib.utils import get_current_iso_time
@@ -35,22 +36,26 @@ def purify_message_content(message: str):
     return message
 
 
-def filter_messages(messages) -> list[dict]:
+def filter_messages(
+    messages: list[DiscordChannelMessageListItem],
+) -> list[DiscordChannelMessageListItem]:
     filtered_messages = []
 
     for message in messages:
-        if message["type"] == 0:
-            if "bot" in message["author"] and message["author"]["bot"]:
+        if message.type == 0:
+            if message.author.bot:
                 continue
 
-            message["content"] = purify_message_content(message["content"])
+            message.content = purify_message_content(message.content)
 
             filtered_messages.append(message)
 
     return filtered_messages
 
 
-def handle_channel(channel, messages) -> bool:
+def handle_channel(
+    channel: DiscordChannelInfo, messages: list[DiscordChannelMessageListItem]
+) -> bool:
     user_prompts = ""
     system_prompts = """
 You are now a chat summarize bot, you will be given a list of messages from a channel,
@@ -68,14 +73,17 @@ Return "NO" as the only output if there are no or valuable message to summarize 
     """
 
     for message in messages:
-        _draft = f"User: {message['author']['username']}\nContent: {message['content']}"
+        _draft = f"User: {message.author.username}\nContent: {message.content}"
 
-        if len(message["embeds"]) > 0:
-            for embed in message["embeds"]:
-                if embed["type"] == "video":
-                    _draft += f"\nVideo: {embed['title']} - ({embed['description']})"
-                elif embed["type"] == "link":
-                    _draft += f"\nLink: {embed['title']} - ({embed['description'] if 'description' in embed else ''})"
+        if len(message.embeds) > 0:
+            for embed in message.embeds:
+                if embed.type == "video":
+                    _draft += f"\nVideo: {embed.title} - ({embed.description})"
+                elif embed.type == "link" or embed.type == "rich":
+                    _draft += f"\nLink: {embed.title}"
+
+                    if embed.description:
+                        _draft += f" - ({embed.description})"
 
         user_prompts += _draft + "\n\n"
 
@@ -87,8 +95,8 @@ Return "NO" as the only output if there are no or valuable message to summarize 
         return False
 
     embed = {
-        "title": f"Summary of {channel['name']}",
-        "description": f"{response.rstrip()}\n\n<#{channel['id']}>",
+        "title": f"Summary of {channel.name}",
+        "description": f"{response.rstrip()}\n\n<#{channel.id}>",
         "timestamp": get_current_iso_time(),
     }
 
@@ -102,15 +110,15 @@ Return "NO" as the only output if there are no or valuable message to summarize 
 
 
 def get_useful_messages():
-    record = get_record(DISCORD_CHANNEL_SUMMARY_PATH)
+    record = get_record_dict(DISCORD_CHANNEL_SUMMARY_PATH)
 
     for server_id, channel_ids in server_channel_list.items():
         for channel_id in channel_ids:
             channel_info = get_channel_info(server_id, channel_id)
 
-            logger.info(f"Getting messages from {channel_info['name']}")
+            logger.info(f"Getting messages from {channel_info.name}")
 
-            messages: list[dict] = get_channel_messages(
+            messages: list[DiscordChannelMessageListItem] = get_channel_messages(
                 server_id,
                 channel_id,
             )
@@ -119,19 +127,18 @@ def get_useful_messages():
 
             # Timestamp checking
             current_iso = get_current_iso_time()
-            previous_checked_iso: str = record[channel_info["id"]] if channel_info["id"] in record else None
+            previous_checked_date: datetime = (
+                record[channel_info.id] if channel_info.id in record else None
+            )
 
             final_checking_messages = []
 
             for message in filtered_messages:
-                if previous_checked_iso:
-                    # Compare milliseconds
-                    previous_checked_timestamp = datetime.fromisoformat(previous_checked_iso).timestamp()
-                    current_timestamp = datetime.fromisoformat(message['timestamp']).timestamp()
+                if not previous_checked_date:
+                    final_checking_messages.append(message)
+                    continue
 
-                    if current_timestamp > previous_checked_timestamp:
-                        final_checking_messages.append(message)
-                else:
+                if message.timestamp > previous_checked_date:
                     final_checking_messages.append(message)
 
             if len(final_checking_messages) == 0:
@@ -141,12 +148,12 @@ def get_useful_messages():
             status = handle_channel(channel_info, final_checking_messages)
 
             if status:
-                record[channel_info["id"]] = current_iso
+                record[channel_info.id] = current_iso
 
                 save_record(DISCORD_CHANNEL_SUMMARY_PATH, record)
 
                 logger.success(
-                    f"Successfully summarized and constructed points for {channel_info['name']}"
+                    f"Successfully summarized and constructed points for {channel_info.name}"
                 )
 
             logger.info(

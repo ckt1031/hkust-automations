@@ -1,8 +1,16 @@
 from functools import lru_cache
 
+import msgspec
 import requests
 
 import lib.env as env
+from canvas.api_types import (
+    AssignmentListItem,
+    ConversationsListItem,
+    CourseListItem,
+    DiscussionTopicItemView,
+    DiscussionTopicListItem,
+)
 from lib.constant import HTTP_CLIENT_HEADERS
 
 CANVAS_API_BASE_URL = "https://canvas.ust.hk/api"
@@ -17,17 +25,19 @@ headers = {
 
 
 @lru_cache
-def get_courses():
+def get_courses() -> list[CourseListItem]:
     url = f"{CANVAS_API_BASE_URL}/v1/courses"
     response = requests.get(url, headers=headers, timeout=5)
 
     if response.status_code != 200:
         raise Exception("Error fetching courses")
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=list[CourseListItem])
 
 
-def get_discussion_topics(course_id: str, only_announcements: bool | None = None):
+def get_discussion_topics(
+    course_id: str, only_announcements: bool | None = None
+) -> list[DiscussionTopicListItem]:
     params = {}
 
     if only_announcements is not None:
@@ -39,20 +49,22 @@ def get_discussion_topics(course_id: str, only_announcements: bool | None = None
     if response.status_code != 200:
         raise Exception("Error fetching discussion topics")
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=list[DiscussionTopicListItem])
 
 
-def get_discussion_topic_view(course_id: str, topic_id: str):
+def get_discussion_topic_view(course_id: str, topic_id: str) -> DiscussionTopicItemView:
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
     response = requests.get(url, headers=headers, timeout=5)
 
     if response.status_code != 200:
         raise Exception("Error fetching discussion topic view")
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=DiscussionTopicItemView)
 
 
-def get_assignments(course_id: str, only_show_upcoming: bool | None = None):
+def get_assignments(
+    course_id: str, only_show_upcoming: bool | None = None
+) -> list[AssignmentListItem]:
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments?order_by=due_at"
 
     params = {}
@@ -65,17 +77,17 @@ def get_assignments(course_id: str, only_show_upcoming: bool | None = None):
     if response.status_code != 200:
         raise Exception("Error fetching assignments")
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=list[AssignmentListItem])
 
 
-def get_conversations():
+def get_conversations() -> list[ConversationsListItem]:
     url = f"{CANVAS_API_BASE_URL}/v1/conversations"
     response = requests.get(url, headers=headers, timeout=5)
 
     if response.status_code != 200:
         raise Exception("Error fetching conversations")
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=list[ConversationsListItem])
 
 
 def get_conversation_detail(conversation_id: str):

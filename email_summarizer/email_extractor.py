@@ -1,10 +1,11 @@
+import msgspec
 import requests
 from loguru import logger
 
 from email_summarizer.email_record import check_email_sender
 from lib.constant import HTTP_CLIENT_HEADERS
 from lib.microsoft_tokens import get_private_graph_token
-from lib.utils import clean_html, remove_css_and_scripts, remove_massive_space
+from lib.utils import clean_html, remove_css_and_scripts
 
 
 class EmailExtractor:
@@ -27,7 +28,7 @@ class EmailExtractor:
             logger.error("Error fetching emails")
             return []
 
-        return response.json()["value"]
+        return msgspec.json.decode(response.text, type=dict)["value"]
 
     def extract_emails(self):
         emails = []
@@ -42,7 +43,7 @@ class EmailExtractor:
                 continue
 
             body = remove_css_and_scripts(clean_html(email["body"]["content"]))
-            body = remove_massive_space(body)
+            body = body.strip()
 
             emails.append(
                 {

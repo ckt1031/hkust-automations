@@ -13,3 +13,4 @@ tiktoken==0.8.0
 feedparser==6.0.11
 trafilatura==1.12.2
 html2text==2024.2.26
+msgspec @ git+https://github.com/jcrist/msgspec.git@main#egg=msgspec

@@ -9,7 +9,12 @@ from email_summarizer.email_extractor import EmailExtractor
 from email_summarizer.email_record import mark_email_as_checked, prune_email_record
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import EMAIL_RECORD_PATH, get_record, is_recorded, save_record
+from lib.onedrive_store import (
+    EMAIL_RECORD_PATH,
+    get_record_list,
+    is_recorded,
+    save_record,
+)
 from lib.prompt import read_email_system_prompt
 
 
@@ -37,7 +42,7 @@ def email_summarize():
     """
     unchecked_email_amount = 0
 
-    mail_records = get_record(EMAIL_RECORD_PATH)
+    mail_records = get_record_list(EMAIL_RECORD_PATH)
 
     # Prune the email record to remove emails older than 7 days
     mail_records = prune_email_record(mail_records)
