@@ -14,14 +14,12 @@ from lib.onedrive_store import (
     is_recorded,
     save_record,
 )
-from lib.prompt import read_summary_system_prompt
 from lib.utils import get_current_iso_time
+from prompts.summary import summary_prompt
 
 
 def handle_single_announcement(course: CourseListItem, topic: DiscussionTopicListItem):
     webhook = env.DISCORD_WEBHOOK_URL_INBOX
-
-    system_prompt = read_summary_system_prompt()
 
     # Convert HTML to plain text
     raw_text = html2text(topic.message)
@@ -33,7 +31,7 @@ def handle_single_announcement(course: CourseListItem, topic: DiscussionTopicLis
     """
 
     llm = LLM()
-    llm_response = llm.run_chat_completion(system_prompt, content)
+    llm_response = llm.run_chat_completion(summary_prompt, content)
 
     embed = {
         "title": f"{course.course_code.strip()}: {topic.title}",

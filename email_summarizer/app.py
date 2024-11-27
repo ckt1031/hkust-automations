@@ -15,7 +15,7 @@ from lib.onedrive_store import (
     is_recorded,
     save_record,
 )
-from lib.prompt import read_email_system_prompt
+from prompts.email_summarize import email_summary_prompt
 
 
 def email_summarize():
@@ -68,8 +68,7 @@ def email_summarize():
 
     # Call the LLM model to summarize the emails
     llm = LLM()
-    system_prompt = read_email_system_prompt()
-    llm_response = llm.run_chat_completion(system_prompt, email_user_prompt)
+    llm_response = llm.run_chat_completion(email_summary_prompt, email_user_prompt)
 
     if llm_response.strip().lower() != "no":
         headers_to_split_on = [
