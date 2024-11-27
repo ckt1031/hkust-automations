@@ -38,11 +38,23 @@ class DiscussionTopicItemView(msgspec.Struct):
     id: int
 
 
+class ConversationsListItemParticipant(msgspec.Struct):
+    name: str
+    avatar_image_url: str | None = None
+
+
+class ConversationsListItemMessage(msgspec.Struct):
+    body: str
+
+
 class ConversationsListItem(msgspec.Struct):
     id: int
-    subject: str
     last_message_at: datetime
-    context_name: str
     avatar_url: str
-    participants: list[dict]
-    messages: list[dict]
+    participants: list[ConversationsListItemParticipant]
+    subject: str | None = None
+    context_name: str | None = None
+
+
+class ConversationsDetail(msgspec.Struct):
+    messages: list[ConversationsListItemMessage]

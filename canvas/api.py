@@ -6,6 +6,7 @@ import requests
 import lib.env as env
 from canvas.api_types import (
     AssignmentListItem,
+    ConversationsDetail,
     ConversationsListItem,
     CourseListItem,
     DiscussionTopicItemView,
@@ -90,11 +91,11 @@ def get_conversations() -> list[ConversationsListItem]:
     return msgspec.json.decode(response.text, type=list[ConversationsListItem])
 
 
-def get_conversation_detail(conversation_id: str):
+def get_conversation_detail(conversation_id: str) -> ConversationsDetail:
     url = f"{CANVAS_API_BASE_URL}/v1/conversations/{conversation_id}"
     response = requests.get(url, headers=headers, timeout=5)
 
     if response.status_code != 200:
         raise Exception("Error fetching conversation messages")
 
-    return response.json()
+    return msgspec.json.decode(response.text, type=ConversationsDetail)
