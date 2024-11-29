@@ -5,6 +5,7 @@ from rich.console import Console
 
 from canvas.announcements import check_canvas_announcements
 from canvas.assignments import check_canvas_assignments
+from canvas.grade_changes import check_grade_changes
 from canvas.inbox import check_canvas_inbox
 from discord.grab_useful_messages import get_useful_messages
 from email_summarizer.app import email_summarize
@@ -27,6 +28,7 @@ function_list = [
             check_canvas_inbox(),
             check_canvas_assignments(),
             check_canvas_announcements(),
+            check_grade_changes(),
         ],
     ],
     ["Summarize Outlook emails", "email_summarize", email_summarize],
@@ -44,6 +46,11 @@ function_list = [
         "Check Canvas inbox",
         "check_canvas_inbox",
         check_canvas_inbox,
+    ],
+    [
+        "Check Canvas grades",
+        "check_canvas_grades",
+        check_grade_changes,
     ],
     [
         "Get useful Discord messages",

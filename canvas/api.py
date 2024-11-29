@@ -5,6 +5,7 @@ import requests
 
 import lib.env as env
 from canvas.api_types import (
+    AssignmeGroupItem,
     AssignmentListItem,
     ConversationsDetail,
     ConversationsListItem,
@@ -39,10 +40,10 @@ def get_courses() -> list[CourseListItem]:
 def get_discussion_topics(
     course_id: str, only_announcements: bool | None = None
 ) -> list[DiscussionTopicListItem]:
-    params = {}
+    params = []
 
     if only_announcements is not None:
-        params["only_announcements"] = only_announcements
+        params.append(("only_announcements", only_announcements))
 
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics"
     response = requests.get(url, headers=headers, timeout=15, params=params)
@@ -66,19 +67,39 @@ def get_discussion_topic_view(course_id: str, topic_id: str) -> DiscussionTopicI
 def get_assignments(
     course_id: str, only_show_upcoming: bool | None = None
 ) -> list[AssignmentListItem]:
-    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments?order_by=due_at"
+    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments"
 
-    params = {}
+    params = [
+        ("order_by", "due_at"),
+        ("include[]", "submission"),
+    ]
 
     if only_show_upcoming:
-        params["bucket"] = "upcoming"
+        params.append(("bucket", "upcoming"))
 
-    response = requests.get(url, headers=headers, timeout=5)
+    response = requests.get(url, headers=headers, timeout=5, params=params)
 
     if response.status_code != 200:
         raise Exception("Error fetching assignments")
 
     return msgspec.json.decode(response.text, type=list[AssignmentListItem])
+
+
+def get_assignment_groups(course_id: str) -> list[AssignmeGroupItem]:
+    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignment_groups"
+
+    params = [
+        ("order_by", "due_at"),
+        ("include[]", "assignments"),
+        ("include[]", "submission"),
+    ]
+
+    response = requests.get(url, headers=headers, timeout=5, params=params)
+
+    if response.status_code != 200:
+        raise Exception("Error fetching assignments")
+
+    return msgspec.json.decode(response.text, type=list[AssignmeGroupItem])
 
 
 def get_conversations() -> list[ConversationsListItem]:

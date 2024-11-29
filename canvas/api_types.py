@@ -20,6 +20,28 @@ class AssignmentListItem(msgspec.Struct):
     course_name: str | None = None
 
 
+class AssignmeGroupAssigmentItemSubmission(msgspec.Struct):
+    id: int
+    grade: str | None = None
+    submitted_at: datetime | None = None
+
+
+class AssignmeGroupAssigmentItem(msgspec.Struct):
+    id: int
+    name: str
+    html_url: str
+
+    description: str | None = None
+    points_possible: float | None = None
+    submission: AssignmeGroupAssigmentItemSubmission | None = None
+
+
+class AssignmeGroupItem(msgspec.Struct):
+    id: int
+    name: str
+    assignments: list[AssignmeGroupAssigmentItem] | None = None
+
+
 class DiscussionTopicListItemAuthor(msgspec.Struct):
     avatar_image_url: str | None = None
 
