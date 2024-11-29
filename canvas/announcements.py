@@ -42,14 +42,17 @@ def handle_single_announcement(course: CourseListItem, topic: DiscussionTopicLis
                 "name": topic.user_name,
                 "icon_url": (
                     topic.author.avatar_image_url
-                    if "avatar_image_url" in topic.author
+                    if topic.author.avatar_image_url
                     else None
                 ),
             }
-            if "user_name" in topic
+            if topic.user_name
             else None
         ),
-        "footer": {"text": course.name.strip(), "timestamp": topic.posted_at},
+        "footer": {
+            "text": course.name.strip(),
+            "timestamp": topic.posted_at.isoformat(),
+        },
         "url": topic.html_url,
     }
 
