@@ -63,7 +63,8 @@ def get_store(path: str) -> dict[str, datetime]:
 
 def save_store(path: str, record: dict[str, datetime]):
     for key, value in record.items():
-        record[key] = value.astimezone().isoformat()
+        if isinstance(value, datetime):
+            record[key] = value.astimezone().isoformat()
 
     response = drive_api(
         method="PUT",

@@ -36,7 +36,7 @@ def filter_messages(messages: list) -> list:
 
     for message in messages:
         if message["type"] == 0:
-            if message["author"]["bot"]:
+            if "bot" in message["author"] and message["author"]["bot"]:
                 continue
 
             message["content"] = purify_message_content(message["content"])
@@ -57,10 +57,13 @@ def handle_channel(channel: dict, messages: list) -> bool:
                 if embed["type"] == "video":
                     _draft += f"\nVideo: {embed['title']} - ({embed['description']})"
                 elif embed["type"] == "link" or embed["type"] == "rich":
-                    _draft += f"\nLink: {embed['title']}"
+                    _draft = "\nLink: "
 
-                    if embed["description"]:
-                        _draft += f" - ({embed['description']})"
+                    if "title" in embed:
+                        _draft += f"{embed['title']} "
+
+                    if "description" in embed:
+                        _draft += f"({embed['description']})"
 
         user_prompts += _draft + "\n\n"
 
@@ -87,7 +90,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
 
 def get_useful_messages():
-    record = get_store(DISCORD_CHANNEL_SUMMARY_PATH)
+    store = get_store(DISCORD_CHANNEL_SUMMARY_PATH)
 
     for server_id, channel_ids in server_channel_list.items():
         for channel_id in channel_ids:
@@ -106,7 +109,7 @@ def get_useful_messages():
             current_time = datetime.now(tz=timezone.utc)
 
             previous_checked_date: datetime = (
-                record[channel_info["id"]] if channel_info["id"] in record else None
+                store[channel_info["id"]] if channel_info["id"] in store else None
             )
 
             final_checking_messages = []
@@ -128,9 +131,9 @@ def get_useful_messages():
             status = handle_channel(channel_info, final_checking_messages)
 
             if status:
-                record[channel_info["id"]] = current_time
+                store[channel_info["id"]] = current_time
 
-                save_store(DISCORD_CHANNEL_SUMMARY_PATH, record)
+                save_store(DISCORD_CHANNEL_SUMMARY_PATH, store)
 
                 logger.success(
                     f"Successfully summarized and constructed points for {channel_info['name']}"
