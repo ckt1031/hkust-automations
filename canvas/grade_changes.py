@@ -40,7 +40,7 @@ def save_grade_store(record: dict[str, dict[str, str]]):
         data=json.dumps(record),
     )
 
-    if response.status_code != 200:
+    if response.status_code >= 300:
         logger.error(f"Error saving grade store file: {response.text}")
 
 

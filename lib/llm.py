@@ -42,8 +42,8 @@ class LLM:
         if content is None:
             raise ValueError("OpenAI API did not return any content")
 
-        token = self.get_token(content)
+        length = len(content)
 
-        logger.success(f"LLM model returned content with token: {token}")
+        logger.success(f"LLM model returned content with length: {length}")
 
         return content
