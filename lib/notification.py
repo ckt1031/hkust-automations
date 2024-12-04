@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from time import sleep
 
 import requests
@@ -5,20 +6,28 @@ from loguru import logger
 
 from lib.constant import HTTP_CLIENT_HEADERS
 
-REMAINING = -1
-REMAINING_EXPIRY = -1
+COOLDOWN_REQUIRED = False
+REMAINING_EXPIRY = datetime.now()
 
 
 def send_discord(
-    webhook_url: str, message: str | None, embed: dict | None, username: str = "School"
+    webhook_url: str,
+    message: str | None,
+    embed: dict | None,
+    username: str | None = "School",
 ):
-    global REMAINING, REMAINING_EXPIRY
+    global COOLDOWN_REQUIRED, REMAINING_EXPIRY
 
-    if REMAINING_EXPIRY is not None and int(REMAINING_EXPIRY) == 0:
-        logger.info(
-            f"Discord webhook rate limit reached, sleeping for {REMAINING_EXPIRY}s"
+    if COOLDOWN_REQUIRED and REMAINING_EXPIRY > datetime.now():
+        seconds_left = (REMAINING_EXPIRY - datetime.now()).total_seconds()
+
+        logger.debug(
+            f"Discord webhook rate limit reached, sleeping for {seconds_left}s"
         )
-        sleep(REMAINING_EXPIRY)
+
+        sleep(seconds_left)
+
+        COOLDOWN_REQUIRED = False
 
     data = {"content": message, "username": username}
 
@@ -39,4 +48,7 @@ def send_discord(
         return
 
     REMAINING = int(remaining)
-    REMAINING_EXPIRY = int(reset_after)
+
+    if REMAINING == 1:
+        COOLDOWN_REQUIRED = True
+        REMAINING_EXPIRY = datetime.now() + timedelta(seconds=float(reset_after))
