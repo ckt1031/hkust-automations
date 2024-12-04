@@ -34,7 +34,9 @@ def llm_generate(system_message: str, user_message: str) -> str:
         timeout=60,
     )
 
-    content: str | None = response["choices"][0]["message"]["content"]
+    data = response.json()
+
+    content: str | None = data["choices"][0]["message"]["content"]
 
     if content is None:
         raise ValueError("OpenAI API did not return any content")

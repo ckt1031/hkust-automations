@@ -62,14 +62,16 @@ def get_store(path: str) -> dict[str, datetime]:
 
 
 def save_store(path: str, record: dict[str, datetime]):
-    for key, value in record.items():
+    d = record.copy()
+
+    for key, value in d.items():
         if isinstance(value, datetime):
-            record[key] = value.astimezone().isoformat()
+            d[key] = value.astimezone().isoformat()
 
     response = drive_api(
         method="PUT",
         path=path,
-        data=json.dumps(record),
+        data=json.dumps(d),
     )
 
     if response.status_code >= 300:
