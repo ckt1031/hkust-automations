@@ -36,7 +36,7 @@ def get_grade_store() -> dict[str, dict[str, str]]:
 def save_grade_store(record: dict[str, dict[str, str]]):
     response = drive_api(
         method="PUT",
-        path=f"{STORE_FOLDER}/grade_changes.json",
+        path=f"{STORE_FOLDER}/canvas_grade_changes.json",
         data=json.dumps(record),
     )
 
