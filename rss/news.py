@@ -7,13 +7,8 @@ from loguru import logger
 import lib.env as env
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import (
-    RSS_NEWS_RECORD_PATH,
-    get_record_list,
-    is_recorded,
-    save_record,
-)
-from lib.utils import get_current_iso_time, get_ms, sha2_256
+from lib.onedrive_store import RSS_NEWS_RECORD_PATH, get_store, save_store
+from lib.utils import get_ms, sha2_256
 from prompts.summary import summary_prompt
 from rss.utils import extract_website, parse_rss_feed
 
@@ -82,8 +77,7 @@ def check_rss_news():
 
     logger.info("Checking RSS news...")
 
-    record = get_record_list(RSS_NEWS_RECORD_PATH)
-    current_iso = get_current_iso_time()
+    store = get_store(RSS_NEWS_RECORD_PATH)
 
     for rss in RSS_LIST:
         logger.info(f"Checking RSS: {rss}")
@@ -92,7 +86,7 @@ def check_rss_news():
         for item in data:
             key = sha2_256(item["id"])
 
-            if is_recorded(record, key):
+            if key in store:
                 logger.info(f"RSS item already checked: {item['title']}")
                 continue
 
@@ -101,10 +95,10 @@ def check_rss_news():
             if status == RSSItemStatus.FAIL:
                 continue
 
-            record.append({key: current_iso})
+            store[key] = datetime.now(timezone.utc)
 
             logger.success(f"RSS item checked: {item['link']}")
 
-    save_record(RSS_NEWS_RECORD_PATH, record)
+    save_store(RSS_NEWS_RECORD_PATH, store)
 
     logger.success("RSS news checked")

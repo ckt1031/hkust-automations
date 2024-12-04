@@ -4,87 +4,84 @@ from html2text import html2text
 from loguru import logger
 
 import lib.env as env
-from canvas.api import CourseListItem, get_courses, get_discussion_topics
-from canvas.api_types import DiscussionTopicListItem
+from canvas.api import get_courses, get_discussion_topics
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import (
-    CANVAS_ANNOUNCEMENT_RECORD_PATH,
-    get_record_list,
-    is_recorded,
-    save_record,
-)
-from lib.utils import get_current_iso_time
+from lib.onedrive_store import CANVAS_ANNOUNCEMENT_RECORD_PATH, get_store, save_store
 from prompts.summary import summary_prompt
 
 
-def handle_single_announcement(course: CourseListItem, topic: DiscussionTopicListItem):
+def handle_single_announcement(course: dict, topic: dict):
     webhook = env.DISCORD_WEBHOOK_URL_INBOX
 
     # Convert HTML to plain text
-    raw_text = html2text(topic.message)
+    raw_text = html2text(topic["message"])
 
     content = f"""
-        Course: {course.name}
-        Title: {topic.title}
+        Course: {course['name']}
+        Title: {topic['title']}
         Content: {raw_text}
     """
 
     llm = LLM()
     llm_response = llm.run_chat_completion(summary_prompt, content)
 
+    name: str = course["name"]
+    course_code: str = course["course_code"]
+
     embed = {
-        "title": f"{course.course_code.strip()}: {topic.title}",
+        "title": f"{course_code.strip()}: {topic['title']}",
         "description": llm_response,
         "color": 0xE22928,
         "author": (
             {
-                "name": topic.user_name,
+                "name": topic["user_name"],
                 "icon_url": (
-                    topic.author.avatar_image_url
-                    if topic.author.avatar_image_url
+                    topic["author"]["avatar_image_url"]
+                    if topic["author"]["avatar_image_url"]
                     else None
                 ),
             }
-            if topic.user_name
+            if topic["user_name"]
             else None
         ),
         "footer": {
-            "text": course.name.strip(),
-            "timestamp": topic.posted_at.isoformat(),
+            "text": name.strip(),
+            "timestamp": topic["posted_at"],
         },
-        "url": topic.html_url,
+        "url": topic["html_url"],
     }
 
     send_discord(webhook, None, embed, "Canvas")
 
-    logger.success(f"Announcement {topic.id} has been sent to Discord")
+    logger.success(f"Announcement {topic['id']} has been sent to Discord")
 
 
 def check_canvas_announcements():
     courses = get_courses()
-    records = get_record_list(CANVAS_ANNOUNCEMENT_RECORD_PATH)
-    iso_time = get_current_iso_time()
+    store = get_store(CANVAS_ANNOUNCEMENT_RECORD_PATH)
 
     for course in courses:
-        discussion_topics = get_discussion_topics(course.id, only_announcements=True)
+        discussion_topics = get_discussion_topics(course["id"], only_announcements=True)
 
         for topic in discussion_topics:
+            posted_at = datetime.fromisoformat(topic["posted_at"])
+
             # Check if the announcement has been longer than 3 days
-            if topic.posted_at < (datetime.now(timezone.utc) - timedelta(days=3)):
+            if posted_at < (datetime.now(timezone.utc) - timedelta(days=3)):
                 logger.debug(
-                    f"Announcement {topic.id} has been posted longer than 3 days, skipping"
+                    f"Announcement {topic['id']} has been posted longer than 3 days, skipping"
                 )
                 continue
 
-            if is_recorded(records, str(topic.id)):
-                logger.info(f"Announcement {topic.id} has been recorded, skipping")
+            if str(topic["id"]) in store:
+                logger.info(f"Announcement {topic['id']} has been recorded, skipping")
                 continue
 
             handle_single_announcement(course, topic)
 
-            records.append({topic.id: iso_time})
+            store[topic["id"]] = datetime.now(timezone.utc)
 
-    save_record(CANVAS_ANNOUNCEMENT_RECORD_PATH, records)
+    save_store(CANVAS_ANNOUNCEMENT_RECORD_PATH, store)
 
     logger.success("All Canvas announcements have been checked")

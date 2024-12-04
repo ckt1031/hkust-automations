@@ -1,6 +1,6 @@
 import hashlib
 import re
-from datetime import datetime, timezone
+from datetime import timezone
 
 from dateutil import parser
 
@@ -38,7 +38,3 @@ def remove_css_and_scripts(raw_html: str) -> str:
     # Remove script tags
     raw_html = re.sub(r"<script.*?>.*?</script>", "", raw_html, flags=re.DOTALL)
     return raw_html
-
-
-def get_current_iso_time():
-    return datetime.now(timezone.utc).astimezone().isoformat()

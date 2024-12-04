@@ -1,20 +1,15 @@
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
 import lib.env as env
 from email_summarizer.email_extractor import EmailExtractor
-from email_summarizer.email_record import mark_email_as_checked, prune_email_record
+from email_summarizer.email_record import prune_email_record
 from lib.llm import LLM
 from lib.notification import send_discord
-from lib.onedrive_store import (
-    EMAIL_RECORD_PATH,
-    get_record_list,
-    is_recorded,
-    save_record,
-)
+from lib.onedrive_store import EMAIL_RECORD_PATH, get_store, save_store
 from prompts.email_summarize import email_summary_prompt
 
 
@@ -42,14 +37,14 @@ def email_summarize():
     """
     unchecked_email_amount = 0
 
-    mail_records = get_record_list(EMAIL_RECORD_PATH)
+    mail_records = get_store(EMAIL_RECORD_PATH)
 
     # Prune the email record to remove emails older than 7 days
     mail_records = prune_email_record(mail_records)
 
     # Check if some email is checked
     for email in emails:
-        checked = is_recorded(mail_records, email["id"])
+        checked = email["id"] in mail_records
 
         if checked:
             logger.info(f"Email {email['id']} was checked, skipping")
@@ -88,9 +83,11 @@ def email_summarize():
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in emails:
-        mail_records = mark_email_as_checked(mail_records, email["id"])
+        current_time = datetime.now(tz=timezone.utc)
+
+        mail_records[email["id"]] = current_time
 
     # Save the email record
-    save_record(EMAIL_RECORD_PATH, mail_records)
+    save_store(EMAIL_RECORD_PATH, mail_records)
 
     logger.success("All emails are checked")

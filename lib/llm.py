@@ -1,4 +1,3 @@
-import tiktoken
 from loguru import logger
 from openai import OpenAI
 
@@ -25,17 +24,10 @@ class LLM:
             default_headers=HTTP_CLIENT_HEADERS,
         )
 
-    def get_token(self, content: str):
-        encoding = tiktoken.get_encoding("o200k_base")
-
-        token = encoding.encode(content)
-
-        return len(token)
-
     def run_chat_completion(self, system_message: str, user_message: str) -> str:
-        token = self.get_token(system_message + user_message)
+        length = len(system_message + user_message)
 
-        logger.info(f"Calling LLM model: {self.model}, token: {token}")
+        logger.info(f"Calling LLM model: {self.model}, length: {length}")
 
         chat_completion = self.client.chat.completions.create(
             model=self.model,

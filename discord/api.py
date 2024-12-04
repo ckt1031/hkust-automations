@@ -1,10 +1,8 @@
 import base64
 
-import msgspec
 import requests
 
 import lib.env as env
-from discord.api_types import DiscordChannelInfo, DiscordChannelMessageListItem
 
 DISCORD_API_BASE_URL = "https://discord.com/api"
 
@@ -53,7 +51,7 @@ def get_discord_headers(ref: str):
     return headers
 
 
-def get_channel_info(server_id: str, channel_id: str) -> DiscordChannelInfo:
+def get_channel_info(server_id: str, channel_id: str) -> dict:
     headers = get_discord_headers(
         f"https://discord.com/channels/{server_id}/{channel_id}"
     )
@@ -64,12 +62,12 @@ def get_channel_info(server_id: str, channel_id: str) -> DiscordChannelInfo:
     if response.status_code != 200:
         raise Exception(f"Failed to get channel info: {response.text}")
 
-    return msgspec.json.decode(response.text, type=DiscordChannelInfo)
+    return response.json()
 
 
 def get_channel_messages(
     server_id: str, channel_id: str, limit=None, around=None
-) -> list[DiscordChannelMessageListItem]:
+) -> list:
     headers = get_discord_headers(
         f"https://discord.com/channels/{server_id}/{channel_id}"
     )
@@ -89,4 +87,4 @@ def get_channel_messages(
     if response.status_code != 200:
         raise Exception(f"Failed to get channel messages: {response.text}")
 
-    return msgspec.json.decode(response.text, type=list[DiscordChannelMessageListItem])
+    return response.json()

@@ -24,4 +24,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Lint Project
-        run: python -m ruff check .
+        run: pip install ruff && python -m ruff check .

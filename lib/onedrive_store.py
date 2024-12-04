@@ -1,6 +1,6 @@
+import json
 from datetime import datetime
 
-import msgspec
 import requests
 from loguru import logger
 
@@ -44,19 +44,7 @@ def is_recorded(list: list[dict[str, datetime]], id: str):
     return False
 
 
-def get_record_list(path: str) -> list[dict[str, datetime]]:
-    default = []
-
-    response = drive_api(method="GET", path=path)
-
-    if response.status_code != 200:
-        logger.error(f"Error getting store file: {response.text}")
-        return default
-
-    return msgspec.json.decode(response.text, type=list[dict[str, datetime]])
-
-
-def get_record_dict(path: str) -> dict[str, datetime]:
+def get_store(path: str) -> dict[str, datetime]:
     default = {}
 
     response = drive_api(method="GET", path=path)
@@ -65,13 +53,23 @@ def get_record_dict(path: str) -> dict[str, datetime]:
         logger.error(f"Error getting store file: {response.text}")
         return default
 
-    return msgspec.json.decode(response.text, type=dict[str, datetime])
+    data: dict[str, str] = response.json()
+
+    for key, value in data.items():
+        data[key] = datetime.fromisoformat(value)
+
+    return data
 
 
-def save_record(path: str, record):
-    json_data = msgspec.json.encode(record)
+def save_store(path: str, record: dict[str, datetime]):
+    for key, value in record.items():
+        record[key] = value.astimezone().isoformat()
 
-    response = drive_api(method="PUT", path=path, data=json_data)
+    response = drive_api(
+        method="PUT",
+        path=path,
+        data=json.dumps(record),
+    )
 
     if response.status_code >= 300:
         raise Exception(f"Error uploading store file: {response.text}")

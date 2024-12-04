@@ -1,35 +1,29 @@
+import json
 import os
 from datetime import datetime, timedelta, timezone
 
-import msgspec
 import requests
 from loguru import logger
 
 import lib.env as env
 from lib.constant import HTTP_CLIENT_HEADERS
 
-TMP_ACCESS_TOKEN_PATH = "./tmp/access_token.json"
+TMP_FOLDER = "./tmp"
+TMP_ACCESS_TOKEN_PATH = f"{TMP_FOLDER}/access_token.json"
 
 
-class AccessTokenStore(msgspec.Struct):
-    access_token: str
-    refresh_token: str
-    expires_in: int
-    expiry_time: datetime | None = None
-
-
-def write_access_token_to_file(data: AccessTokenStore):
+def write_access_token_to_file(data: dict):
     # Make sure the tmp directory exists
-    if not os.path.exists("./tmp"):
-        os.makedirs("./tmp")
+    if not os.path.exists(TMP_FOLDER):
+        os.makedirs(TMP_FOLDER)
 
     # Add expires_in seconds to the current time
-    data.expiry_time = datetime.now(timezone.utc) + timedelta(seconds=data.expires_in)
+    data["expiry_time"] = (
+        datetime.now(timezone.utc) + timedelta(seconds=data["expires_in"])
+    ).isoformat()
 
-    jsonString = msgspec.json.encode(data)
-
-    with open(TMP_ACCESS_TOKEN_PATH, "wb") as f:
-        f.write(jsonString)
+    with open(TMP_ACCESS_TOKEN_PATH, "w") as f:
+        f.write(json.dumps(data))
 
     logger.success("Access token written to temp file")
 
@@ -37,21 +31,27 @@ def write_access_token_to_file(data: AccessTokenStore):
 def read_access_token_from_file() -> str | None:
     # Open the file, check if it exists
     try:
-        with open(TMP_ACCESS_TOKEN_PATH, "rb") as f:
+        with open(TMP_ACCESS_TOKEN_PATH, "r") as f:
             jsonString = f.read()
 
-        data = msgspec.json.decode(jsonString, type=AccessTokenStore)
+        if not jsonString or jsonString == "":
+            return None
+
+        data: dict = json.loads(jsonString)
+        expiry_time = datetime.fromisoformat(data["expiry_time"])
 
         # Check if the token has expired
-        if data.expiry_time < datetime.now(timezone.utc):
+        if expiry_time < datetime.now(timezone.utc):
             logger.warning(
-                f"Microsoft access token is about to expire, it expires in {data.expiry_time}"
+                f"Microsoft access token is about to expire, it expires in {data['expiry_time']}"
             )
             return None
 
-        logger.debug(f"Access token read from temp file, expires in {data.expiry_time}")
+        logger.debug(
+            f"Access token read from temp file, expires in {data['expiry_time']}"
+        )
 
-        return data.access_token
+        return data["access_token"]
     except FileNotFoundError:
         return None
 
@@ -88,8 +88,9 @@ def get_private_graph_token():
         )
         return None
 
-    jsonString = msgspec.json.decode(response.text, type=AccessTokenStore)
+    data: dict = response.json()
 
-    write_access_token_to_file(jsonString)
+    # Write the access token to a file
+    write_access_token_to_file(data)
 
-    return jsonString.access_token
+    return data["access_token"]

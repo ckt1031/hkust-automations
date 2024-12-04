@@ -6,13 +6,7 @@ from loguru import logger
 import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
 from lib.notification import send_discord
-from lib.onedrive_store import (
-    CANVAS_INBOX_REMINDER_PATH,
-    get_record_list,
-    is_recorded,
-    save_record,
-)
-from lib.utils import get_current_iso_time
+from lib.onedrive_store import CANVAS_INBOX_REMINDER_PATH, get_store, save_store
 
 
 def check_canvas_inbox():
@@ -30,37 +24,36 @@ def check_canvas_inbox():
         logger.success("No conversations to check")
         return
 
-    records = get_record_list(CANVAS_INBOX_REMINDER_PATH)
-    iso_time = get_current_iso_time()
+    store = get_store(CANVAS_INBOX_REMINDER_PATH)
 
     for conversation in conversations:
+        last_message_at = datetime.fromisoformat(conversation["last_message_at"])
+
         # Check if the conversation has been longer than 72 hours
-        if conversation.last_message_at < (
-            datetime.now(timezone.utc) - timedelta(hours=72)
-        ):
+        if last_message_at < (datetime.now(timezone.utc) - timedelta(hours=72)):
             logger.info(
-                f"Conversation {conversation.id} has been longer than 72 hours, skipping"
+                f"Conversation {conversation['id']} has been longer than 72 hours, skipping"
             )
             continue
 
         # Check if the conversation has already been recorded
-        if is_recorded(records, str(conversation.id)):
-            logger.info(f"Conversation {conversation.id} was recorded, skipping")
+        if str(conversation["id"]) in store:
+            logger.info(f"Conversation {conversation['id']} was recorded, skipping")
             continue
 
-        detail = get_conversation_detail(conversation.id)
-        content = detail.messages[0].body
+        detail = get_conversation_detail(conversation["id"])
+        content = detail["messages"][0]["body"]
 
         if len(content) > 1700:
             content = content[:1700] + "..."
 
         embed = {
-            "title": f"New Conversation: {conversation.subject}",
+            "title": f"New Conversation: {conversation['subject']}",
             "description": content,
-            "footer": {"text": conversation.context_name},
+            "footer": {"text": conversation["context_name"]},
             "author": {
-                "name": conversation.participants[0].name,
-                "icon_url": conversation.avatar_url,
+                "name": conversation["participants"][0]["name"],
+                "icon_url": conversation["avatar_url"],
             },
         }
 
@@ -69,8 +62,8 @@ def check_canvas_inbox():
         logger.success(f"Conversation {conversation.id} sent to Discord")
 
         # Add the conversation to the records
-        records.append({str(conversation.id): iso_time})
+        store[str(conversation["id"])] = datetime.now(timezone.utc)
 
-    save_record(CANVAS_INBOX_REMINDER_PATH, records)
+    save_store(CANVAS_INBOX_REMINDER_PATH, store)
 
     logger.success("Inbox checked successfully")

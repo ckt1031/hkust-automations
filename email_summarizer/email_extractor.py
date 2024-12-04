@@ -1,4 +1,3 @@
-import msgspec
 import requests
 from loguru import logger
 
@@ -28,7 +27,7 @@ class EmailExtractor:
             logger.error("Error fetching emails")
             return []
 
-        return msgspec.json.decode(response.text, type=dict)["value"]
+        return response.json()["value"]
 
     def extract_emails(self):
         emails = []

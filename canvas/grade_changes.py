@@ -1,21 +1,21 @@
-import msgspec
+import json
+
 from loguru import logger
 
 import lib.env as env
 from canvas.api import get_assignment_groups, get_courses
 from lib.notification import send_discord
-from lib.onedrive_store import STORE_FOLDER, drive_api, save_record
+from lib.onedrive_store import STORE_FOLDER, drive_api
 
+# Example of the record:
 # {
 #     "course_id": {
 #         "assignment_id": "grade"
 #     }
 # }
 
-CANVAS_GRADE_CHANGES_PATH = f"{STORE_FOLDER}/grade_changes.json"
 
-
-def get_grade_record(path: str) -> dict[str, dict[int, str]]:
+def get_grade_store() -> dict[str, dict[str, str]]:
     webhook = env.DISCORD_WEBHOOK_URL_ASSIGNMENTS
 
     if webhook is None:
@@ -24,69 +24,80 @@ def get_grade_record(path: str) -> dict[str, dict[int, str]]:
 
     default = {}
 
-    response = drive_api(method="GET", path=path)
+    response = drive_api(method="GET", path=f"{STORE_FOLDER}/canvas_grade_changes.json")
 
     if response.status_code != 200:
         logger.error(f"Error getting grade store file: {response.text}")
         return default
 
-    return msgspec.json.decode(response.text, type=dict[str, dict[int, str]])
+    return response.json()
+
+
+def save_grade_store(record: dict[str, dict[str, str]]):
+    response = drive_api(
+        method="PUT",
+        path=f"{STORE_FOLDER}/grade_changes.json",
+        data=json.dumps(record),
+    )
+
+    if response.status_code != 200:
+        logger.error(f"Error saving grade store file: {response.text}")
 
 
 def check_grade_changes():
     courses = get_courses()
 
-    record = get_grade_record(CANVAS_GRADE_CHANGES_PATH)
+    store = get_grade_store()
 
     for course in courses:
-        course.name = course.name.strip()
-
-        course_id = str(course.id)
+        couse_name: str = course["name"]
+        course_id = str(course["id"])
         assignments_groups = get_assignment_groups(course_id)
 
         for group in assignments_groups:
-            if group.assignments is None:
+            if group["assignments"] is None:
                 logger.debug(
-                    f"No assignments in group {group.id} in course {course.id}"
+                    f"No assignments in group {group['id']} in course {course['id']}"
                 )
                 continue
 
-            for assignment in group.assignments:
-                if assignment.submission is None:
-                    logger.debug(
-                        f"No submission for assignment {assignment.id} in course {course.id}"
-                    )
-                    continue
-
-                if assignment.submission.grade is None:
-                    logger.debug(
-                        f"No grade for assignment {assignment.id} in course {course.id}"
-                    )
-                    continue
+            for assignment in group["assignments"]:
+                assignment["id"] = str(assignment["id"])
 
                 if (
-                    record.get(course_id, {}).get(assignment.id)
-                    == assignment.submission.grade
+                    assignment["submission"] is None
+                    or "grade" not in assignment["submission"]
+                    or assignment["submission"]["grade"] is None
                 ):
                     logger.debug(
-                        f"Grade for assignment {assignment.id} in course {course.id} has not changed"
+                        f"No grade for assignment {assignment['id']} in course {course['id']}"
                     )
                     continue
 
-                record.setdefault(course_id, {})[assignment.id] = (
-                    record[course_id][assignment.id]
-                    if record.get(course_id, {}).get(assignment.id)
-                    else "0"
-                )
+                # Initialize the record if it doesn't exist
+                if course_id not in store:
+                    store[course_id] = {}
+
+                if assignment["id"] not in store[course_id]:
+                    store[course_id][assignment["id"]] = "0"
+
+                if (
+                    store[course_id][assignment["id"]]
+                    == assignment["submission"]["grade"]
+                ):
+                    logger.debug(
+                        f"Grade for assignment {assignment['id']} in course {course['id']} has not changed ({assignment['submission']['grade']}/{assignment['points_possible']})"
+                    )
+                    continue
 
                 original_field = (
-                    "```diff\n- " + record[course_id][assignment.id] + "\n```"
+                    "```diff\n- " + store[course_id][assignment["id"]] + "\n```"
                 )
-                new_field = "```diff\n+ " + assignment.submission.grade + "\n```"
+                new_field = "```diff\n+ " + assignment["submission"]["grade"] + "\n```"
 
                 embed = {
-                    "title": f"Grade change for {assignment.name}",
-                    "url": assignment.html_url,
+                    "title": f"Grade change for {assignment['name']}",
+                    "url": assignment["html_url"],
                     "fields": [
                         {
                             "name": "Original Grade",
@@ -95,21 +106,21 @@ def check_grade_changes():
                         },
                         {"name": "Modified Grade", "value": new_field, "inline": True},
                     ],
-                    "footer": {"text": course.name},
+                    "footer": {
+                        "text": couse_name.strip(),
+                    },
                 }
 
                 send_discord(env.DISCORD_WEBHOOK_URL_ASSIGNMENTS, None, embed, "Canvas")
 
                 logger.success(
-                    f"Grade for assignment {assignment.id} in course {course.id} has changed from {record[course_id][assignment.id]} to {assignment.submission.grade}"
+                    f"Grade for assignment {assignment['id']} in course {course['id']} has changed from {store[course_id][assignment['id']]} to {assignment['submission']['grade']}"
                 )
 
                 logger.debug(
-                    f"Grade for assignment {assignment.id} is {assignment.submission.grade}/{assignment.points_possible} in course {course.id}"
+                    f"Grade for assignment {assignment['id']} is {assignment['submission']['grade']}/{assignment['points_possible']} in course {course['id']}"
                 )
 
-                record.setdefault(course_id, {})[
-                    (assignment.id)
-                ] = assignment.submission.grade
+                store[course_id][assignment["id"]] = assignment["submission"]["grade"]
 
-    save_record(CANVAS_GRADE_CHANGES_PATH, record)
+    save_grade_store(store)
