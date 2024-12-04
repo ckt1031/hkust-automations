@@ -6,7 +6,7 @@ from loguru import logger
 
 from discord.api import get_channel_info, get_channel_messages
 from lib import env
-from lib.llm import LLM
+from lib.llm import llm_generate
 from lib.notification import send_discord
 from lib.onedrive_store import DISCORD_CHANNEL_SUMMARY_PATH, get_store, save_store
 from prompts.discord_useful_summary import discord_summary_prompts
@@ -67,8 +67,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
         user_prompts += _draft + "\n\n"
 
-    llm = LLM()
-    response = llm.run_chat_completion(discord_summary_prompts, user_prompts)
+    response = llm_generate(discord_summary_prompts, user_prompts)
 
     if response.strip().lower() == "no":
         logger.info("No valuable message to summarize and construct points.")

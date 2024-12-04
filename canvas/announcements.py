@@ -5,7 +5,7 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_courses, get_discussion_topics
-from lib.llm import LLM
+from lib.llm import llm_generate
 from lib.notification import send_discord
 from lib.onedrive_store import CANVAS_ANNOUNCEMENT_RECORD_PATH, get_store, save_store
 from prompts.summary import summary_prompt
@@ -23,8 +23,7 @@ def handle_single_announcement(course: dict, topic: dict):
         Content: {raw_text}
     """
 
-    llm = LLM()
-    llm_response = llm.run_chat_completion(summary_prompt, content)
+    llm_response = llm_generate(summary_prompt, content)
 
     name: str = course["name"]
     course_code: str = course["course_code"]

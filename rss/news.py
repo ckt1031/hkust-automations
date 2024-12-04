@@ -5,7 +5,7 @@ from enum import Enum
 from loguru import logger
 
 import lib.env as env
-from lib.llm import LLM
+from lib.llm import llm_generate
 from lib.notification import send_discord
 from lib.onedrive_store import RSS_NEWS_RECORD_PATH, get_store, save_store
 from lib.utils import get_ms, sha2_256
@@ -51,8 +51,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
             Content: {article['raw_text']}
         """
 
-        llm = LLM()
-        llm_response = llm.run_chat_completion(summary_prompt, user_prompt)
+        llm_response = llm_generate(summary_prompt, user_prompt)
 
         embed = {
             "title": rss_item["title"],

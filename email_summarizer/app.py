@@ -7,7 +7,7 @@ from loguru import logger
 import lib.env as env
 from email_summarizer.email_extractor import EmailExtractor
 from email_summarizer.email_record import prune_email_record
-from lib.llm import LLM
+from lib.llm import llm_generate
 from lib.notification import send_discord
 from lib.onedrive_store import EMAIL_RECORD_PATH, get_store, save_store
 from prompts.email_summarize import email_summary_prompt
@@ -62,8 +62,7 @@ def email_summarize():
         return
 
     # Call the LLM model to summarize the emails
-    llm = LLM()
-    llm_response = llm.run_chat_completion(email_summary_prompt, email_user_prompt)
+    llm_response = llm_generate(email_summary_prompt, email_user_prompt)
 
     if llm_response.strip().lower() != "no":
         headers_to_split_on = [
