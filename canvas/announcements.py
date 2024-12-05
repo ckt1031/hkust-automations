@@ -5,8 +5,8 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_courses, get_discussion_topics
+from discord.webhook import send_discord
 from lib.llm import llm_generate
-from lib.notification import send_discord
 from lib.onedrive_store import CANVAS_ANNOUNCEMENT_RECORD_PATH, get_store, save_store
 from prompts.summary import summary_prompt
 

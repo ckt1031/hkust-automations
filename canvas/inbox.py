@@ -5,7 +5,7 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
-from lib.notification import send_discord
+from discord.webhook import send_discord
 from lib.onedrive_store import CANVAS_INBOX_REMINDER_PATH, get_store, save_store
 
 

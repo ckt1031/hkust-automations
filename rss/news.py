@@ -5,8 +5,8 @@ from enum import Enum
 from loguru import logger
 
 import lib.env as env
+from discord.webhook import send_discord
 from lib.llm import llm_generate
-from lib.notification import send_discord
 from lib.onedrive_store import RSS_NEWS_RECORD_PATH, get_store, save_store
 from lib.utils import get_ms, sha2_256
 from prompts.summary import summary_prompt

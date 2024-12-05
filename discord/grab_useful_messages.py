@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 from loguru import logger
 
 from discord.api import get_channel_info, get_channel_messages
+from discord.webhook import send_discord
 from lib import env
 from lib.llm import llm_generate
-from lib.notification import send_discord
 from lib.onedrive_store import DISCORD_CHANNEL_SUMMARY_PATH, get_store, save_store
 from prompts.discord_useful_summary import discord_summary_prompts
 

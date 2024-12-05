@@ -4,7 +4,7 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_assignment_groups, get_courses
-from lib.notification import send_discord
+from discord.webhook import send_discord
 from lib.onedrive_store import STORE_FOLDER, drive_api
 
 # Example of the record:

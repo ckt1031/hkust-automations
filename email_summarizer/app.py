@@ -5,10 +5,10 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
 import lib.env as env
+from discord.webhook import send_discord
 from email_summarizer.email_extractor import EmailExtractor
 from email_summarizer.email_record import prune_email_record
 from lib.llm import llm_generate
-from lib.notification import send_discord
 from lib.onedrive_store import EMAIL_RECORD_PATH, get_store, save_store
 from prompts.email_summarize import email_summary_prompt
 
