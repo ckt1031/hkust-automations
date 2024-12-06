@@ -1,6 +1,6 @@
 import base64
 
-import requests
+import httpx
 
 import lib.env as env
 
@@ -57,7 +57,9 @@ def get_channel_info(server_id: str, channel_id: str) -> dict:
     )
 
     url = f"{DISCORD_API_BASE_URL}/v10/channels/{channel_id}"
-    response = requests.get(url, headers=headers)
+
+    client = httpx.Client(headers=headers, timeout=15, http2=True)
+    response = client.get(url)
 
     if response.status_code != 200:
         raise Exception(f"Failed to get channel info: {response.text}")
@@ -82,7 +84,8 @@ def get_channel_messages(
     if around:
         params["around"] = around
 
-    response = requests.get(url, headers=headers, params=params)
+    client = httpx.Client(headers=headers, timeout=15, http2=True)
+    response = client.get(url, params=params)
 
     if response.status_code != 200:
         raise Exception(f"Failed to get channel messages: {response.text}")

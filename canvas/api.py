@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-import requests
+import httpx
 
 import lib.env as env
 from lib.constant import HTTP_CLIENT_HEADERS
@@ -15,11 +15,17 @@ headers = {
     "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
 }
 
+canvas_client = httpx.Client(
+    http2=True,
+    headers=headers,
+    timeout=15,
+)
+
 
 @lru_cache
 def get_courses() -> list:
     url = f"{CANVAS_API_BASE_URL}/v1/courses"
-    response = requests.get(url, headers=headers, timeout=5)
+    response = canvas_client.get(url)
 
     if response.status_code != 200:
         raise Exception("Error fetching courses")
@@ -36,7 +42,7 @@ def get_discussion_topics(
         params.append(("only_announcements", only_announcements))
 
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics"
-    response = requests.get(url, headers=headers, timeout=15, params=params)
+    response = canvas_client.get(url, params=params)
 
     if response.status_code != 200:
         raise Exception("Error fetching discussion topics")
@@ -46,7 +52,7 @@ def get_discussion_topics(
 
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
     url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
-    response = requests.get(url, headers=headers, timeout=5)
+    response = canvas_client.get(url)
 
     if response.status_code != 200:
         raise Exception("Error fetching discussion topic view")
@@ -65,7 +71,7 @@ def get_assignments(course_id: str, only_show_upcoming: bool | None = None) -> l
     if only_show_upcoming:
         params.append(("bucket", "upcoming"))
 
-    response = requests.get(url, headers=headers, timeout=5, params=params)
+    response = canvas_client.get(url, params=params)
 
     if response.status_code != 200:
         raise Exception("Error fetching assignments")
@@ -82,7 +88,7 @@ def get_assignment_groups(course_id: str) -> list:
         ("include[]", "submission"),
     ]
 
-    response = requests.get(url, headers=headers, timeout=5, params=params)
+    response = canvas_client.get(url, params=params)
 
     if response.status_code != 200:
         raise Exception("Error fetching assignments")
@@ -92,7 +98,7 @@ def get_assignment_groups(course_id: str) -> list:
 
 def get_conversations() -> list:
     url = f"{CANVAS_API_BASE_URL}/v1/conversations"
-    response = requests.get(url, headers=headers, timeout=5)
+    response = canvas_client.get(url)
 
     if response.status_code != 200:
         raise Exception("Error fetching conversations")
@@ -102,7 +108,7 @@ def get_conversations() -> list:
 
 def get_conversation_detail(conversation_id: str) -> dict:
     url = f"{CANVAS_API_BASE_URL}/v1/conversations/{conversation_id}"
-    response = requests.get(url, headers=headers, timeout=5)
+    response = canvas_client.get(url)
 
     if response.status_code != 200:
         raise Exception("Error fetching conversation messages")

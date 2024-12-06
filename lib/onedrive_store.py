@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-import requests
+import httpx
 from loguru import logger
 
 from lib import env
@@ -20,6 +20,8 @@ CANVAS_ASSIGNMENT_REMINDER_PATH = f"{STORE_FOLDER}/canvas_assignment_reminder.js
 
 DISCORD_CHANNEL_SUMMARY_PATH = f"{STORE_FOLDER}/discord_channel_summary.json"
 
+client = httpx.Client(timeout=15, http2=True, headers=HTTP_CLIENT_HEADERS)
+
 
 def drive_api(method="GET", path="", data=None):
     url = f"https://graph.microsoft.com/v1.0/me/drive/root:/{path}:/content"
@@ -28,10 +30,9 @@ def drive_api(method="GET", path="", data=None):
         "Accept": "application/json",
         "Authorization": f"Bearer {get_private_graph_token()}",
         "Content-Type": "application/json",
-        "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
     }
 
-    response = requests.request(method, url, headers=headers, data=data)
+    response = client.request(method, url, headers=headers, data=data)
 
     return response
 
@@ -49,16 +50,34 @@ def get_store(path: str) -> dict[str, datetime]:
 
     response = drive_api(method="GET", path=path)
 
-    if response.status_code != 200:
-        logger.error(f"Error getting store file: {response.text}")
+    if response.status_code >= 400:
+        logger.error(
+            f"Error getting store file ({response.status_code}): {response.text}"
+        )
         return default
 
-    data: dict[str, str] = response.json()
+    # Get location of the file
+    location = response.headers.get("Location")
 
-    for key, value in data.items():
-        data[key] = datetime.fromisoformat(value)
+    if location:
+        response = client.get(location)
 
-    return data
+        if response.status_code >= 300:
+            logger.error(
+                f"Error getting store file ({response.status_code}): {response.text}"
+            )
+            return default
+
+        data: dict[str, str] = response.json()
+
+        for key, value in data.items():
+            data[key] = datetime.fromisoformat(value)
+
+        logger.debug(f"Loaded store file: {path}")
+
+        return data
+
+    return default
 
 
 def save_store(path: str, record: dict[str, datetime]):
@@ -76,3 +95,5 @@ def save_store(path: str, record: dict[str, datetime]):
 
     if response.status_code >= 300:
         raise Exception(f"Error uploading store file: {response.text}")
+
+    logger.debug(f"Saved store file: {path}")

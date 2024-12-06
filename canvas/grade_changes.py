@@ -1,5 +1,6 @@
 import json
 
+import httpx
 from loguru import logger
 
 import lib.env as env
@@ -26,11 +27,32 @@ def get_grade_store() -> dict[str, dict[str, str]]:
 
     response = drive_api(method="GET", path=f"{STORE_FOLDER}/canvas_grade_changes.json")
 
-    if response.status_code != 200:
-        logger.error(f"Error getting grade store file: {response.text}")
+    if response.status_code >= 400:
+        logger.error(
+            f"Error getting grade store file ({response.status_code}): {response.text}"
+        )
         return default
 
-    return response.json()
+    # Get location of the file
+    location = response.headers.get("Location")
+
+    if location:
+        client = httpx.Client(http2=True)
+        response = client.get(location)
+
+        if response.status_code >= 300:
+            logger.error(
+                f"Error getting store file ({response.status_code}): {response.text}"
+            )
+            return default
+
+        data = response.json()
+
+        logger.debug("Loaded grade store file")
+
+        return data
+
+    return default
 
 
 def save_grade_store(record: dict[str, dict[str, str]]):

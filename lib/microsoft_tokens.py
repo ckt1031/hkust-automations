@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
-import requests
+import httpx
 from loguru import logger
 
 import lib.env as env
@@ -80,7 +80,8 @@ def get_private_graph_token():
         "refresh_token": env.MICROSOFT_REFRESH_TOKEN,
     }
 
-    response = requests.post(url, data=payload, headers=HTTP_CLIENT_HEADERS)
+    client = httpx.Client(headers=HTTP_CLIENT_HEADERS, timeout=15, http2=True)
+    response = client.post(url, data=payload)
 
     if response.status_code != 200:
         logger.error(

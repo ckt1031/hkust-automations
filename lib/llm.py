@@ -1,4 +1,4 @@
-import requests
+import httpx
 from loguru import logger
 
 from lib.constant import HTTP_CLIENT_HEADERS
@@ -27,7 +27,7 @@ def llm_generate(system_message: str, user_message: str) -> str:
 
     headers.update(HTTP_CLIENT_HEADERS)
 
-    response = requests.post(
+    response = httpx.post(
         f"{OPENAI_API_BASE_URL}/chat/completions",
         headers=headers,
         json=body,

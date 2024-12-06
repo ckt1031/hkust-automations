@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 from time import sleep
 
-import requests
+import httpx
 from loguru import logger
 
 from lib.constant import HTTP_CLIENT_HEADERS
 
 COOLDOWN_REQUIRED = False
 REMAINING_EXPIRY = datetime.now()
+webhook_client = httpx.Client(http2=True, headers=HTTP_CLIENT_HEADERS)
 
 
 def send_discord(
@@ -35,7 +36,7 @@ def send_discord(
         data["embeds"] = [embed]
 
     # Send the message to the Discord webhook
-    response = requests.post(webhook_url, json=data, headers=HTTP_CLIENT_HEADERS)
+    response = webhook_client.post(webhook_url, json=data)
 
     if response.status_code != 204:
         raise ValueError(f"Discord webhook returned status code {response.status_code}")

@@ -1,4 +1,4 @@
-import requests
+import httpx
 from loguru import logger
 
 from email_summarizer.email_record import check_email_sender
@@ -15,8 +15,7 @@ class EmailExtractor:
             "Content-Type": "application/json",
             "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
         }
-        self.session = requests.Session()
-        self.session.headers.update(headers)
+        self.session = httpx.Client(http2=True, headers=headers)
 
     def fetch_emails(self):
         url = "https://graph.microsoft.com/v1.0/me/messages?$select=sender,subject,body,receivedDateTime"
