@@ -23,44 +23,44 @@ function_list = [
         "Run all below",
         "all",
         lambda: [
-            check_rss_news(),
-            email_summarize(),
-            check_canvas_inbox(),
-            check_canvas_assignments(),
-            check_canvas_announcements(),
-            check_grade_changes(),
+            try_run(check_rss_news),
+            try_run(email_summarize),
+            try_run(check_canvas_inbox),
+            try_run(check_canvas_assignments),
+            try_run(check_canvas_announcements),
+            try_run(check_grade_changes),
         ],
     ],
-    ["Summarize Outlook emails", "email_summarize", email_summarize],
+    ["Summarize Outlook emails", "email_summarize", lambda: email_summarize()],
     [
         "Check Canvas assignments",
         "check_canvas_assignments",
-        check_canvas_assignments,
+        lambda: check_canvas_assignments(),
     ],
     [
         "Check Canvas announcements",
         "check_canvas_announcements",
-        check_canvas_announcements,
+        lambda: check_canvas_announcements(),
     ],
     [
         "Check Canvas inbox",
         "check_canvas_inbox",
-        check_canvas_inbox,
+        lambda: check_canvas_inbox(),
     ],
     [
         "Check Canvas grades",
         "check_canvas_grades",
-        check_grade_changes,
+        lambda: check_grade_changes,
     ],
     [
         "Get useful Discord messages",
         "get_useful_discord_messages",
-        get_useful_messages,
+        lambda: get_useful_messages,
     ],
     [
         "Check RSS news",
         "check_rss_news",
-        check_rss_news,
+        lambda: check_rss_news(),
     ],
     [
         "Exit",
@@ -68,6 +68,14 @@ function_list = [
         lambda: sys.exit(0),
     ],
 ]
+
+
+def try_run(func):
+    try:
+        func()
+    except Exception as e:
+        logger.error(f"Error running {func.__name__}: {e}")
+
 
 if len(sys.argv) > 1:
     short_code = sys.argv[1]
