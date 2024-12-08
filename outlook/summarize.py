@@ -6,10 +6,10 @@ from loguru import logger
 
 import lib.env as env
 from discord.webhook import send_discord
-from email_summarizer.extractor import EmailExtractor
-from email_summarizer.store import prune_email_store
 from lib.llm import llm_generate
 from lib.onedrive_store import get_store, save_store
+from outlook.extractor import EmailExtractor
+from outlook.store import prune_email_store
 from prompts.email_summarize import email_summary_prompt
 
 

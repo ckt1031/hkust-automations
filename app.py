@@ -8,7 +8,7 @@ from canvas.assignments import check_canvas_assignments
 from canvas.grade_changes import check_grade_changes
 from canvas.inbox import check_canvas_inbox
 from discord.grab_useful_messages import get_useful_messages
-from email_summarizer.summarize import email_summarize
+from outlook.summarize import email_summarize
 from rss.news import check_rss_news
 
 # Remove loggers time, level

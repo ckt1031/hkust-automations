@@ -1,10 +1,10 @@
 import httpx
 from loguru import logger
 
-from email_summarizer.store import check_email_sender
 from lib.constant import HTTP_CLIENT_HEADERS
 from lib.microsoft_tokens import get_private_graph_token
 from lib.utils import clean_html, remove_css_and_scripts
+from outlook.store import check_email_sender
 
 
 class EmailExtractor:
