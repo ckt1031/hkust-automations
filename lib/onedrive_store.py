@@ -50,10 +50,9 @@ def get_store(path: str) -> dict[str, datetime]:
         response = client.get(location)
 
         if response.status_code >= 300:
-            logger.error(
+            raise Exception(
                 f"Error getting store file ({response.status_code}): {response.text}"
             )
-            return default
 
         data: dict[str, str] = response.json()
 
