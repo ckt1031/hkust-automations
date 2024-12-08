@@ -6,9 +6,9 @@ from loguru import logger
 import lib.env as env
 from canvas.api import get_assignment_groups, get_courses
 from discord.webhook import send_discord
-from lib.onedrive_store import STORE_FOLDER, drive_api
+from lib.onedrive_store import drive_api
 
-# Example of the record:
+# Example of the store:
 # {
 #     "course_id": {
 #         "assignment_id": "grade"
@@ -25,7 +25,10 @@ def get_grade_store() -> dict[str, dict[str, str]]:
 
     default = {}
 
-    response = drive_api(method="GET", path=f"{STORE_FOLDER}/canvas_grade_changes.json")
+    response = drive_api(
+        method="GET",
+        path=f"{env.ONEDRIVE_STORE_FOLDER}/canvas_grade_changes.json",
+    )
 
     if response.status_code >= 400:
         logger.error(
@@ -55,11 +58,11 @@ def get_grade_store() -> dict[str, dict[str, str]]:
     return default
 
 
-def save_grade_store(record: dict[str, dict[str, str]]):
+def save_grade_store(store: dict[str, dict[str, str]]):
     response = drive_api(
         method="PUT",
-        path=f"{STORE_FOLDER}/canvas_grade_changes.json",
-        data=json.dumps(record),
+        path=f"{env.ONEDRIVE_STORE_FOLDER}/canvas_grade_changes.json",
+        data=json.dumps(store),
     )
 
     if response.status_code >= 300:
@@ -96,7 +99,7 @@ def check_grade_changes():
                     )
                     continue
 
-                # Initialize the record if it doesn't exist
+                # Initialize the store if it doesn't exist
                 if course_id not in store:
                     store[course_id] = {}
 

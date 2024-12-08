@@ -4,9 +4,9 @@ from datetime import datetime, timedelta, timezone
 from loguru import logger
 
 
-def prune_email_record(list: dict[str, datetime]):
+def prune_email_store(list: dict[str, datetime]):
     """
-    Prune the email record to remove emails older than 7
+    Prune the email store to remove emails older than 7
     days
     """
 
@@ -16,7 +16,7 @@ def prune_email_record(list: dict[str, datetime]):
             # Remove the email from the list
             del list[id]
 
-            logger.debug(f"Email {id} removed from the record (older than 7 days)")
+            logger.debug(f"Email {id} removed from the store (older than 7 days)")
 
     return list
 

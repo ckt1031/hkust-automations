@@ -7,7 +7,7 @@ from loguru import logger
 import lib.env as env
 from discord.webhook import send_discord
 from lib.llm import llm_generate
-from lib.onedrive_store import RSS_NEWS_RECORD_PATH, get_store, save_store
+from lib.onedrive_store import get_store, save_store
 from lib.utils import get_ms, sha2_256
 from prompts.summary import summary_prompt
 from rss.utils import extract_website, parse_rss_feed
@@ -76,7 +76,8 @@ def check_rss_news():
 
     logger.info("Checking RSS news...")
 
-    store = get_store(RSS_NEWS_RECORD_PATH)
+    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/rss_news_record.json"
+    store = get_store(store_path)
 
     for rss in RSS_LIST:
         logger.info(f"Checking RSS: {rss}")
@@ -98,6 +99,6 @@ def check_rss_news():
 
             logger.success(f"RSS item checked: {item['link']}")
 
-    save_store(RSS_NEWS_RECORD_PATH, store)
+    save_store(store_path, store)
 
     logger.success("RSS news checked")

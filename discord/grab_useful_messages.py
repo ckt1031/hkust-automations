@@ -8,7 +8,7 @@ from discord.api import get_channel_info, get_channel_messages
 from discord.webhook import send_discord
 from lib import env
 from lib.llm import llm_generate
-from lib.onedrive_store import DISCORD_CHANNEL_SUMMARY_PATH, get_store, save_store
+from lib.onedrive_store import get_store, save_store
 from prompts.discord_useful_summary import discord_summary_prompts
 
 server_channel_list = {
@@ -89,7 +89,8 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
 
 def get_useful_messages():
-    store = get_store(DISCORD_CHANNEL_SUMMARY_PATH)
+    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/discord_channel_summary.json"
+    store = get_store(store_path)
 
     for server_id, channel_ids in server_channel_list.items():
         for channel_id in channel_ids:
@@ -132,7 +133,7 @@ def get_useful_messages():
             if status:
                 store[channel_info["id"]] = current_time
 
-                save_store(DISCORD_CHANNEL_SUMMARY_PATH, store)
+                save_store(store_path, store)
 
                 logger.success(
                     f"Successfully summarized and constructed points for {channel_info['name']}"

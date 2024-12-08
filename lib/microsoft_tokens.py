@@ -23,7 +23,7 @@ def write_access_token_to_file(data: dict):
     ).isoformat()
 
     with open(TMP_ACCESS_TOKEN_PATH, "w") as f:
-        f.write(json.dumps(data))
+        f.write(json.dumps(data, indent=4))
 
     logger.success("Access token written to temp file")
 

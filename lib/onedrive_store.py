@@ -4,21 +4,8 @@ from datetime import datetime
 import httpx
 from loguru import logger
 
-from lib import env
 from lib.constant import HTTP_CLIENT_HEADERS
 from lib.microsoft_tokens import get_private_graph_token
-
-STORE_FOLDER = env.ONEDRIVE_STORE_FOLDER
-
-# Stores
-EMAIL_RECORD_PATH = f"{STORE_FOLDER}/email_record.json"
-RSS_NEWS_RECORD_PATH = f"{STORE_FOLDER}/rss_news_record.json"
-
-CANVAS_INBOX_REMINDER_PATH = f"{STORE_FOLDER}/canvas_inbox_reminder.json"
-CANVAS_ANNOUNCEMENT_RECORD_PATH = f"{STORE_FOLDER}/canvas_announcement_record.json"
-CANVAS_ASSIGNMENT_REMINDER_PATH = f"{STORE_FOLDER}/canvas_assignment_reminder.json"
-
-DISCORD_CHANNEL_SUMMARY_PATH = f"{STORE_FOLDER}/discord_channel_summary.json"
 
 client = httpx.Client(timeout=15, http2=True, headers=HTTP_CLIENT_HEADERS)
 

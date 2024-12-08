@@ -1,67 +1,65 @@
 from functools import lru_cache
+from urllib.parse import urlparse
 
 import httpx
 
 import lib.env as env
 from lib.constant import HTTP_CLIENT_HEADERS
 
-CANVAS_API_BASE_URL = "https://canvas.ust.hk/api"
 
+def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict:
+    headers = {
+        "Authorization": f"Bearer {env.CANVAS_API_KEY}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
+    }
 
-headers = {
-    "Authorization": f"Bearer {env.CANVAS_API_KEY}",
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
-}
+    canvas_client = httpx.Client(
+        http2=True,
+        headers=headers,
+        timeout=15,
+    )
 
-canvas_client = httpx.Client(
-    http2=True,
-    headers=headers,
-    timeout=15,
-)
+    url = f"https://canvas.ust.hk/api{path}"
+
+    response = canvas_client.get(url, params=params)
+
+    if response.status_code != 200:
+        # Name as the suffix path, e.g. /courses
+        path = urlparse(url).path
+        suffix_name = path.split("/")[-1]
+
+        raise Exception(f"Error fetching {suffix_name}")
+
+    return response.json()
 
 
 @lru_cache
 def get_courses() -> list:
-    url = f"{CANVAS_API_BASE_URL}/v1/courses"
-    response = canvas_client.get(url)
-
-    if response.status_code != 200:
-        raise Exception("Error fetching courses")
-
-    return response.json()
+    return canvas_response("/v1/courses")
 
 
 def get_discussion_topics(
     course_id: str, only_announcements: bool | None = None
 ) -> list:
-    params = []
+    params: list[tuple[str, str]] = []
 
     if only_announcements is not None:
         params.append(("only_announcements", only_announcements))
 
-    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics"
-    response = canvas_client.get(url, params=params)
+    path = f"/v1/courses/{course_id}/discussion_topics"
 
-    if response.status_code != 200:
-        raise Exception("Error fetching discussion topics")
-
-    return response.json()
+    return canvas_response(path, params=params)
 
 
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
-    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
-    response = canvas_client.get(url)
-
-    if response.status_code != 200:
-        raise Exception("Error fetching discussion topic view")
-
-    return response.json()
+    path = f"/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
+    return canvas_response(path)
 
 
 def get_assignments(course_id: str, only_show_upcoming: bool | None = None) -> list:
-    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignments"
+    path = f"/v1/courses/{course_id}/assignments"
 
     params = [
         ("order_by", "due_at"),
@@ -71,16 +69,11 @@ def get_assignments(course_id: str, only_show_upcoming: bool | None = None) -> l
     if only_show_upcoming:
         params.append(("bucket", "upcoming"))
 
-    response = canvas_client.get(url, params=params)
-
-    if response.status_code != 200:
-        raise Exception("Error fetching assignments")
-
-    return response.json()
+    return canvas_response(path, params=params)
 
 
 def get_assignment_groups(course_id: str) -> list:
-    url = f"{CANVAS_API_BASE_URL}/v1/courses/{course_id}/assignment_groups"
+    path = f"/v1/courses/{course_id}/assignment_groups"
 
     params = [
         ("order_by", "due_at"),
@@ -88,29 +81,12 @@ def get_assignment_groups(course_id: str) -> list:
         ("include[]", "submission"),
     ]
 
-    response = canvas_client.get(url, params=params)
-
-    if response.status_code != 200:
-        raise Exception("Error fetching assignments")
-
-    return response.json()
+    return canvas_response(path, params=params)
 
 
 def get_conversations() -> list:
-    url = f"{CANVAS_API_BASE_URL}/v1/conversations"
-    response = canvas_client.get(url)
-
-    if response.status_code != 200:
-        raise Exception("Error fetching conversations")
-
-    return response.json()
+    return canvas_response("/v1/conversations")
 
 
 def get_conversation_detail(conversation_id: str) -> dict:
-    url = f"{CANVAS_API_BASE_URL}/v1/conversations/{conversation_id}"
-    response = canvas_client.get(url)
-
-    if response.status_code != 200:
-        raise Exception("Error fetching conversation messages")
-
-    return response.json()
+    return canvas_response(f"/v1/conversations/{conversation_id}")

@@ -6,7 +6,7 @@ from loguru import logger
 import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
 from discord.webhook import send_discord
-from lib.onedrive_store import CANVAS_INBOX_REMINDER_PATH, get_store, save_store
+from lib.onedrive_store import get_store, save_store
 
 
 def check_canvas_inbox():
@@ -24,7 +24,8 @@ def check_canvas_inbox():
         logger.success("No conversations to check")
         return
 
-    store = get_store(CANVAS_INBOX_REMINDER_PATH)
+    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/canvas_inbox_reminder.json"
+    store = get_store(store_path)
 
     for conversation in conversations:
         last_message_at = datetime.fromisoformat(conversation["last_message_at"])
@@ -64,6 +65,6 @@ def check_canvas_inbox():
         # Add the conversation to the records
         store[str(conversation["id"])] = datetime.now(timezone.utc)
 
-    save_store(CANVAS_INBOX_REMINDER_PATH, store)
+    save_store(store_path, store)
 
     logger.success("Inbox checked successfully")

@@ -7,7 +7,7 @@ import lib.env as env
 from canvas.api import get_courses, get_discussion_topics
 from discord.webhook import send_discord
 from lib.llm import llm_generate
-from lib.onedrive_store import CANVAS_ANNOUNCEMENT_RECORD_PATH, get_store, save_store
+from lib.onedrive_store import get_store, save_store
 from prompts.summary import summary_prompt
 
 
@@ -58,7 +58,9 @@ def handle_single_announcement(course: dict, topic: dict):
 
 def check_canvas_announcements():
     courses = get_courses()
-    store = get_store(CANVAS_ANNOUNCEMENT_RECORD_PATH)
+
+    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/canvas_announcement_record.json"
+    store = get_store(store_path)
 
     for course in courses:
         discussion_topics = get_discussion_topics(course["id"], only_announcements=True)
@@ -81,6 +83,6 @@ def check_canvas_announcements():
 
             store[topic["id"]] = datetime.now(timezone.utc)
 
-    save_store(CANVAS_ANNOUNCEMENT_RECORD_PATH, store)
+    save_store(store_path, store)
 
     logger.success("All Canvas announcements have been checked")
