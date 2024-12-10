@@ -60,7 +60,7 @@ def check_canvas_inbox():
 
         send_discord(webhook_url, None, embed)
 
-        logger.success(f"Conversation {conversation.id} sent to Discord")
+        logger.success(f"Conversation {conversation['id']} sent to Discord")
 
         # Add the conversation to the records
         store[str(conversation["id"])] = datetime.now(timezone.utc)

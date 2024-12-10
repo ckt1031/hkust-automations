@@ -84,7 +84,7 @@ def get_assignment_groups(course_id: str) -> list:
     return canvas_response(path, params=params)
 
 
-def get_conversations() -> list:
+def get_conversations() -> list[dict]:
     return canvas_response("/v1/conversations")
 
 
