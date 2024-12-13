@@ -21,9 +21,7 @@ jobs:
           cache: "pip"
 
       - name: Install Packages
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install --upgrade -r requirements.txt
 
       - name: Lint Project
         run: pip install ruff && python -m ruff check .

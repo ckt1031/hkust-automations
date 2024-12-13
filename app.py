@@ -50,12 +50,12 @@ function_list = [
     [
         "Check Canvas grades",
         "check_canvas_grades",
-        lambda: check_grade_changes,
+        lambda: check_grade_changes(),
     ],
     [
         "Get useful Discord messages",
         "get_useful_discord_messages",
-        lambda: get_useful_messages,
+        lambda: get_useful_messages(),
     ],
     [
         "Check RSS news",

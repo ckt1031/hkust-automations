@@ -19,9 +19,7 @@ jobs:
           cache: "pip"
 
       - name: Install Packages
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install --upgrade -r requirements.txt
 
       - name: Run all
         run: LOGURU_LEVEL="INFO" python app.py all
