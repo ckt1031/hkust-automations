@@ -2,11 +2,10 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
-import httpx
+import requests
 from loguru import logger
 
 import lib.env as env
-from lib.constant import HTTP_CLIENT_HEADERS
 
 TMP_FOLDER = "./tmp"
 TMP_ACCESS_TOKEN_PATH = f"{TMP_FOLDER}/access_token.json"
@@ -80,8 +79,7 @@ def get_private_graph_token():
         "refresh_token": env.MICROSOFT_REFRESH_TOKEN,
     }
 
-    client = httpx.Client(headers=HTTP_CLIENT_HEADERS, timeout=15, http2=True)
-    response = client.post(url, data=payload)
+    response = requests.post(url, data=payload, timeout=15)
 
     if response.status_code != 200:
         logger.error(

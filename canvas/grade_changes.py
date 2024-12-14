@@ -1,6 +1,5 @@
 import json
 
-import httpx
 from loguru import logger
 
 import lib.env as env
@@ -36,26 +35,11 @@ def get_grade_store() -> dict[str, dict[str, str]]:
         )
         return default
 
-    # Get location of the file
-    location = response.headers.get("Location")
+    data = response.json()
 
-    if location:
-        client = httpx.Client(http2=True)
-        response = client.get(location)
+    logger.debug("Loaded grade store file")
 
-        if response.status_code >= 300:
-            logger.error(
-                f"Error getting store file ({response.status_code}): {response.text}"
-            )
-            return default
-
-        data = response.json()
-
-        logger.debug("Loaded grade store file")
-
-        return data
-
-    return default
+    return data
 
 
 def save_grade_store(store: dict[str, dict[str, str]]):

@@ -1,13 +1,10 @@
 import json
 from datetime import datetime
 
-import httpx
+import requests
 from loguru import logger
 
-from lib.constant import HTTP_CLIENT_HEADERS
 from lib.microsoft_tokens import get_private_graph_token
-
-client = httpx.Client(timeout=15, http2=True, headers=HTTP_CLIENT_HEADERS)
 
 
 def drive_api(method="GET", path="", data=None):
@@ -19,7 +16,7 @@ def drive_api(method="GET", path="", data=None):
         "Content-Type": "application/json",
     }
 
-    response = client.request(method, url, headers=headers, data=data)
+    response = requests.request(method, url, headers=headers, data=data, timeout=15)
 
     return response
 
@@ -43,27 +40,14 @@ def get_store(path: str) -> dict[str, datetime]:
         )
         return default
 
-    # Get location of the file
-    location = response.headers.get("Location")
+    data: dict[str, str] = response.json()
 
-    if location:
-        response = client.get(location)
+    for key, value in data.items():
+        data[key] = datetime.fromisoformat(value)
 
-        if response.status_code >= 300:
-            raise Exception(
-                f"Error getting store file ({response.status_code}): {response.text}"
-            )
+    logger.debug(f"Loaded store file: {path}")
 
-        data: dict[str, str] = response.json()
-
-        for key, value in data.items():
-            data[key] = datetime.fromisoformat(value)
-
-        logger.debug(f"Loaded store file: {path}")
-
-        return data
-
-    return default
+    return data
 
 
 def save_store(path: str, record: dict[str, datetime]):

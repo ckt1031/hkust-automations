@@ -1,11 +1,10 @@
 from functools import lru_cache
 from urllib.parse import urlparse
 
-import httpx
+import requests
 from loguru import logger
 
 import lib.env as env
-from lib.constant import HTTP_CLIENT_HEADERS
 
 
 def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict | list:
@@ -13,18 +12,11 @@ def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict | lis
         "Authorization": f"Bearer {env.CANVAS_API_KEY}",
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "User-Agent": HTTP_CLIENT_HEADERS["User-Agent"],
     }
-
-    canvas_client = httpx.Client(
-        http2=True,
-        headers=headers,
-        timeout=15,
-    )
 
     url = f"https://canvas.ust.hk/api{path}"
 
-    response = canvas_client.get(url, params=params)
+    response = requests.get(url, params=params, headers=headers, timeout=15)
 
     if response.status_code != 200:
         # Name as the suffix path, e.g. /courses
