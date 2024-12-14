@@ -2,12 +2,13 @@ from functools import lru_cache
 from urllib.parse import urlparse
 
 import httpx
+from loguru import logger
 
 import lib.env as env
 from lib.constant import HTTP_CLIENT_HEADERS
 
 
-def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict:
+def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict | list:
     headers = {
         "Authorization": f"Bearer {env.CANVAS_API_KEY}",
         "Content-Type": "application/json",
@@ -30,14 +31,26 @@ def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict:
         path = urlparse(url).path
         suffix_name = path.split("/")[-1]
 
-        raise Exception(f"Error fetching {suffix_name}")
+        raise Exception(f"Error fetching {suffix_name}", response.text)
 
     return response.json()
 
 
 @lru_cache
 def get_courses() -> list:
-    return canvas_response("/v1/courses")
+    response: list[dict] = canvas_response("/v1/courses")
+
+    courses = []
+
+    for course in response:
+        # If course has access_restricted_by_date=True, skip
+        if course.get("access_restricted_by_date") is True:
+            logger.debug(f"Course {course['id']} is restricted by date")
+            continue
+
+        courses.append(course)
+
+    return courses
 
 
 def get_discussion_topics(

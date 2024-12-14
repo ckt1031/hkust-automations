@@ -10,15 +10,17 @@ def prune_email_store(list: dict[str, datetime]):
     days
     """
 
+    new_list = list.copy()
+
     for id, value in list.items():
         # If the email is older than 7 days, remove it
         if value < (datetime.now(timezone.utc) - timedelta(days=7)):
             # Remove the email from the list
-            del list[id]
+            del new_list[id]
 
             logger.debug(f"Email {id} removed from the store (older than 7 days)")
 
-    return list
+    return new_list
 
 
 def check_email_sender(sender_email: str) -> bool:
