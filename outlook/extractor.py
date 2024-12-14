@@ -15,7 +15,8 @@ class EmailExtractor:
             "Content-Type": "application/json",
         }
 
-        self.session = requests.Session(headers=headers)
+        self.session = requests.Session()
+        self.session.headers.update(headers)
 
     def fetch_emails(self):
         url = "https://graph.microsoft.com/v1.0/me/messages?$select=sender,subject,body,receivedDateTime"
