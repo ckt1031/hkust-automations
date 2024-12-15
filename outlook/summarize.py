@@ -5,9 +5,9 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
 import lib.env as env
-from discord.webhook import send_discord
-from lib.llm import llm_generate
+from discord.webhook import send_discord_webhook
 from lib.onedrive_store import get_store, save_store
+from lib.openai import generate_chat_completion
 from outlook.extractor import EmailExtractor
 from outlook.store import prune_email_store
 from prompts.email_summarize import email_summary_prompt
@@ -65,7 +65,7 @@ def email_summarize():
         return
 
     # Call the LLM model to summarize the emails
-    llm_response = llm_generate(email_summary_prompt, email_user_prompt)
+    llm_response = generate_chat_completion(email_summary_prompt, email_user_prompt)
 
     if llm_response.strip().lower() != "no":
         headers_to_split_on = [
@@ -79,7 +79,7 @@ def email_summarize():
         result = markdown_splitter.split_text(llm_response)
 
         for split in result:
-            send_discord(webhook_url, split.page_content, None, "HKUST Email")
+            send_discord_webhook(webhook_url, split.page_content, None, "HKUST Email")
 
         logger.success("Email summary sent to Discord")
 

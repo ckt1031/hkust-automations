@@ -4,7 +4,7 @@ import requests
 
 import lib.env as env
 
-DISCORD_API_BASE_URL = "https://discord.com/api"
+DISCORD_API_BASE_URL = "https://discord.com/api/v10"
 
 
 def get_discord_headers(ref: str):
@@ -56,7 +56,7 @@ def get_channel_info(server_id: str, channel_id: str) -> dict:
         f"https://discord.com/channels/{server_id}/{channel_id}"
     )
 
-    url = f"{DISCORD_API_BASE_URL}/v10/channels/{channel_id}"
+    url = f"{DISCORD_API_BASE_URL}/channels/{channel_id}"
 
     response = requests.get(url, headers=headers, timeout=15)
 
@@ -73,7 +73,7 @@ def get_channel_messages(
         f"https://discord.com/channels/{server_id}/{channel_id}"
     )
 
-    url = f"{DISCORD_API_BASE_URL}/v10/channels/{channel_id}/messages"
+    url = f"{DISCORD_API_BASE_URL}/channels/{channel_id}/messages"
 
     params = {}
 

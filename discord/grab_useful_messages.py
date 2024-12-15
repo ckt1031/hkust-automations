@@ -5,10 +5,10 @@ from datetime import datetime, timezone
 from loguru import logger
 
 from discord.api import get_channel_info, get_channel_messages
-from discord.webhook import send_discord
+from discord.webhook import send_discord_webhook
 from lib import env
-from lib.llm import llm_generate
 from lib.onedrive_store import get_store, save_store
+from lib.openai import generate_chat_completion
 from prompts.discord_useful_summary import discord_summary_prompts
 
 server_channel_list = {
@@ -67,7 +67,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
         user_prompts += _draft + "\n\n"
 
-    response = llm_generate(discord_summary_prompts, user_prompts)
+    response = generate_chat_completion(discord_summary_prompts, user_prompts)
 
     if response.strip().lower() == "no":
         logger.info("No valuable message to summarize and construct points.")
@@ -79,7 +79,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
         "timestamp": datetime.now(tz=timezone.utc).astimezone().isoformat(),
     }
 
-    send_discord(
+    send_discord_webhook(
         env.DISCORD_WEBHOOK_URL_DISCORD_NEWS,
         None,
         embed,

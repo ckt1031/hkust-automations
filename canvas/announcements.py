@@ -5,9 +5,9 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_courses, get_discussion_topics
-from discord.webhook import send_discord
-from lib.llm import llm_generate
+from discord.webhook import send_discord_webhook
 from lib.onedrive_store import get_store, save_store
+from lib.openai import generate_chat_completion
 from prompts.summary import summary_prompt
 
 
@@ -23,7 +23,7 @@ def handle_single_announcement(course: dict, topic: dict):
         Content: {raw_text}
     """
 
-    llm_response = llm_generate(summary_prompt, content)
+    llm_response = generate_chat_completion(summary_prompt, content)
 
     name: str = course["name"]
     course_code: str = course["course_code"]
@@ -51,7 +51,7 @@ def handle_single_announcement(course: dict, topic: dict):
         "url": topic["html_url"],
     }
 
-    send_discord(webhook, None, embed, "Canvas")
+    send_discord_webhook(webhook, None, embed, "Canvas")
 
     logger.success(f"Announcement {topic['id']} has been sent to Discord")
 

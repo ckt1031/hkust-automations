@@ -5,7 +5,7 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
-from discord.webhook import send_discord
+from discord.webhook import send_discord_webhook
 from lib.onedrive_store import get_store, save_store
 
 
@@ -58,7 +58,7 @@ def check_canvas_inbox():
             },
         }
 
-        send_discord(webhook_url, None, embed)
+        send_discord_webhook(webhook_url, None, embed)
 
         logger.success(f"Conversation {conversation['id']} sent to Discord")
 

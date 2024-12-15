@@ -4,7 +4,7 @@ from loguru import logger
 
 import lib.env as env
 from canvas.api import get_assignment_groups, get_courses
-from discord.webhook import send_discord
+from discord.webhook import send_discord_webhook
 from lib.onedrive_store import drive_api
 
 # Example of the store:
@@ -120,7 +120,9 @@ def check_grade_changes():
                     },
                 }
 
-                send_discord(env.DISCORD_WEBHOOK_URL_ASSIGNMENTS, None, embed, "Canvas")
+                send_discord_webhook(
+                    env.DISCORD_WEBHOOK_URL_ASSIGNMENTS, None, embed, "Canvas"
+                )
 
                 logger.success(
                     f"Grade for assignment {assignment['id']} in course {course['id']} has changed from {store[course_id][assignment['id']]} to {assignment['submission']['grade']}"

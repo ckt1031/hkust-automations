@@ -5,9 +5,9 @@ from enum import Enum
 from loguru import logger
 
 import lib.env as env
-from discord.webhook import send_discord
-from lib.llm import llm_generate
+from discord.webhook import send_discord_webhook
 from lib.onedrive_store import get_store, save_store
+from lib.openai import generate_chat_completion
 from lib.utils import get_ms, sha2_256
 from prompts.summary import summary_prompt
 from rss.utils import extract_website, parse_rss_feed
@@ -51,7 +51,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
             Content: {article['raw_text']}
         """
 
-        llm_response = llm_generate(summary_prompt, user_prompt)
+        llm_response = generate_chat_completion(summary_prompt, user_prompt)
 
         embed = {
             "title": rss_item["title"],
@@ -60,7 +60,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
             "color": 0x013466,
         }
 
-        send_discord(webhook, None, embed, "HKUST News")
+        send_discord_webhook(webhook, None, embed, "HKUST News")
 
         return RSSItemStatus.OK
     except Exception as e:

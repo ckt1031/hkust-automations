@@ -8,7 +8,7 @@ COOLDOWN_REQUIRED = False
 REMAINING_EXPIRY = datetime.now()
 
 
-def send_discord(
+def send_discord_webhook(
     webhook_url: str,
     message: str | None,
     embed: dict | None,
