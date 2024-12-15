@@ -3,16 +3,16 @@ from datetime import datetime, timedelta, timezone
 from html2text import html2text
 from loguru import logger
 
-import lib.env as env
 from canvas.api import get_courses, get_discussion_topics
 from discord.webhook import send_discord_webhook
+from lib.env import Environment
 from lib.onedrive_store import get_store, save_store
 from lib.openai import generate_chat_completion
 from prompts.summary import summary_prompt
 
 
 def handle_single_announcement(course: dict, topic: dict):
-    webhook = env.DISCORD_WEBHOOK_URL_INBOX
+    webhook = Environment.get("DISCORD_WEBHOOK_URL_INBOX")
 
     # Convert HTML to plain text
     raw_text = html2text(topic["message"])
@@ -51,7 +51,7 @@ def handle_single_announcement(course: dict, topic: dict):
         "url": topic["html_url"],
     }
 
-    send_discord_webhook(webhook, None, embed, "Canvas")
+    send_discord_webhook(webhook, embed=embed, username="Canvas")
 
     logger.success(f"Announcement {topic['id']} has been sent to Discord")
 
@@ -59,7 +59,7 @@ def handle_single_announcement(course: dict, topic: dict):
 def check_canvas_announcements():
     courses = get_courses()
 
-    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/canvas_announcement_record.json"
+    store_path = "canvas_announcement_record.json"
     store = get_store(store_path)
 
     for course in courses:

@@ -6,7 +6,7 @@ from loguru import logger
 
 from discord.api import get_channel_info, get_channel_messages
 from discord.webhook import send_discord_webhook
-from lib import env
+from lib.env import Environment
 from lib.onedrive_store import get_store, save_store
 from lib.openai import generate_chat_completion
 from prompts.discord_useful_summary import discord_summary_prompts
@@ -47,6 +47,12 @@ def filter_messages(messages: list) -> list:
 
 
 def handle_channel(channel: dict, messages: list) -> bool:
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_DISCORD_NEWS")
+
+    if webhook_url is None:
+        logger.error("webhook_url is not provided in the environment variables")
+        return False
+
     user_prompts = ""
 
     for message in messages:
@@ -79,17 +85,13 @@ def handle_channel(channel: dict, messages: list) -> bool:
         "timestamp": datetime.now(tz=timezone.utc).astimezone().isoformat(),
     }
 
-    send_discord_webhook(
-        env.DISCORD_WEBHOOK_URL_DISCORD_NEWS,
-        None,
-        embed,
-    )
+    send_discord_webhook(webhook_url, embed=embed)
 
     return True
 
 
 def get_useful_messages():
-    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/discord_channel_summary.json"
+    store_path = "discord_channel_summary.json"
     store = get_store(store_path)
 
     for server_id, channel_ids in server_channel_list.items():

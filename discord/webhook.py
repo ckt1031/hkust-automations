@@ -10,9 +10,9 @@ REMAINING_EXPIRY = datetime.now()
 
 def send_discord_webhook(
     webhook_url: str,
-    message: str | None,
-    embed: dict | None,
-    username: str | None = "School",
+    message: str | None = None,
+    embed: dict | None = None,
+    username="School",
 ):
     global COOLDOWN_REQUIRED, REMAINING_EXPIRY
 

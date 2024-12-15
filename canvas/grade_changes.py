@@ -2,9 +2,9 @@ import json
 
 from loguru import logger
 
-import lib.env as env
 from canvas.api import get_assignment_groups, get_courses
 from discord.webhook import send_discord_webhook
+from lib.env import Environment
 from lib.onedrive_store import drive_api
 
 # Example of the store:
@@ -16,17 +16,19 @@ from lib.onedrive_store import drive_api
 
 
 def get_grade_store() -> dict[str, dict[str, str]]:
-    webhook = env.DISCORD_WEBHOOK_URL_ASSIGNMENTS
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_ASSIGNMENTS")
 
-    if webhook is None:
+    if webhook_url is None:
         logger.error("No DISCORD_WEBHOOK_URL_ASSIGNMENTS set")
         return
 
     default = {}
 
+    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+
     response = drive_api(
         method="GET",
-        path=f"{env.ONEDRIVE_STORE_FOLDER}/canvas_grade_changes.json",
+        path=f"{base_folder}/canvas_grade_changes.json",
     )
 
     if response.status_code >= 400:
@@ -43,9 +45,10 @@ def get_grade_store() -> dict[str, dict[str, str]]:
 
 
 def save_grade_store(store: dict[str, dict[str, str]]):
+    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
     response = drive_api(
         method="PUT",
-        path=f"{env.ONEDRIVE_STORE_FOLDER}/canvas_grade_changes.json",
+        path=f"{base_folder}/canvas_grade_changes.json",
         data=json.dumps(store),
     )
 
@@ -54,6 +57,12 @@ def save_grade_store(store: dict[str, dict[str, str]]):
 
 
 def check_grade_changes():
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_ASSIGNMENTS")
+
+    if webhook_url is None:
+        logger.error("No DISCORD_WEBHOOK_URL_ASSIGNMENTS set")
+        return
+
     courses = get_courses()
 
     store = get_grade_store()
@@ -120,9 +129,7 @@ def check_grade_changes():
                     },
                 }
 
-                send_discord_webhook(
-                    env.DISCORD_WEBHOOK_URL_ASSIGNMENTS, None, embed, "Canvas"
-                )
+                send_discord_webhook(webhook_url, embed=embed, username="Canvas")
 
                 logger.success(
                     f"Grade for assignment {assignment['id']} in course {course['id']} has changed from {store[course_id][assignment['id']]} to {assignment['submission']['grade']}"

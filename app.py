@@ -70,11 +70,11 @@ function_list = [
 ]
 
 
-def try_run(func):
+def try_run(action):
     try:
-        func()
+        action()
     except Exception as e:
-        logger.error(f"Error running {func.__name__}: {e}")
+        logger.error(f"Error running {action.__name__}: {e}")
 
 
 if len(sys.argv) > 1:
@@ -86,26 +86,22 @@ if len(sys.argv) > 1:
             function[2]()
             sys.exit(0)
 
-    console.print("Invalid short code", style="red bold")
-    console.print()
+    console.print("Invalid short code\n", style="red bold")
 
 for i, function in enumerate(function_list):
     console.print(f"[{i + 1}] {function[0]}")
 
 # Print empty line
-console.print()
+choice = input("\nEnter the number of the function you want to run: ")
 
-choice = input("Enter the number of the function you want to run: ")
-
-console.print()
-
-if (
-    not choice.isdigit()
-    or (int(choice) - 1) >= len(function_list)
-    or (int(choice) - 1) < 0
-):
-    console.print(f"Invalid choice: {choice}", style="red bold")
-    console.print()
+if not choice.isdigit():
+    console.print("\nChoice must be a number!", style="red bold")
     sys.exit(1)
 
-function_list[int(choice) - 1][2]()
+choice_index = int(choice) - 1
+
+if choice_index >= len(function_list) or choice_index < 0:
+    console.print(f"\nInvalid choice: {choice}", style="red bold")
+    sys.exit(1)
+
+function_list[choice_index][2]()

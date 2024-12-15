@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
-import lib.env as env
 from discord.webhook import send_discord_webhook
+from lib.env import Environment
 from lib.onedrive_store import get_store, save_store
 from lib.openai import generate_chat_completion
 from outlook.extractor import EmailExtractor
@@ -14,8 +14,7 @@ from prompts.email_summarize import email_summary_prompt
 
 
 def email_summarize():
-    webhook_url = env.DISCORD_WEBHOOK_URL_EMAILS
-    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/email_record.json"
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_EMAILS")
 
     if webhook_url is None:
         logger.error(
@@ -40,6 +39,7 @@ def email_summarize():
 
     unchecked_email_amount = 0
 
+    store_path = "email_record.json"
     store = get_store(store_path)
 
     # Prune the email store to remove emails older than 7 days
@@ -79,7 +79,9 @@ def email_summarize():
         result = markdown_splitter.split_text(llm_response)
 
         for split in result:
-            send_discord_webhook(webhook_url, split.page_content, None, "HKUST Email")
+            send_discord_webhook(
+                webhook_url, split.page_content, username="HKUST Email"
+            )
 
         logger.success("Email summary sent to Discord")
 

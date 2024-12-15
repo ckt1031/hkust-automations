@@ -2,19 +2,24 @@ from functools import lru_cache
 from urllib.parse import urlparse
 
 import requests
+from dotenv import load_dotenv
 from loguru import logger
 
-import lib.env as env
+from lib.env import Environment
+
+load_dotenv()
 
 
 def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict | list:
+    CANVAS_API_KEY = Environment.get("CANVAS_API_KEY")
+
     headers = {
-        "Authorization": f"Bearer {env.CANVAS_API_KEY}",
+        "Authorization": f"Bearer {CANVAS_API_KEY}",
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
 
-    url = f"https://canvas.ust.hk/api{path}"
+    url = f"https://canvas.ust.hk/api/v1{path}"
 
     response = requests.get(url, params=params, headers=headers, timeout=15)
 
@@ -30,7 +35,7 @@ def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict | lis
 
 @lru_cache
 def get_courses() -> list:
-    response: list[dict] = canvas_response("/v1/courses")
+    response: list[dict] = canvas_response("/courses")
 
     courses = []
 
@@ -53,18 +58,18 @@ def get_discussion_topics(
     if only_announcements is not None:
         params.append(("only_announcements", only_announcements))
 
-    path = f"/v1/courses/{course_id}/discussion_topics"
+    path = f"/courses/{course_id}/discussion_topics"
 
     return canvas_response(path, params=params)
 
 
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
-    path = f"/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
+    path = f"/courses/{course_id}/discussion_topics/{topic_id}/view"
     return canvas_response(path)
 
 
 def get_assignments(course_id: str, only_show_upcoming: bool | None = None) -> list:
-    path = f"/v1/courses/{course_id}/assignments"
+    path = f"/courses/{course_id}/assignments"
 
     params = [
         ("order_by", "due_at"),
@@ -78,7 +83,7 @@ def get_assignments(course_id: str, only_show_upcoming: bool | None = None) -> l
 
 
 def get_assignment_groups(course_id: str) -> list:
-    path = f"/v1/courses/{course_id}/assignment_groups"
+    path = f"/courses/{course_id}/assignment_groups"
 
     params = [
         ("order_by", "due_at"),
@@ -90,8 +95,8 @@ def get_assignment_groups(course_id: str) -> list:
 
 
 def get_conversations() -> list[dict]:
-    return canvas_response("/v1/conversations")
+    return canvas_response("/conversations")
 
 
 def get_conversation_detail(conversation_id: str) -> dict:
-    return canvas_response(f"/v1/conversations/{conversation_id}")
+    return canvas_response(f"/conversations/{conversation_id}")

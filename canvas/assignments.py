@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 
 from loguru import logger
 
-import lib.env as env
 from canvas.api import get_assignments, get_courses
 from discord.webhook import send_discord_webhook
+from lib.env import Environment
 from lib.onedrive_store import get_store, save_store
 
 
@@ -44,7 +44,7 @@ def get_assignments_for_all_courses() -> list:
 
 
 def check_canvas_assignments():
-    webhook_url = env.DISCORD_WEBHOOK_URL_ASSIGNMENTS
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_ASSIGNMENTS")
 
     if webhook_url is None:
         logger.error(
@@ -58,7 +58,7 @@ def check_canvas_assignments():
         logger.success("No assignments to check")
         return
 
-    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/canvas_assignment_reminder.json"
+    store_path = "canvas_assignment_reminder.json"
     store = get_store(store_path)
 
     for assignment in assignments:
@@ -86,7 +86,7 @@ def check_canvas_assignments():
             "footer": {"text": assignment["course_name"]},
         }
 
-        send_discord_webhook(webhook_url, None, embed)
+        send_discord_webhook(webhook_url, embed=embed)
 
         logger.success(f"Assignment {assignment['id']} has been sent to Discord")
 

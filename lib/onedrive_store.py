@@ -4,6 +4,7 @@ from datetime import datetime
 import requests
 from loguru import logger
 
+from lib.env import Environment
 from lib.microsoft_tokens import get_private_graph_token
 
 
@@ -32,7 +33,9 @@ def is_recorded(list: list[dict[str, datetime]], id: str):
 def get_store(path: str) -> dict[str, datetime]:
     default = {}
 
-    response = drive_api(method="GET", path=path)
+    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+
+    response = drive_api(method="GET", path=f"{base_folder}/{path}")
 
     if response.status_code >= 400:
         logger.error(
@@ -57,9 +60,11 @@ def save_store(path: str, record: dict[str, datetime]):
         if isinstance(value, datetime):
             d[key] = value.astimezone().isoformat()
 
+    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+
     response = drive_api(
         method="PUT",
-        path=path,
+        path=f"{base_folder}/{path}",
         data=json.dumps(d),
     )
 

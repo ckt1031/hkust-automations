@@ -4,8 +4,8 @@ from enum import Enum
 
 from loguru import logger
 
-import lib.env as env
 from discord.webhook import send_discord_webhook
+from lib.env import Environment
 from lib.onedrive_store import get_store, save_store
 from lib.openai import generate_chat_completion
 from lib.utils import get_ms, sha2_256
@@ -60,7 +60,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
             "color": 0x013466,
         }
 
-        send_discord_webhook(webhook, None, embed, "HKUST News")
+        send_discord_webhook(webhook, embed=embed, username="HKUST News")
 
         return RSSItemStatus.OK
     except Exception as e:
@@ -70,13 +70,15 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
 
 
 def check_rss_news():
-    if env.DISCORD_WEBHOOK_URL_NEWS is None:
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_NEWS")
+
+    if webhook_url is None:
         logger.error("DISCORD_WEBHOOK_URL_NEWS is not set")
         sys.exit(1)
 
     logger.info("Checking RSS news...")
 
-    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/rss_news_record.json"
+    store_path = "rss_news_record.json"
     store = get_store(store_path)
 
     for rss in RSS_LIST:
@@ -90,7 +92,7 @@ def check_rss_news():
                 logger.info(f"RSS item already checked: {item['title']}")
                 continue
 
-            status = check_single_rss_item(env.DISCORD_WEBHOOK_URL_NEWS, item)
+            status = check_single_rss_item(webhook_url, item)
 
             if status == RSSItemStatus.FAIL:
                 continue

@@ -3,14 +3,14 @@ from datetime import datetime, timedelta, timezone
 
 from loguru import logger
 
-import lib.env as env
 from canvas.api import get_conversation_detail, get_conversations
 from discord.webhook import send_discord_webhook
+from lib.env import Environment
 from lib.onedrive_store import get_store, save_store
 
 
 def check_canvas_inbox():
-    webhook_url = env.DISCORD_WEBHOOK_URL_INBOX
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_INBOX")
 
     if webhook_url is None:
         logger.error(
@@ -24,7 +24,7 @@ def check_canvas_inbox():
         logger.success("No conversations to check")
         return
 
-    store_path = f"{env.ONEDRIVE_STORE_FOLDER}/canvas_inbox_reminder.json"
+    store_path = "canvas_inbox_reminder.json"
     store = get_store(store_path)
 
     for conversation in conversations:
@@ -58,7 +58,7 @@ def check_canvas_inbox():
             },
         }
 
-        send_discord_webhook(webhook_url, None, embed)
+        send_discord_webhook(webhook_url, embed=embed)
 
         logger.success(f"Conversation {conversation['id']} sent to Discord")
 

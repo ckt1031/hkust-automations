@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 from loguru import logger
 
-import lib.env as env
+from lib.env import Environment
 
 TMP_FOLDER = "./tmp"
 TMP_ACCESS_TOKEN_PATH = f"{TMP_FOLDER}/access_token.json"
@@ -61,11 +61,11 @@ def get_private_graph_token():
     if access_token:
         return access_token
 
-    if (
-        not env.MICROSOFT_REFRESH_TOKEN
-        or not env.MICROSOFT_CLIENT_ID
-        or not env.MICROSOFT_CLIENT_SECRET
-    ):
+    refresh_token = Environment.get("MICROSOFT_REFRESH_TOKEN")
+    client_id = Environment.get("MICROSOFT_CLIENT_ID")
+    client_secret = Environment.get("MICROSOFT_CLIENT_SECRET")
+
+    if not refresh_token or not client_id or not client_secret:
         logger.error("Microsoft refresh token, client ID, or client secret is not set")
         return
 
@@ -74,9 +74,9 @@ def get_private_graph_token():
     payload = {
         "grant_type": "refresh_token",
         "REDIRECT_URL": "https://login.microsoftonline.com/common/oauth2/nativeclient",
-        "CLIENT_ID": env.MICROSOFT_CLIENT_ID,
-        "CLIENT_SECRET": env.MICROSOFT_CLIENT_SECRET,
-        "refresh_token": env.MICROSOFT_REFRESH_TOKEN,
+        "CLIENT_ID": client_id,
+        "CLIENT_SECRET": client_secret,
+        "refresh_token": refresh_token,
     }
 
     response = requests.post(url, data=payload, timeout=15)
