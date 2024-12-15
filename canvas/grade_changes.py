@@ -16,12 +16,6 @@ from lib.onedrive_store import drive_api
 
 
 def get_grade_store() -> dict[str, dict[str, str]]:
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_ASSIGNMENTS")
-
-    if webhook_url is None:
-        logger.error("No DISCORD_WEBHOOK_URL_ASSIGNMENTS set")
-        return
-
     default = {}
 
     base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
@@ -57,10 +51,10 @@ def save_grade_store(store: dict[str, dict[str, str]]):
 
 
 def check_grade_changes():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_ASSIGNMENTS")
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
-        logger.error("No DISCORD_WEBHOOK_URL_ASSIGNMENTS set")
+        logger.error("No DISCORD_WEBHOOK_URL_CANVAS set")
         return
 
     courses = get_courses()

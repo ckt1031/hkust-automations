@@ -10,11 +10,11 @@ from lib.onedrive_store import get_store, save_store
 
 
 def check_canvas_inbox():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_INBOX")
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
         logger.error(
-            "Discord webhook URL is not provided in the environment variables (DISCORD_WEBHOOK_URL_INBOX)"
+            "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
         sys.exit(1)
 

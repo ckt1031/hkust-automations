@@ -44,11 +44,11 @@ def get_assignments_for_all_courses() -> list:
 
 
 def check_canvas_assignments():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_ASSIGNMENTS")
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
         logger.error(
-            "Discord webhook URL is not provided in the environment variables (DISCORD_WEBHOOK_URL_ASSIGNMENTS)"
+            "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
         sys.exit(1)
 

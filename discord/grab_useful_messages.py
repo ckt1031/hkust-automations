@@ -47,10 +47,12 @@ def filter_messages(messages: list) -> list:
 
 
 def handle_channel(channel: dict, messages: list) -> bool:
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_DISCORD_NEWS")
+    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
 
     if webhook_url is None:
-        logger.error("webhook_url is not provided in the environment variables")
+        logger.error(
+            "DISCORD_WEBHOOK_URL_DISCORD_SUMMARY is not provided in the environment variables"
+        )
         return False
 
     user_prompts = ""

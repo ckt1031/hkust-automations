@@ -12,7 +12,7 @@ from prompts.summary import summary_prompt
 
 
 def handle_single_announcement(course: dict, topic: dict):
-    webhook = Environment.get("DISCORD_WEBHOOK_URL_INBOX")
+    webhook = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
 
     # Convert HTML to plain text
     raw_text = html2text(topic["message"])
