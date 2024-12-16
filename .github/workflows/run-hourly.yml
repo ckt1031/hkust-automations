@@ -1,14 +1,14 @@
-name: Frequent Run
+name: Hourly Run
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "30 * * * *"
 
 jobs:
   Script:
     name: Script
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -20,16 +20,17 @@ jobs:
       - run: pip install --upgrade -r requirements.txt
 
       - name: Run Script
-        run: LOGURU_LEVEL="INFO" python app.py all
+        run: |
+            export LOGURU_LEVEL="INFO"
+            python app.py check_rss_news
+            python app.py get_useful_discord_messages
         env:
-          CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
-
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
           OPENAI_API_MODEL: ${{ secrets.OPENAI_API_MODEL }}
 
-          DISCORD_WEBHOOK_URL_CANVAS: ${{ secrets.DISCORD_WEBHOOK_URL_CANVAS }}
-          DISCORD_WEBHOOK_URL_EMAILS: ${{ secrets.DISCORD_WEBHOOK_URL_EMAILS }}
+          DISCORD_WEBHOOK_URL_NEWS: ${{ secrets.DISCORD_WEBHOOK_URL_NEWS }}
+          DISCORD_WEBHOOK_URL_DISCORD_SUMMARY: ${{ secrets.DISCORD_WEBHOOK_URL_DISCORD_SUMMARY }}
 
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
           MICROSOFT_CLIENT_SECRET: ${{ secrets.MICROSOFT_CLIENT_SECRET }}

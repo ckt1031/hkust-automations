@@ -23,7 +23,6 @@ function_list = [
         "Run all below",
         "all",
         lambda: [
-            try_run(check_rss_news),
             try_run(email_summarize),
             try_run(check_canvas_inbox),
             try_run(check_canvas_assignments),
