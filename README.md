@@ -2,7 +2,7 @@
 
 A set of tools to push information to HKUST students.
 
-We current support pushing information to Discord via webhooks, other platforms can be added in the future.
+We currently support pushing information to Discord via webhooks, other platforms can be added in the future.
 
 ## Setting Up Microsoft Email Summarization
 
