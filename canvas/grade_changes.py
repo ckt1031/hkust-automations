@@ -4,7 +4,7 @@ from loguru import logger
 
 from canvas.api import get_assignment_groups, get_courses
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import drive_api
 
 # Example of the store:
@@ -18,7 +18,7 @@ from lib.onedrive_store import drive_api
 def get_grade_store() -> dict[str, dict[str, str]]:
     default = {}
 
-    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
     response = drive_api(
         method="GET",
@@ -39,7 +39,7 @@ def get_grade_store() -> dict[str, dict[str, str]]:
 
 
 def save_grade_store(store: dict[str, dict[str, str]]):
-    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
     response = drive_api(
         method="PUT",
         path=f"{base_folder}/canvas_grade_changes.json",
@@ -51,7 +51,7 @@ def save_grade_store(store: dict[str, dict[str, str]]):
 
 
 def check_grade_changes():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
         logger.error("No DISCORD_WEBHOOK_URL_CANVAS set")
@@ -62,7 +62,7 @@ def check_grade_changes():
     store = get_grade_store()
 
     for course in courses:
-        couse_name: str = course["name"]
+        course_name: str = course["name"]
         course_id = str(course["id"])
         assignments_groups = get_assignment_groups(course_id)
 
@@ -119,7 +119,7 @@ def check_grade_changes():
                         {"name": "Modified Grade", "value": new_field, "inline": True},
                     ],
                     "footer": {
-                        "text": couse_name.strip(),
+                        "text": course_name.strip(),
                     },
                 }
 

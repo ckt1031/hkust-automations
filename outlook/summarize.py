@@ -5,16 +5,16 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 from loguru import logger
 
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
-from lib.openai import generate_chat_completion
+from lib.openai_api import generate_chat_completion
 from outlook.extractor import EmailExtractor
 from outlook.store import prune_email_store
 from prompts.email_summarize import email_summary_prompt
 
 
 def email_summarize():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_EMAILS")
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_EMAILS")
 
     if webhook_url is None:
         logger.error(

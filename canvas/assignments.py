@@ -5,7 +5,7 @@ from loguru import logger
 
 from canvas.api import get_assignments, get_courses
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
 
 
@@ -44,7 +44,7 @@ def get_assignments_for_all_courses() -> list:
 
 
 def check_canvas_assignments():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
         logger.error(

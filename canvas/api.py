@@ -5,13 +5,16 @@ import requests
 from dotenv import load_dotenv
 from loguru import logger
 
-from lib.env import Environment
+from lib.env import getenv
 
 load_dotenv()
 
 
-def canvas_response(path: str, params: list[tuple[str, str]] = []) -> dict | list:
-    CANVAS_API_KEY = Environment.get("CANVAS_API_KEY")
+def canvas_response(path: str, params=None) -> dict | list:
+    if params is None:
+        params = []
+
+    CANVAS_API_KEY = getenv("CANVAS_API_KEY")
 
     headers = {
         "Authorization": f"Bearer {CANVAS_API_KEY}",
@@ -51,9 +54,9 @@ def get_courses() -> list:
 
 
 def get_discussion_topics(
-    course_id: str, only_announcements: bool | None = None
+        course_id: str, only_announcements: bool | None = None
 ) -> list:
-    params: list[tuple[str, str]] = []
+    params: list[tuple[str, str | bool]] = []
 
     if only_announcements is not None:
         params.append(("only_announcements", only_announcements))

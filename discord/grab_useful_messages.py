@@ -6,9 +6,9 @@ from loguru import logger
 
 from discord.api import get_channel_info, get_channel_messages
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
-from lib.openai import generate_chat_completion
+from lib.openai_api import generate_chat_completion
 from prompts.discord_useful_summary import discord_summary_prompts
 
 server_channel_list = {
@@ -47,7 +47,7 @@ def filter_messages(messages: list) -> list:
 
 
 def handle_channel(channel: dict, messages: list) -> bool:
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
 
     if webhook_url is None:
         logger.error(

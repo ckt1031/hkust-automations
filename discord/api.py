@@ -2,14 +2,14 @@ import base64
 
 import requests
 
-from lib.env import Environment
+from lib.env import getenv
 
 DISCORD_API_BASE_URL = "https://discord.com/api/v10"
 
 
 def get_discord_headers(ref: str):
     headers = {
-        "Authorization": Environment.get("DISCORD_USER_TOKEN"),
+        "Authorization": getenv("DISCORD_USER_TOKEN"),
         # Mock browser headers
         "Host": "discord.com",
         "Priority": "undefined",

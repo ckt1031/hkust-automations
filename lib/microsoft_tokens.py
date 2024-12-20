@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 from loguru import logger
 
-from lib.env import Environment
+from lib.env import getenv
 
 TMP_FOLDER = "./tmp"
 TMP_ACCESS_TOKEN_PATH = f"{TMP_FOLDER}/access_token.json"
@@ -61,9 +61,9 @@ def get_private_graph_token():
     if access_token:
         return access_token
 
-    refresh_token = Environment.get("MICROSOFT_REFRESH_TOKEN")
-    client_id = Environment.get("MICROSOFT_CLIENT_ID")
-    client_secret = Environment.get("MICROSOFT_CLIENT_SECRET")
+    refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
+    client_id = getenv("MICROSOFT_CLIENT_ID")
+    client_secret = getenv("MICROSOFT_CLIENT_SECRET")
 
     if not refresh_token or not client_id or not client_secret:
         logger.error("Microsoft refresh token, client ID, or client secret is not set")

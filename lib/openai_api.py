@@ -2,18 +2,18 @@ from dotenv import load_dotenv
 from loguru import logger
 from openai import OpenAI
 
-from lib.env import Environment
+from lib.env import getenv
 
 load_dotenv()
 
 
 def generate_chat_completion(system_message: str, user_message: str) -> str:
     client = OpenAI(
-        api_key=Environment.get("OPENAI_API_KEY"),
-        base_url=Environment.get("OPENAI_API_BASE_URL", "https://api.openai.com/v1"),
+        api_key=getenv("OPENAI_API_KEY"),
+        base_url=getenv("OPENAI_API_BASE_URL", "https://api.openai.com/v1"),
     )
 
-    model = Environment.get("OPENAI_API_MODEL", "gpt-4o-mini")
+    model = getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
     chat_completion = client.chat.completions.create(
         messages=[

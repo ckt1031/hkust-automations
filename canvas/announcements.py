@@ -5,14 +5,14 @@ from loguru import logger
 
 from canvas.api import get_courses, get_discussion_topics
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
-from lib.openai import generate_chat_completion
+from lib.openai_api import generate_chat_completion
 from prompts.summary import summary_prompt
 
 
 def handle_single_announcement(course: dict, topic: dict):
-    webhook = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
+    webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     # Convert HTML to plain text
     raw_text = html2text(topic["message"])

@@ -5,9 +5,9 @@ from enum import Enum
 from loguru import logger
 
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
-from lib.openai import generate_chat_completion
+from lib.openai_api import generate_chat_completion
 from lib.utils import get_ms, sha2_256
 from prompts.summary import summary_prompt
 from rss.utils import extract_website, parse_rss_feed
@@ -16,7 +16,7 @@ RSS_LIST = [
     "https://itsc.hkust.edu.hk/rss.xml",
 ]
 
-MAXMIUM_CHECK_DAYS = 5
+MAXIMUM_CHECK_DAYS = 5
 
 
 def exceed_maximum_check_days(date: str) -> bool:
@@ -24,7 +24,7 @@ def exceed_maximum_check_days(date: str) -> bool:
 
     now = datetime.now(timezone.utc).timestamp()
 
-    return (now - ms) > MAXMIUM_CHECK_DAYS * 24 * 60 * 60
+    return (now - ms) > MAXIMUM_CHECK_DAYS * 24 * 60 * 60
 
 
 class RSSItemStatus(Enum):
@@ -70,7 +70,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
 
 
 def check_rss_news():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_NEWS")
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_NEWS")
 
     if webhook_url is None:
         logger.error("DISCORD_WEBHOOK_URL_NEWS is not set")

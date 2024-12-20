@@ -4,7 +4,7 @@ from datetime import datetime
 import requests
 from loguru import logger
 
-from lib.env import Environment
+from lib.env import getenv
 from lib.microsoft_tokens import get_private_graph_token
 
 
@@ -22,9 +22,9 @@ def drive_api(method="GET", path="", data=None):
     return response
 
 
-def is_recorded(list: list[dict[str, datetime]], id: str):
-    for item in list:
-        if item.get(str(id)):
+def is_recorded(data: list[dict[str, datetime]], item_id: str):
+    for item in data:
+        if item.get(str(item_id)):
             return True
 
     return False
@@ -33,7 +33,7 @@ def is_recorded(list: list[dict[str, datetime]], id: str):
 def get_store(path: str) -> dict[str, datetime]:
     default = {}
 
-    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
     response = drive_api(method="GET", path=f"{base_folder}/{path}")
 
@@ -44,28 +44,29 @@ def get_store(path: str) -> dict[str, datetime]:
         return default
 
     data: dict[str, str] = response.json()
+    new_data: dict[str, datetime] = {}
 
     for key, value in data.items():
-        data[key] = datetime.fromisoformat(value)
+        new_data[key] = datetime.fromisoformat(value)
 
     logger.debug(f"Loaded store file: {path}")
 
-    return data
+    return new_data
 
 
-def save_store(path: str, record: dict[str, datetime]):
-    d = record.copy()
+def save_store(path: str, original_data: dict[str, datetime]):
+    new_data: dict[str, str] = {}
 
-    for key, value in d.items():
+    for key, value in original_data.items():
         if isinstance(value, datetime):
-            d[key] = value.astimezone().isoformat()
+            new_data[key] = value.astimezone().isoformat()
 
-    base_folder = Environment.get("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
+    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
     response = drive_api(
         method="PUT",
         path=f"{base_folder}/{path}",
-        data=json.dumps(d),
+        data=json.dumps(new_data),
     )
 
     if response.status_code >= 300:

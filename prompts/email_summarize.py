@@ -71,10 +71,10 @@ Concise summary of the email content
 6. Ignore unclear or irrelevant emails.
 7. Keep summaries concise but include all crucial information.
 8. Generate suitable titles for each email based on the content.
-9. Do not include subscription info like "You can subscribe to ..." or "You are receiving/suscribed to this email because..." in the output.
+9. Do not include subscription info like "You can subscribe to ..." or "You are receiving/subscribed to this email because..." in the output.
 10. Return "NO" as the only output if there are no or valuable emails to summarize.
 11. If there are no any information in section / category, do not include them in the output, and do not include that subheading.
-12. No duplicate information should be included in the output, and betweeb the categories.
+12. No duplicate information should be included in the output, and between the categories.
 13. If there are only "Information" category, do not include the subheading "Information" in the output.
 
 Your goal is to create clear, organized, and easily scan-able email summaries that save students time and ensure they don't miss important information.

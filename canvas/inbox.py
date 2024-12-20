@@ -5,12 +5,12 @@ from loguru import logger
 
 from canvas.api import get_conversation_detail, get_conversations
 from discord.webhook import send_discord_webhook
-from lib.env import Environment
+from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
 
 
 def check_canvas_inbox():
-    webhook_url = Environment.get("DISCORD_WEBHOOK_URL_CANVAS")
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
         logger.error(
