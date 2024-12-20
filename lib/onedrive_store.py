@@ -30,7 +30,7 @@ def is_recorded(data: list[dict[str, datetime]], item_id: str):
     return False
 
 
-def get_store(path: str) -> dict[str, datetime]:
+def get_store(path: str):
     default = {}
 
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
@@ -44,32 +44,41 @@ def get_store(path: str) -> dict[str, datetime]:
         return default
 
     data: dict[str, str] = response.json()
-    new_data: dict[str, datetime] = {}
-
-    for key, value in data.items():
-        new_data[key] = datetime.fromisoformat(value)
 
     logger.debug(f"Loaded store file: {path}")
 
-    return new_data
+    return data
 
 
-def save_store(path: str, original_data: dict[str, datetime]):
-    new_data: dict[str, str] = {}
-
-    for key, value in original_data.items():
-        if isinstance(value, datetime):
-            new_data[key] = value.astimezone().isoformat()
-
+def save_store(path: str, d: dict | list):
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
     response = drive_api(
         method="PUT",
         path=f"{base_folder}/{path}",
-        data=json.dumps(new_data),
+        data=json.dumps(d),
     )
 
     if response.status_code >= 300:
         raise Exception(f"Error uploading store file: {response.text}")
 
     logger.debug(f"Saved store file: {path}")
+
+
+def get_store_with_datetime(path: str) -> dict[str, datetime]:
+    d = get_store(path)
+    new_data: dict[str, datetime] = {}
+
+    for key, value in d.items():
+        new_data[key] = datetime.fromisoformat(value)
+
+    return new_data
+
+
+def save_store_with_datetime(path: str, data: dict[str, datetime]):
+    new_data: dict[str, str] = {}
+
+    for key, value in data.items():
+        new_data[key] = value.astimezone().isoformat()
+
+    save_store(path, new_data)

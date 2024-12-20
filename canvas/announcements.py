@@ -6,7 +6,7 @@ from loguru import logger
 from canvas.api import get_courses, get_discussion_topics
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
-from lib.onedrive_store import get_store, save_store
+from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
 from prompts.summary import summary_prompt
 
@@ -60,7 +60,7 @@ def check_canvas_announcements():
     courses = get_courses()
 
     store_path = "canvas_announcement_record.json"
-    store = get_store(store_path)
+    store = get_store_with_datetime(store_path)
 
     for course in courses:
         discussion_topics = get_discussion_topics(course["id"], only_announcements=True)
@@ -83,6 +83,6 @@ def check_canvas_announcements():
 
             store[topic["id"]] = datetime.now(timezone.utc)
 
-    save_store(store_path, store)
+    save_store_with_datetime(store_path, store)
 
     logger.success("All Canvas announcements have been checked")

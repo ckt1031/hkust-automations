@@ -7,7 +7,7 @@ from loguru import logger
 from discord.api import get_channel_info, get_channel_messages
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
-from lib.onedrive_store import get_store, save_store
+from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
 from prompts.discord_useful_summary import discord_summary_prompts
 
@@ -94,7 +94,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
 def get_useful_messages():
     store_path = "discord_channel_summary.json"
-    store = get_store(store_path)
+    store = get_store_with_datetime(store_path)
 
     for server_id, channel_ids in server_channel_list.items():
         for channel_id in channel_ids:
@@ -137,7 +137,7 @@ def get_useful_messages():
             if status:
                 store[channel_info["id"]] = current_time
 
-                save_store(store_path, store)
+                save_store_with_datetime(store_path, store)
 
                 logger.success(
                     f"Successfully summarized and constructed points for {channel_info['name']}"

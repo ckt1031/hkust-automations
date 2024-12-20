@@ -6,7 +6,7 @@ from loguru import logger
 
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
-from lib.onedrive_store import get_store, save_store
+from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
 from outlook.extractor import EmailExtractor
 from outlook.store import prune_email_store
@@ -40,7 +40,7 @@ def email_summarize():
     unchecked_email_amount = 0
 
     store_path = "email_record.json"
-    store = get_store(store_path)
+    store = get_store_with_datetime(store_path)
 
     # Prune the email store to remove emails older than 7 days
     store = prune_email_store(store)
@@ -92,6 +92,6 @@ def email_summarize():
         store[email["id"]] = current_time
 
     # Save the email store
-    save_store(store_path, store)
+    save_store_with_datetime(store_path, store)
 
     logger.success("All emails are checked")

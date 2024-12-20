@@ -9,6 +9,7 @@ from canvas.inbox import check_canvas_inbox
 from discord.grab_useful_messages import get_useful_messages
 from outlook.summarize import email_summarize
 from rss.news import check_rss_news
+from usthing.letter_grade_change import check_letter_grade_change
 
 # Remove loggers time, level
 logger.remove()
@@ -33,6 +34,7 @@ function_dict = {
             check_canvas_assignments(),
             check_canvas_announcements(),
             check_grade_changes(),
+            check_letter_grade_change(),
         ]
     ),
     "email_summarize": try_run(email_summarize),
@@ -42,6 +44,7 @@ function_dict = {
     "check_canvas_grades": try_run(check_grade_changes),
     "get_useful_discord_messages": try_run(get_useful_messages),
     "check_rss_news": try_run(check_rss_news),
+    "check_letter_grade_change": try_run(check_letter_grade_change),
     "exit": lambda: sys.exit(0),
 }
 

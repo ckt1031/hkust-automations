@@ -54,7 +54,7 @@ def get_courses() -> list:
 
 
 def get_discussion_topics(
-        course_id: str, only_announcements: bool | None = None
+    course_id: str, only_announcements: bool | None = None
 ) -> list:
     params: list[tuple[str, str | bool]] = []
 

@@ -6,7 +6,7 @@ from loguru import logger
 
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
-from lib.onedrive_store import get_store, save_store
+from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
 from lib.utils import get_ms, sha2_256
 from prompts.summary import summary_prompt
@@ -64,8 +64,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
 
         return RSSItemStatus.OK
     except Exception as e:
-        logger.error(f"Failed to extract website and summarize content: {link}")
-        logger.error(e)
+        logger.error(f"Failed to extract website and summarize content: {link}\n", e)
         return RSSItemStatus.FAIL
 
 
@@ -79,7 +78,7 @@ def check_rss_news():
     logger.info("Checking RSS news...")
 
     store_path = "rss_news_record.json"
-    store = get_store(store_path)
+    store = get_store_with_datetime(store_path)
 
     for rss in RSS_LIST:
         logger.info(f"Checking RSS: {rss}")
@@ -101,6 +100,6 @@ def check_rss_news():
 
             logger.success(f"RSS item checked: {item['link']}")
 
-    save_store(store_path, store)
+    save_store_with_datetime(store_path, store)
 
     logger.success("RSS news checked")

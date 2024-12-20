@@ -1,6 +1,4 @@
-import json
-import os
-from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 
 import requests
 from loguru import logger
@@ -8,59 +6,30 @@ from loguru import logger
 from lib.env import getenv
 
 TMP_FOLDER = "./tmp"
-TMP_ACCESS_TOKEN_PATH = f"{TMP_FOLDER}/access_token.json"
 
 
-def write_access_token_to_file(data: dict):
-    # Make sure the tmp directory exists
-    if not os.path.exists(TMP_FOLDER):
-        os.makedirs(TMP_FOLDER)
+@lru_cache
+def get_me_info(token: str):
+    url = "https://graph.microsoft.com/v1.0/me"
 
-    # Add expires_in seconds to the current time
-    data["expiry_time"] = (
-        datetime.now(timezone.utc) + timedelta(seconds=data["expires_in"])
-    ).isoformat()
+    headers = {
+        "Accept": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
 
-    with open(TMP_ACCESS_TOKEN_PATH, "w") as f:
-        f.write(json.dumps(data, indent=4))
+    response = requests.get(url, headers=headers, timeout=15)
 
-    logger.success("Access token written to temp file")
-
-
-def read_access_token_from_file() -> str | None:
-    # Open the file, check if it exists
-    try:
-        with open(TMP_ACCESS_TOKEN_PATH, "r") as f:
-            jsonString = f.read()
-
-        if not jsonString or jsonString == "":
-            return None
-
-        data: dict = json.loads(jsonString)
-        expiry_time = datetime.fromisoformat(data["expiry_time"])
-
-        # Check if the token has expired
-        if expiry_time < datetime.now(timezone.utc):
-            logger.warning(
-                f"Microsoft access token is about to expire, it expires in {data['expiry_time']}"
-            )
-            return None
-
-        logger.debug(
-            f"Access token read from temp file, expires in {data['expiry_time']}"
+    if response.status_code != 200:
+        logger.error(
+            f"Error getting Microsoft user info ({response.status_code}): {response.text}"
         )
-
-        return data["access_token"]
-    except FileNotFoundError:
         return None
 
+    return response.json()
 
+
+@lru_cache
 def get_private_graph_token():
-    access_token = read_access_token_from_file()
-
-    if access_token:
-        return access_token
-
     refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
     client_id = getenv("MICROSOFT_CLIENT_ID")
     client_secret = getenv("MICROSOFT_CLIENT_SECRET")
@@ -83,13 +52,39 @@ def get_private_graph_token():
 
     if response.status_code != 200:
         logger.error(
-            f"Error getting microsoft access token ({response.status_code}): {response.text}"
+            f"Error getting Microsoft access token ({response.status_code}): {response.text}"
         )
         return None
 
     data: dict = response.json()
 
-    # Write the access token to a file
-    write_access_token_to_file(data)
+    return data["access_token"]
+
+
+@lru_cache
+def get_usthing_private_graph_token():
+    talentID = "c917f3e2-9322-4926-9bb3-daca730413ca"
+    clientID = "b4bc4b9a-7162-44c5-bb50-fe935dce1f5a"
+
+    url = f"https://login.microsoftonline.com/{talentID}/oauth2/v2.0/token"
+
+    MICROSOFT_REFRESH_TOKEN = getenv("USTHING_MICROSOFT_REFRESH_TOKEN")
+
+    payload = {
+        "client_id": clientID,
+        "grant_type": "refresh_token",
+        "redirect_uri": "usthing://oauth-login",
+        "refresh_token": MICROSOFT_REFRESH_TOKEN,
+    }
+
+    response = requests.post(url, data=payload, timeout=5)
+
+    if response.status_code != 200:
+        logger.error(
+            f"Error getting USTHing Microsoft access token ({response.status_code}): {response.text}"
+        )
+        return None
+
+    data: dict = response.json()
 
     return data["access_token"]

@@ -1,11 +1,9 @@
-import json
-
 from loguru import logger
 
 from canvas.api import get_assignment_groups, get_courses
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
-from lib.onedrive_store import drive_api
+from lib.onedrive_store import get_store, save_store
 
 # Example of the store:
 # {
@@ -13,41 +11,6 @@ from lib.onedrive_store import drive_api
 #         "assignment_id": "grade"
 #     }
 # }
-
-
-def get_grade_store() -> dict[str, dict[str, str]]:
-    default = {}
-
-    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
-
-    response = drive_api(
-        method="GET",
-        path=f"{base_folder}/canvas_grade_changes.json",
-    )
-
-    if response.status_code >= 400:
-        logger.error(
-            f"Error getting grade store file ({response.status_code}): {response.text}"
-        )
-        return default
-
-    data = response.json()
-
-    logger.debug("Loaded grade store file")
-
-    return data
-
-
-def save_grade_store(store: dict[str, dict[str, str]]):
-    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
-    response = drive_api(
-        method="PUT",
-        path=f"{base_folder}/canvas_grade_changes.json",
-        data=json.dumps(store),
-    )
-
-    if response.status_code >= 300:
-        logger.error(f"Error saving grade store file: {response.text}")
 
 
 def check_grade_changes():
@@ -59,7 +22,8 @@ def check_grade_changes():
 
     courses = get_courses()
 
-    store = get_grade_store()
+    store_path = "canvas_grade_changes.json"
+    store = get_store(store_path)
 
     for course in courses:
         course_name: str = course["name"]
@@ -135,4 +99,4 @@ def check_grade_changes():
 
                 store[course_id][assignment["id"]] = assignment["submission"]["grade"]
 
-    save_grade_store(store)
+    save_store(store_path, store)

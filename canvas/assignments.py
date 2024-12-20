@@ -6,7 +6,7 @@ from loguru import logger
 from canvas.api import get_assignments, get_courses
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
-from lib.onedrive_store import get_store, save_store
+from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 
 
 def get_assignments_for_all_courses() -> list:
@@ -59,7 +59,7 @@ def check_canvas_assignments():
         return
 
     store_path = "canvas_assignment_reminder.json"
-    store = get_store(store_path)
+    store = get_store_with_datetime(store_path)
 
     for assignment in assignments:
         # Check if the assignment has already been recorded
@@ -93,6 +93,6 @@ def check_canvas_assignments():
         # Add the assignment to the records
         store[str(assignment["id"])] = datetime.now(timezone.utc)
 
-    save_store(store_path, store)
+    save_store_with_datetime(store_path, store)
 
     logger.success("All assignments have been checked")
