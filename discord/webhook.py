@@ -8,7 +8,14 @@ from loguru import logger
 SHELVE_PATH = "./tmp/discord"
 
 
+def ensure_tmp_dir():
+    if not os.path.exists("./tmp"):
+        os.makedirs("./tmp")
+
+
 def get_cooldown_status():
+    ensure_tmp_dir()
+
     with shelve.open(SHELVE_PATH) as db:
         expiry = db.get("remaining_expiry", datetime.now().isoformat())
         expiry = datetime.fromisoformat(expiry)
@@ -28,19 +35,19 @@ def set_cooldown_status(cooldown_required: bool, remaining_expiry: datetime):
 
 
 def send_discord_webhook(
-    webhook_url: str,
-    message: str | None = None,
-    embed: dict | None = None,
-    username="School",
+        webhook_url: str,
+        message: str | None = None,
+        embed: dict | None = None,
+        username="School",
 ):
     cooldown_status = get_cooldown_status()
 
     if (
-        cooldown_status["cooldown_required"]
-        and cooldown_status["remaining_expiry"] > datetime.now()
+            cooldown_status["cooldown_required"]
+            and cooldown_status["remaining_expiry"] > datetime.now()
     ):
         seconds_left = (
-            cooldown_status["remaining_expiry"] - datetime.now()
+                cooldown_status["remaining_expiry"] - datetime.now()
         ).total_seconds()
 
         logger.debug(
