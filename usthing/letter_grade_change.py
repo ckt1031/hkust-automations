@@ -1,3 +1,5 @@
+import sys
+
 from loguru import logger
 
 from discord.webhook import send_discord_webhook
@@ -18,7 +20,7 @@ def check_letter_grade_change():
         logger.error(
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
-        return
+        sys.exit(1)
 
     grades = data["stdtInfo"][0]["stdtCourseGrade"]
 

@@ -2,7 +2,6 @@ langchain_text_splitters==0.3.4
 loguru==0.7.3
 python-dotenv==1.0.1
 python_dateutil==2.9.0.post0
-rich==13.9.4
 feedparser==6.0.11
 trafilatura==2.0.0
 html2text==2024.2.26
