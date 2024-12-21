@@ -93,10 +93,6 @@ def check_grade_changes():
                     f"Grade for assignment {assignment['id']} in course {course['id']} has changed from {store[course_id][assignment['id']]} to {assignment['submission']['grade']}"
                 )
 
-                logger.debug(
-                    f"Grade for assignment {assignment['id']} is {assignment['submission']['grade']}/{assignment['points_possible']} in course {course['id']}"
-                )
-
                 store[course_id][assignment["id"]] = assignment["submission"]["grade"]
 
     save_store(store_path, store)

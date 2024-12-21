@@ -30,6 +30,6 @@ def generate_chat_completion(system_message: str, user_message: str) -> str:
     if content is None:
         raise ValueError("OpenAI API did not return any content")
 
-    logger.info(f"Called OpenAI API with model: {model}")
+    logger.debug(f"Called OpenAI API with model: {model}")
 
     return content

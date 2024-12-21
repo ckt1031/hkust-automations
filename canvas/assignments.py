@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timezone
 
 from loguru import logger
@@ -50,7 +49,7 @@ def check_canvas_assignments():
         logger.error(
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
-        sys.exit(1)
+        return
 
     assignments = get_assignments_for_all_courses()
 

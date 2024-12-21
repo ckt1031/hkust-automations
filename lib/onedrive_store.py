@@ -17,7 +17,13 @@ def drive_api(method="GET", path="", data=None):
         "Content-Type": "application/json",
     }
 
-    response = requests.request(method, url, headers=headers, data=data, timeout=15)
+    response = requests.request(
+        method,
+        url,
+        headers=headers,
+        data=data,
+        timeout=10,
+    )
 
     return response
 
@@ -36,6 +42,10 @@ def get_store(path: str):
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
     response = drive_api(method="GET", path=f"{base_folder}/{path}")
+
+    if response.status_code == 404:
+        logger.debug(f"Store file not found: {path}, returning default")
+        return default
 
     if response.status_code >= 400:
         logger.error(

@@ -57,6 +57,14 @@ def handle_single_announcement(course: dict, topic: dict):
 
 
 def check_canvas_announcements():
+    webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
+
+    if webhook is None:
+        logger.error(
+            "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
+        )
+        return
+
     courses = get_courses()
 
     store_path = "canvas_announcement_record.json"

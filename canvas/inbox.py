@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime, timedelta, timezone
 
 from loguru import logger
@@ -16,7 +15,7 @@ def check_canvas_inbox():
         logger.error(
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
-        sys.exit(1)
+        return
 
     conversations = get_conversations()
 

@@ -23,16 +23,16 @@ def get_me_info(token: str):
         logger.error(
             f"Error getting Microsoft user info ({response.status_code}): {response.text}"
         )
-        return None
+        raise Exception("Error getting Microsoft user info: " + response.text)
 
     return response.json()
 
 
 @lru_cache
 def get_private_graph_token():
-    refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
     client_id = getenv("MICROSOFT_CLIENT_ID")
     client_secret = getenv("MICROSOFT_CLIENT_SECRET")
+    refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
 
     if not refresh_token or not client_id or not client_secret:
         logger.error("Microsoft refresh token, client ID, or client secret is not set")
@@ -54,7 +54,7 @@ def get_private_graph_token():
         logger.error(
             f"Error getting Microsoft access token ({response.status_code}): {response.text}"
         )
-        return None
+        raise Exception("Error getting Microsoft access token: " + response.text)
 
     data: dict = response.json()
 
@@ -83,7 +83,9 @@ def get_usthing_private_graph_token():
         logger.error(
             f"Error getting USTHing Microsoft access token ({response.status_code}): {response.text}"
         )
-        return None
+        raise Exception(
+            "Error getting USTHing Microsoft access token: " + response.text
+        )
 
     data: dict = response.json()
 
