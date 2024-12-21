@@ -1,3 +1,4 @@
+import os
 import shelve
 from datetime import datetime, timedelta
 from time import sleep
@@ -35,19 +36,19 @@ def set_cooldown_status(cooldown_required: bool, remaining_expiry: datetime):
 
 
 def send_discord_webhook(
-        webhook_url: str,
-        message: str | None = None,
-        embed: dict | None = None,
-        username="School",
+    webhook_url: str,
+    message: str | None = None,
+    embed: dict | None = None,
+    username="School",
 ):
     cooldown_status = get_cooldown_status()
 
     if (
-            cooldown_status["cooldown_required"]
-            and cooldown_status["remaining_expiry"] > datetime.now()
+        cooldown_status["cooldown_required"]
+        and cooldown_status["remaining_expiry"] > datetime.now()
     ):
         seconds_left = (
-                cooldown_status["remaining_expiry"] - datetime.now()
+            cooldown_status["remaining_expiry"] - datetime.now()
         ).total_seconds()
 
         logger.debug(
