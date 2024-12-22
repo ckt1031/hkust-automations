@@ -49,12 +49,6 @@ def filter_messages(messages: list) -> list:
 def handle_channel(channel: dict, messages: list) -> bool:
     webhook_url = getenv("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
 
-    if webhook_url is None:
-        logger.error(
-            "DISCORD_WEBHOOK_URL_DISCORD_SUMMARY is not provided in the environment variables"
-        )
-        return False
-
     user_prompts = ""
 
     for message in messages:
@@ -93,6 +87,13 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
 
 def get_useful_messages():
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
+
+    if webhook_url is None:
+        raise ValueError(
+            "DISCORD_WEBHOOK_URL_DISCORD_SUMMARY is not provided in the environment variables"
+        )
+
     store_path = "discord_channel_summary.json"
     store = get_store_with_datetime(store_path)
 
@@ -143,7 +144,7 @@ def get_useful_messages():
                     f"Successfully summarized and constructed points for {channel_info['name']}"
                 )
 
-            logger.info(
+            logger.debug(
                 "Sleeping for 5 seconds before getting messages from the next channel, wait for it..."
             )
 

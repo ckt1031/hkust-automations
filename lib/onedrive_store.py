@@ -48,10 +48,7 @@ def get_store(path: str):
         return default
 
     if response.status_code >= 400:
-        logger.error(
-            f"Error getting store file ({response.status_code}): {response.text}"
-        )
-        return default
+        raise Exception(f"Error getting store file: {response.text}")
 
     data: dict[str, str] = response.json()
 

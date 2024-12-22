@@ -20,9 +20,6 @@ def get_me_info(token: str):
     response = requests.get(url, headers=headers, timeout=15)
 
     if response.status_code != 200:
-        logger.error(
-            f"Error getting Microsoft user info ({response.status_code}): {response.text}"
-        )
         raise Exception("Error getting Microsoft user info: " + response.text)
 
     return response.json()
@@ -51,9 +48,6 @@ def get_private_graph_token():
     response = requests.post(url, data=payload, timeout=15)
 
     if response.status_code != 200:
-        logger.error(
-            f"Error getting Microsoft access token ({response.status_code}): {response.text}"
-        )
         raise Exception("Error getting Microsoft access token: " + response.text)
 
     data: dict = response.json()
@@ -80,9 +74,6 @@ def get_usthing_private_graph_token():
     response = requests.post(url, data=payload, timeout=5)
 
     if response.status_code != 200:
-        logger.error(
-            f"Error getting USTHing Microsoft access token ({response.status_code}): {response.text}"
-        )
         raise Exception(
             "Error getting USTHing Microsoft access token: " + response.text
         )

@@ -40,7 +40,7 @@ if len(sys.argv) > 1:
     if short_code in function_dict:
         function_dict[short_code]()
     else:
-        logger.error("Invalid short code")
+        raise ValueError("Invalid short code")
     sys.exit(0)
 
 for i, (name, func) in enumerate(function_dict.items(), 1):
@@ -49,13 +49,11 @@ for i, (name, func) in enumerate(function_dict.items(), 1):
 choice = input("\nEnter the number of the function you want to run: ")
 
 if not choice.isdigit():
-    logger.error(f"Invalid choice: {choice}")
-    sys.exit(1)
+    raise ValueError(f"Invalid choice: {choice}")
 
 choice_index = int(choice) - 1
 
 if choice_index >= len(function_dict) or choice_index < 0:
-    logger.error(f"Invalid choice: {choice}")
-    sys.exit(1)
+    raise ValueError(f"Invalid choice: {choice}")
 
 list(function_dict.values())[choice_index]()

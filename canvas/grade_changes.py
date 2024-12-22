@@ -17,8 +17,9 @@ def check_grade_changes():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
-        logger.error("No DISCORD_WEBHOOK_URL_CANVAS set")
-        return
+        raise ValueError(
+            "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
+        )
 
     courses = get_courses()
 

@@ -1,4 +1,3 @@
-import sys
 
 from loguru import logger
 
@@ -17,10 +16,9 @@ def check_letter_grade_change():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
-        logger.error(
+        raise ValueError(
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
-        sys.exit(1)
 
     grades = data["stdtInfo"][0]["stdtCourseGrade"]
 

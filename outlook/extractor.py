@@ -24,8 +24,7 @@ class EmailExtractor:
         response = self.session.get(url)
 
         if response.status_code != 200:
-            logger.error("Error fetching emails")
-            return []
+            raise Exception("Error fetching emails")
 
         return response.json()["value"]
 

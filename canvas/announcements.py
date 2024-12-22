@@ -60,10 +60,9 @@ def check_canvas_announcements():
     webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook is None:
-        logger.error(
+        raise ValueError(
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
-        return
 
     courses = get_courses()
 

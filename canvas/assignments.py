@@ -46,10 +46,9 @@ def check_canvas_assignments():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
-        logger.error(
+        raise ValueError(
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
-        return
 
     assignments = get_assignments_for_all_courses()
 
