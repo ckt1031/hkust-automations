@@ -6,6 +6,8 @@ from canvas.api import get_conversation_detail, get_conversations
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
+from lib.openai_api import generate_chat_completion
+from prompts.summary import summary_prompt
 
 
 def check_canvas_inbox():
@@ -41,15 +43,16 @@ def check_canvas_inbox():
             continue
 
         detail = get_conversation_detail(conversation["id"])
-        content = detail["messages"][0]["body"]
 
-        if len(content) > 1700:
-            content = content[:1700] + "..."
+        content = f"Context: {conversation["context_name"]}\nTitle: {conversation['subject']}\nContent: {detail["messages"][0]["body"]}"
+        llm_response = generate_chat_completion(summary_prompt, content)
 
         embed = {
-            "title": f"New Conversation: {conversation['subject']}",
-            "description": content,
-            "footer": {"text": conversation["context_name"]},
+            "title": f"Conversation: {conversation['subject']}",
+            "description": llm_response,
+            "footer": {
+                "text": conversation["context_name"].strip() + " Inbox",
+            },
             "author": {
                 "name": conversation["participants"][0]["name"],
                 "icon_url": conversation["avatar_url"],
@@ -63,6 +66,6 @@ def check_canvas_inbox():
         # Add the conversation to the records
         store[str(conversation["id"])] = datetime.now(timezone.utc)
 
-    save_store_with_datetime(store_path, store)
+        save_store_with_datetime(store_path, store)
 
-    logger.success("Inbox checked successfully")
+        logger.success("Inbox checked successfully")

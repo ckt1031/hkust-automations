@@ -17,8 +17,8 @@ def generate_chat_completion(system_message: str, user_message: str) -> str:
 
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
+            {"role": "system", "content": system_message.strip()},
+            {"role": "user", "content": user_message.strip()},
         ],
         stream=False,
         model=model,

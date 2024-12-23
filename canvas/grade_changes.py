@@ -77,15 +77,17 @@ def check_grade_changes():
                     "url": assignment["html_url"],
                     "fields": [
                         {
-                            "name": "Original Grade",
+                            "name": "Original",
                             "value": original_field,
                             "inline": True,
                         },
-                        {"name": "Modified Grade", "value": new_field, "inline": True},
+                        {"name": "New", "value": new_field, "inline": True},
                     ],
                     "footer": {
                         "text": course_name.strip(),
                     },
+                    # Green
+                    "color": 0x9EFE59,
                 }
 
                 send_discord_webhook(webhook_url, embed=embed, username="Canvas")

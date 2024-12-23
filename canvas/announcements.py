@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from html2text import html2text
+import html2text
 from loguru import logger
 
 from canvas.api import get_courses, get_discussion_topics
@@ -14,14 +14,14 @@ from prompts.summary import summary_prompt
 def handle_single_announcement(course: dict, topic: dict):
     webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
-    # Convert HTML to plain text
-    raw_text = html2text(topic["message"])
+    txt = html2text.HTML2Text()
+    txt.ignore_emphasis = True
+    txt.ignore_images = True
 
-    content = f"""
-        Course: {course['name']}
-        Title: {topic['title']}
-        Content: {raw_text}
-    """
+    # Convert HTML to plain text
+    raw_text = txt.handle(topic["message"])
+
+    content = f"Course: {course['name']}\nTitle: {topic['title']}\nContent: {raw_text}"
 
     llm_response = generate_chat_completion(summary_prompt, content)
 
