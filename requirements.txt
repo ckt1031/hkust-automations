@@ -7,3 +7,5 @@ trafilatura==2.0.0
 html2text==2024.2.26
 requests==2.32.3
 openai==1.58.1
+python-dateutil~=2.9.0.post0
+langchain-text-splitters~=0.3.4

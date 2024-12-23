@@ -1,9 +1,29 @@
+import re
+import string
+
+import html2text
 import requests
 from loguru import logger
 
 from lib.microsoft_tokens import get_private_graph_token
-from lib.utils import clean_html, remove_css_and_scripts
+from lib.utils import remove_css_and_scripts
 from outlook.store import check_email_sender
+
+
+def remove_non_ascii(text: str):
+    printable = set(string.printable)
+    text = "".join(filter(lambda x: x in printable, text))
+
+    return text.encode("ascii", errors="ignore").decode()
+
+
+def remove_excessive_newlines(text: str):
+    return text.replace("\n\n", "\n").replace("\n\n", "\n")
+
+
+# Keep newlines, but remove excessive spaces
+def remove_excessive_spaces(text: str):
+    return re.sub(r"[ \t]+", " ", text)
 
 
 class EmailExtractor:
@@ -40,8 +60,15 @@ class EmailExtractor:
                 )
                 continue
 
-            body = remove_css_and_scripts(clean_html(email["body"]["content"]))
-            body = body.strip()
+            txt = html2text.HTML2Text()
+            txt.ignore_emphasis = True
+            txt.ignore_images = True
+            # txt.ignore_tables = True
+
+            body = txt.handle(email["body"]["content"])
+            body = remove_css_and_scripts(body)
+            body = remove_excessive_newlines(body)
+            body = remove_excessive_spaces(body)
 
             emails.append(
                 {

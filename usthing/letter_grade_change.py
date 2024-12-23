@@ -1,4 +1,3 @@
-
 from loguru import logger
 
 from discord.webhook import send_discord_webhook

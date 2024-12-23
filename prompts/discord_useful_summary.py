@@ -11,4 +11,4 @@ only grab useful information from Discord Server, respond with a summary of the 
 6. Ignore all irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slang's.
 
 Return "NO" as the only output if there are no or valuable message to summarize and construct points.
-    """
+"""

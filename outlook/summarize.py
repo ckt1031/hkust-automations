@@ -28,37 +28,28 @@ def email_summarize():
     today_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     today_day = datetime.now().strftime("%A")  # Monday, Tuesday, etc.
 
-    email_user_prompt = f"""
-    Date: {today_date}
-    Day: {today_day}
-
-    Emails:
-    """
-
-    unchecked_email_amount = 0
+    email_user_prompt = f"Date: {today_date}\nWeekday: {today_day}\n\n---\n\n"
 
     store_path = "email_record.json"
     store = get_store_with_datetime(store_path)
-
     # Prune the email store to remove emails older than 7 days
     store = prune_email_store(store)
+
+    checking_emails = []
 
     # Check if some email is checked
     for email in emails:
         checked = email["id"] in store
 
         if checked:
-            logger.info(f"Email {email['id']} was checked, skipping")
-
-            # Remove the email from the list
-            emails.remove(email)
+            logger.debug(f"Email {email['id']} was checked, skipping")
             continue
 
-        email_user_prompt += f"\n\n\nSubject: {email['subject']}\nFrom: {email['from']}\nBody: {email['body']}"
-        unchecked_email_amount += 1
+        email_user_prompt += f"Subject: {email['subject']}\nFrom: {email['from']}\nBody:\n\n{email['body']}\n\n---\n\n"
+        checking_emails.append(email)
 
     # If there are no unchecked emails, exit the program
-    if unchecked_email_amount == 0:
+    if len(checking_emails) == 0:
         logger.success("No unchecked emails found")
         return
 
@@ -84,7 +75,7 @@ def email_summarize():
         logger.success("Email summary sent to Discord")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
-    for email in emails:
+    for email in checking_emails:
         current_time = datetime.now(tz=timezone.utc)
 
         store[email["id"]] = current_time
@@ -92,4 +83,4 @@ def email_summarize():
     # Save the email store
     save_store_with_datetime(store_path, store)
 
-    logger.success("All emails are checked")
+    logger.success(f"{len(checking_emails)} emails are checked")
