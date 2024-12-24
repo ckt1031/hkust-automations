@@ -1,45 +1,14 @@
 from datetime import datetime, timezone
 
+from html2text import html2text
 from loguru import logger
 
-from canvas.api import get_assignments, get_courses
+from canvas.api import get_all_assignments_from_all_courses
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
-
-
-def get_assignments_for_all_courses() -> list:
-    courses = get_courses()
-
-    assignments = []
-
-    for course in courses:
-        course_id = str(course["id"])
-
-        course_assignments = []
-
-        for assignment in get_assignments(course_id, only_show_upcoming=True):
-            if not assignment["due_at"]:
-                logger.debug(f"Assignment {assignment['id']} has no due date, skipping")
-                continue
-
-            due_at = datetime.fromisoformat(assignment["due_at"])
-
-            if due_at < datetime.now(timezone.utc):
-                logger.debug(
-                    f"Assignment {assignment['id']} has passed the due date, skipping"
-                )
-                continue
-
-            if assignment["graded_submissions_exist"]:
-                name: str = assignment["name"]
-
-                assignment["course_name"] = name.strip()
-                course_assignments.append(assignment)
-
-        assignments.extend(course_assignments)
-
-    return assignments
+from lib.openai_api import generate_chat_completion
+from prompts import summary
 
 
 def check_canvas_assignments():
@@ -50,7 +19,7 @@ def check_canvas_assignments():
             "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
         )
 
-    assignments = get_assignments_for_all_courses()
+    assignments = get_all_assignments_from_all_courses()
 
     if len(assignments) == 0:
         logger.success("No assignments to check")
@@ -60,6 +29,10 @@ def check_canvas_assignments():
     store = get_store_with_datetime(store_path)
 
     for assignment in assignments:
+        if not assignment["graded_submissions_exist"]:
+            logger.debug(f"Assignment {assignment['id']} has no graded submissions")
+            continue
+
         # Check if the assignment has already been recorded
         if str(assignment["id"]) in store:
             logger.debug(f"Assignment {assignment['id']} was recorded, skipping")
@@ -70,19 +43,49 @@ def check_canvas_assignments():
             logger.info(f"Assignment {assignment['id']} has submissions, skipping")
             continue
 
-        message = "No expiration, but do it as soon as possible."
+        # PHYS1112
+        if (
+            "not graded" in assignment["name"].lower()
+            or "tutorial" in assignment["name"].lower()
+        ):
+            logger.debug(f"Assignment {assignment['id']} will not be graded, skipping")
+            continue
+
+        embed = {
+            "title": f"New Assignment: {assignment['name']}",
+            "url": assignment["html_url"],
+            "footer": {"text": assignment["course_name"]},
+        }
 
         if assignment["due_at"] is not None:
             due_at = datetime.fromisoformat(assignment["due_at"])
 
-            message = f"Expiration date: `{assignment['due_at']}`, <t:{int(due_at.timestamp())}:R>"
+            if due_at < datetime.now(timezone.utc):
+                logger.debug(
+                    f"Assignment {assignment['id']} has passed the due date, skipping"
+                )
+                continue
 
-        embed = {
-            "title": f"New Assignment: {assignment['name']}",
-            "description": message,
-            "url": assignment["html_url"],
-            "footer": {"text": assignment["course_name"]},
-        }
+            date_time_str = due_at.strftime("%Y-%m-%d %H:%M:%S")
+
+            embed["fields"] = [
+                {
+                    "name": "Due Date",
+                    "value": date_time_str + f" (<t:{int(due_at.timestamp())}:R>)",
+                    "inline": True,
+                }
+            ]
+
+        if assignment["description"] is not None:
+            assignment["description"] = html2text(assignment["description"])
+            user_prompt = f"Name: {assignment['name']}\nCourse: {assignment['course_name']}\nDescription: {assignment['description']}"
+
+            llm_response = generate_chat_completion(
+                summary.summary_prompt, user_prompt
+            ).strip()
+            embed["description"] = llm_response
+
+            print(llm_response)
 
         send_discord_webhook(webhook_url, embed=embed)
 

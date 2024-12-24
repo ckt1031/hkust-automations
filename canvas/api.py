@@ -53,6 +53,7 @@ def get_courses() -> list:
     return courses
 
 
+@lru_cache
 def get_discussion_topics(
     course_id: str, only_announcements: bool | None = None
 ) -> list:
@@ -66,25 +67,13 @@ def get_discussion_topics(
     return canvas_response(path, params=params)
 
 
+@lru_cache
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
     path = f"/courses/{course_id}/discussion_topics/{topic_id}/view"
     return canvas_response(path)
 
 
-def get_assignments(course_id: str, only_show_upcoming: bool | None = None) -> list:
-    path = f"/courses/{course_id}/assignments"
-
-    params = [
-        ("order_by", "due_at"),
-        ("include[]", "submission"),
-    ]
-
-    if only_show_upcoming:
-        params.append(("bucket", "upcoming"))
-
-    return canvas_response(path, params=params)
-
-
+@lru_cache
 def get_assignment_groups(course_id: str) -> list:
     path = f"/courses/{course_id}/assignment_groups"
 
@@ -97,9 +86,36 @@ def get_assignment_groups(course_id: str) -> list:
     return canvas_response(path, params=params)
 
 
+@lru_cache
+def get_all_assignments_from_all_courses():
+    courses = get_courses()
+
+    assignments = []
+
+    for course in courses:
+        course_name: str = course["name"]
+        course_id = str(course["id"])
+        assignments_groups = get_assignment_groups(course_id)
+
+        for group in assignments_groups:
+            if group["assignments"] is None:
+                continue
+
+            for assignment in group["assignments"]:
+                assignment["id"] = str(assignment["id"])
+                assignment["name"] = assignment["name"].strip()
+                assignment["course_name"] = course_name.strip()
+
+                assignments.append(assignment)
+
+    return assignments
+
+
+@lru_cache
 def get_conversations() -> list[dict]:
     return canvas_response("/conversations")
 
 
+@lru_cache
 def get_conversation_detail(conversation_id: str) -> dict:
     return canvas_response(f"/conversations/{conversation_id}")
