@@ -47,4 +47,4 @@ def check_letter_grade_change():
 
     save_store(store_path, store)
 
-    logger.success("Letter grade check completed")
+    logger.success("USTHing letter grade check completed")

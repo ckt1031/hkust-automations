@@ -5,7 +5,6 @@ from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
 
-
 # Example of the store:
 # {
 #     "course_id": {
@@ -31,9 +30,9 @@ def check_grade_changes():
         assignment["id"] = str(assignment["id"])
 
         if (
-                assignment["submission"] is None
-                or "grade" not in assignment["submission"]
-                or assignment["submission"]["grade"] is None
+            assignment["submission"] is None
+            or "grade" not in assignment["submission"]
+            or assignment["submission"]["grade"] is None
         ):
             logger.debug(
                 f"No grade for assignment {assignment['id']} in course {course_id}"
@@ -83,3 +82,5 @@ def check_grade_changes():
         store[course_id][assignment["id"]] = assignment["submission"]["grade"]
 
     save_store(store_path, store)
+
+    logger.success("Canvas Grade changes have been checked")

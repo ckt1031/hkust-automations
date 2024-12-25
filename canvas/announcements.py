@@ -83,7 +83,7 @@ def check_canvas_announcements():
                 continue
 
             if str(topic["id"]) in store:
-                logger.info(f"Announcement {topic['id']} has been recorded, skipping")
+                logger.debug(f"Announcement {topic['id']} has been recorded, skipping")
                 continue
 
             handle_single_announcement(course, topic)
@@ -92,4 +92,4 @@ def check_canvas_announcements():
 
     save_store_with_datetime(store_path, store)
 
-    logger.success("All Canvas announcements have been checked")
+    logger.success("Canvas announcements have been checked")

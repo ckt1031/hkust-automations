@@ -32,7 +32,7 @@ def check_canvas_inbox():
 
         # Check if the conversation has been longer than 72 hours
         if last_message_at < (datetime.now(timezone.utc) - timedelta(hours=72)):
-            logger.info(
+            logger.debug(
                 f"Conversation {conversation['id']} has been longer than 72 hours, skipping"
             )
             continue
@@ -68,4 +68,4 @@ def check_canvas_inbox():
 
         save_store_with_datetime(store_path, store)
 
-        logger.success("Inbox checked successfully")
+        logger.success("Canvas Inbox checked successfully")

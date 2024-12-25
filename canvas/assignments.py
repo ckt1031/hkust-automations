@@ -40,7 +40,7 @@ def check_canvas_assignments():
 
         # Ignore if assignment has submissions
         if assignment["has_submitted_submissions"]:
-            logger.info(f"Assignment {assignment['id']} has submissions, skipping")
+            logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
             continue
 
         # PHYS1112
@@ -76,7 +76,10 @@ def check_canvas_assignments():
                 }
             ]
 
-        if assignment["description"] is not None:
+        if (
+            assignment["description"] is not None
+            and len(assignment["description"].strip()) > 0
+        ):
             assignment["description"] = html2text(assignment["description"])
             user_prompt = f"Name: {assignment['name']}\nCourse: {assignment['course_name']}\nDescription: {assignment['description']}"
 
@@ -96,4 +99,4 @@ def check_canvas_assignments():
 
     save_store_with_datetime(store_path, store)
 
-    logger.success("All assignments have been checked")
+    logger.success("Canvas assignments have been checked")

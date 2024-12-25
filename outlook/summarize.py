@@ -83,4 +83,4 @@ def email_summarize():
     # Save the email store
     save_store_with_datetime(store_path, store)
 
-    logger.success(f"{len(checking_emails)} emails are checked")
+    logger.success(f"{len(checking_emails)} Outlook emails are checked")

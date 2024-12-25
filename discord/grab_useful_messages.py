@@ -149,3 +149,5 @@ def get_useful_messages():
             )
 
             time.sleep(5)
+
+    logger.success("Discord channels have been checked and summarized")
