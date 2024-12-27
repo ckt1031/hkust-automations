@@ -6,10 +6,10 @@ from loguru import logger
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
-from lib.openai_api import generate_chat_completion
+from lib.openai_api import generate_schema
 from outlook.extractor import EmailExtractor
 from outlook.store import prune_email_store
-from prompts.email_summarize import email_summary_prompt
+from prompts.email_summarize import EmailSummarySchema, email_summary_prompt
 
 
 def email_summarize():
@@ -54,22 +54,24 @@ def email_summarize():
         return
 
     # Call the LLM model to summarize the emails
-    llm_response = generate_chat_completion(email_summary_prompt, email_user_prompt)
+    llm_response = generate_schema(
+        email_summary_prompt, email_user_prompt, EmailSummarySchema
+    )
 
-    if llm_response.strip().lower() != "no":
+    if llm_response.available:
         headers_to_split_on = [
-            ("#", "Header 1"),
             ("##", "Header 2"),
             ("###", "Header 3"),
         ]
         markdown_splitter = MarkdownHeaderTextSplitter(
-            headers_to_split_on=headers_to_split_on, strip_headers=False
+            strip_headers=False,
+            headers_to_split_on=headers_to_split_on,
         )
-        result = markdown_splitter.split_text(llm_response)
+        result = markdown_splitter.split_text(llm_response.summary)
 
         for split in result:
             send_discord_webhook(
-                webhook_url, split.page_content, username="HKUST Email"
+                webhook_url, message=split.page_content, username="HKUST Email"
             )
 
         logger.success("Email summary sent to Discord")
@@ -77,7 +79,6 @@ def email_summarize():
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in checking_emails:
         current_time = datetime.now(tz=timezone.utc)
-
         store[email["id"]] = current_time
 
     # Save the email store
