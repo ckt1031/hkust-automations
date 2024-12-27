@@ -1,4 +1,5 @@
 import base64
+from functools import lru_cache
 
 import requests
 
@@ -51,6 +52,21 @@ def get_discord_headers(ref: str):
     return headers
 
 
+@lru_cache
+def get_guild_info(server_id: str) -> dict:
+    headers = get_discord_headers(f"https://discord.com/channels/{server_id}")
+
+    url = f"{DISCORD_API_BASE_URL}/guilds/{server_id}"
+
+    response = requests.get(url, headers=headers, timeout=15)
+
+    if response.status_code != 200:
+        raise Exception(f"Failed to get guild info: {response.text}")
+
+    return response.json()
+
+
+@lru_cache
 def get_channel_info(server_id: str, channel_id: str) -> dict:
     headers = get_discord_headers(
         f"https://discord.com/channels/{server_id}/{channel_id}"

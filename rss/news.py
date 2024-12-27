@@ -44,7 +44,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
             logger.info(f"Article is too old: {article['date']}, skip")
             return RSSItemStatus.SKIP
 
-        user_prompt = f"Date: {article["date"]}\nTitle: {article["title"]}\nLink: {link}\nContent: {article['raw_text']}"
+        user_prompt = f"Date: {article["date"]}\nTitle: {article["title"]}\nContent: {article['raw_text']}"
 
         llm_response = generate_chat_completion(summary_prompt, user_prompt)
 

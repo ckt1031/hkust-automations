@@ -4,12 +4,12 @@ from datetime import datetime, timezone
 
 from loguru import logger
 
-from discord.api import get_channel_info, get_channel_messages
+from discord.api import get_channel_info, get_channel_messages, get_guild_info
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
-from lib.openai_api import generate_chat_completion
-from prompts.discord_useful_summary import discord_summary_prompts
+from lib.openai_api import generate_schema
+from prompts.discord_useful_summary import DiscordSummarySchema, discord_summary_prompts
 
 server_channel_list = {
     # HKUST FYS Discord Server
@@ -57,7 +57,9 @@ def handle_channel(channel: dict, messages: list) -> bool:
         if len(message["embeds"]) > 0:
             for embed in message["embeds"]:
                 if embed["type"] == "video":
-                    _draft += f"\nVideo: {embed['title']} - ({embed['description']})"
+                    _draft += (
+                        f"\nVideo: {embed['title']} - ({embed.get('description', '')})"
+                    )
                 elif embed["type"] == "link" or embed["type"] == "rich":
                     _draft = "\nLink: "
 
@@ -69,16 +71,24 @@ def handle_channel(channel: dict, messages: list) -> bool:
 
         user_prompts += _draft + "\n\n"
 
-    response = generate_chat_completion(discord_summary_prompts, user_prompts)
+    response = generate_schema(
+        discord_summary_prompts, user_prompts, DiscordSummarySchema
+    )
 
-    if response.strip().lower() == "no":
-        logger.info("No valuable message to summarize and construct points.")
+    if not response.available or len(response.summary) == 0:
+        logger.info(
+            f"No valuable message to summarize and construct points for {channel['name']} in {channel['guild']["name"]}"
+        )
         return False
 
     embed = {
         "title": f"Summary of {channel['name']}",
-        "description": f"{response.rstrip()}\n\n<#{channel['id']}>",
-        "timestamp": datetime.now(tz=timezone.utc).astimezone().isoformat(),
+        "description": response.summary.rstrip(),
+        "url": f"https://discord.com/channels/{channel['guild_id']}/{channel['id']}",
+        "footer": {
+            # Guild name
+            "text": channel["guild"]["name"],
+        },
     }
 
     send_discord_webhook(webhook_url, embed=embed)
@@ -98,10 +108,15 @@ def get_useful_messages():
     store = get_store_with_datetime(store_path)
 
     for server_id, channel_ids in server_channel_list.items():
+        guild = get_guild_info(server_id)
         for channel_id in channel_ids:
             channel_info = get_channel_info(server_id, channel_id)
 
-            logger.info(f"Getting messages from {channel_info['name']}")
+            channel_info["guild"] = guild
+
+            logger.info(
+                f"GET messages from \"{channel_info['name']}\" in \"{guild['name']}\""
+            )
 
             messages = get_channel_messages(
                 server_id,
