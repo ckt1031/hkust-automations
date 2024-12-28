@@ -26,24 +26,28 @@ def check_letter_grade_change():
         return
 
     for grade_data in grades:
-        crseGrade: str = grade_data["crseGrade"]
-        grade_letter = crseGrade.strip()
-        key = grade_data["crseTakenTerm"] + "-" + grade_data["crseCode"]
+        courseGrade: str = grade_data["crseGrade"]
+        courseCode: str = grade_data["crseCode"]
+        grade_letter = courseGrade.strip()
+        key = grade_data["crseTakenTerm"] + "-" + courseCode
 
         if grade_letter == "":
-            logger.warning(f"No grade for {grade_data['crseCode']}, skipping")
+            logger.warning(f"{courseCode} has no grade, skipping")
             continue
 
-        if store.get(key) is None or store[key] != grade_letter:
-            logger.success(
-                f"Grade for {grade_data['crseCode']} has set to {grade_letter}"
-            )
-            store[key] = grade_letter
+        if store.get(key) is not None and store[key] == grade_letter:
+            logger.info(f"Grade for {courseCode} ({grade_letter}) is recorded, skipping")
+            continue
 
-            send_discord_webhook(
-                webhook_url,
-                message=f"Grade for **{grade_data['crseCode']}** has set to `{grade_letter}`",
-            )
+        logger.success(
+            f"Grade for {courseCode} has set to {grade_letter}"
+        )
+        store[key] = grade_letter
+
+        send_discord_webhook(
+            webhook_url,
+            message=f"Grade for **{courseCode}** has set to `{grade_letter}`",
+        )
 
     save_store(store_path, store)
 
