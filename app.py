@@ -22,7 +22,6 @@ function_dict = {
         check_canvas_assignments(),
         check_canvas_announcements(),
         check_grade_changes(),
-        check_letter_grade_change(),
     ],
     "email_summarize": email_summarize,
     "check_canvas_assignments": check_canvas_assignments,

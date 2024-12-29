@@ -21,9 +21,10 @@ jobs:
 
       - name: Run Script
         run: |
-            export LOGURU_LEVEL="INFO"
-            python app.py check_rss_news
-            python app.py get_useful_discord_messages
+          export LOGURU_LEVEL="INFO"
+          python app.py check_rss_news
+          python app.py get_useful_discord_messages
+          python app.py check_letter_grade_change
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
