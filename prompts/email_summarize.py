@@ -12,7 +12,7 @@ Analyze and summarize emails from the university, focusing on important informat
 
 # Instructions
 
-- Use markdown format for the summary, simple, concise, clear, straight to the point
+- The summary must be in string markdown format, simple, concise, clear, straight to the point, no extra comments
 - Prioritize based on importance and urgency
 - Use the second person "you" when addressing the student in summaries
 - Bold important words, dates, times, and locations using asterisks
