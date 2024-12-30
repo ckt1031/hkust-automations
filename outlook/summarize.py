@@ -42,7 +42,7 @@ def email_summarize():
         checked = email["id"] in store
 
         if checked:
-            logger.debug(f"Email {email['id']} was checked, skipping")
+            logger.debug(f"Email {email['id']} ({email['subject']}) was checked, skipping")
             continue
 
         email_user_prompt += f"Subject: {email['subject']}\nFrom: {email['from']}\nBody:\n\n{email['body']}\n\n---\n\n"
