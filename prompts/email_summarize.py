@@ -1,4 +1,4 @@
-from openai import BaseModel
+from pydantic import BaseModel
 
 
 class EmailSummarySchema(BaseModel):
@@ -12,7 +12,6 @@ Analyze and summarize emails from the university, focusing on important informat
 
 # Instructions
 
-- Generate valid JSON body with boolean "available" (true or false) and string "summary" (markdown text) fields, no codeblocks
 - Use markdown format for the summary, simple, concise, clear, straight to the point
 - Prioritize based on importance and urgency
 - Use the second person "you" when addressing the student in summaries

@@ -1,4 +1,4 @@
-from openai import BaseModel
+from pydantic import BaseModel
 
 
 class DiscordSummarySchema(BaseModel):
@@ -12,7 +12,6 @@ You will be given a list of messages from a channel and help people grab useful 
 
 # Instructions
 
-- Generate valid JSON body with boolean "available" and string "summary" fields, no codeblocks
 - Bullet points with bolded short title in markdown in summary, straight to the point
 - Include the most important information.
 - Include date and time of specific dated information
