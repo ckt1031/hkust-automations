@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from loguru import logger
 from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from lib.env import getenv
 
@@ -14,6 +15,7 @@ client = OpenAI(
 model = getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(10))
 def generate_schema(system_message: str, user_message: str, schema):
     completion = client.beta.chat.completions.parse(
         model=model,
@@ -38,6 +40,7 @@ def generate_schema(system_message: str, user_message: str, schema):
     return res.parsed
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(10))
 def generate_chat_completion(system_message: str, user_message: str) -> str:
     chat_completion = client.chat.completions.create(
         messages=[

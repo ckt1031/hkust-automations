@@ -3,6 +3,7 @@ from datetime import datetime
 
 import requests
 from loguru import logger
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from lib.env import getenv
 from lib.microsoft_tokens import get_private_graph_token
@@ -36,6 +37,7 @@ def is_recorded(data: list[dict[str, datetime]], item_id: str):
     return False
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(15))
 def get_store(path: str):
     default = {}
 
@@ -57,6 +59,7 @@ def get_store(path: str):
     return data
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(15))
 def save_store(path: str, d: dict | list):
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 

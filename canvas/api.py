@@ -4,12 +4,14 @@ from urllib.parse import urlparse
 import requests
 from dotenv import load_dotenv
 from loguru import logger
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from lib.env import getenv
 
 load_dotenv()
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def canvas_response(path: str, params=None) -> dict | list:
     if params is None:
         params = []
