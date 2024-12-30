@@ -24,7 +24,7 @@ Analyze and summarize emails from the university, focusing on important informat
 - For the Information section, group all items under one subheading and use a numbered list for brief summaries of each item
     If there is only one item, do not use a list, just a brief summary
 - Keep summary concise but include all crucial information
-- All links must have text in square brackets followed by the URL in parentheses, example: [text](url)
+- For important links, use markdown links, never use URL as the link text alone, use the title of the link [text](url)
 - Ignore subscription info like "You can subscribe to ..." or "You are receiving/subscribed to this email because..."
 - Ignore unclear or irrelevant emails
 - Mark available as false, mark string fields as empty if there are no valuable emails to summarize
