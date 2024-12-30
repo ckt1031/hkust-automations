@@ -36,12 +36,12 @@ def check_letter_grade_change():
             continue
 
         if store.get(key) is not None and store[key] == grade_letter:
-            logger.info(f"Grade for {courseCode} ({grade_letter}) is recorded, skipping")
+            logger.info(
+                f"Grade for {courseCode} ({grade_letter}) is recorded, skipping"
+            )
             continue
 
-        logger.success(
-            f"Grade for {courseCode} has set to {grade_letter}"
-        )
+        logger.success(f"Grade for {courseCode} has set to {grade_letter}")
         store[key] = grade_letter
 
         send_discord_webhook(
