@@ -38,8 +38,20 @@ class EmailExtractor:
         self.session = requests.Session()
         self.session.headers.update(headers)
 
+    def get_inbox_folder_id(self):
+        url = "https://graph.microsoft.com/v1.0/me/mailFolders/inbox"
+
+        response = self.session.get(url)
+
+        if response.status_code != 200:
+            raise Exception("Error fetching inbox folders")
+
+        return response.json()["id"]
+
     def fetch_emails(self):
-        url = "https://graph.microsoft.com/v1.0/me/messages?$select=sender,subject,body,receivedDateTime"
+        inbox_id = self.get_inbox_folder_id()
+
+        url = f"https://graph.microsoft.com/v1.0/me/mailFolders/{inbox_id}/messages?$select=sender,subject,body,receivedDateTime"
 
         response = self.session.get(url)
 
@@ -63,7 +75,6 @@ class EmailExtractor:
             txt = html2text.HTML2Text()
             txt.ignore_emphasis = True
             txt.ignore_images = True
-            # txt.ignore_tables = True
 
             body = txt.handle(email["body"]["content"])
             body = remove_css_and_scripts(body)
