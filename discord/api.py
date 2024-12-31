@@ -1,5 +1,5 @@
 import base64
-from functools import lru_cache
+from functools import cache
 
 import requests
 
@@ -52,7 +52,7 @@ def get_discord_headers(ref: str):
     return headers
 
 
-@lru_cache
+@cache
 def get_guild_info(server_id: str) -> dict:
     headers = get_discord_headers(f"https://discord.com/channels/{server_id}")
 
@@ -66,7 +66,7 @@ def get_guild_info(server_id: str) -> dict:
     return response.json()
 
 
-@lru_cache
+@cache
 def get_channel_info(server_id: str, channel_id: str) -> dict:
     headers = get_discord_headers(
         f"https://discord.com/channels/{server_id}/{channel_id}"

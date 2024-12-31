@@ -1,12 +1,12 @@
 import os
-from functools import lru_cache
+from functools import cache
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-@lru_cache
+@cache
 def getenv(name: str, default=None) -> str | None:
     try:
         return os.getenv(name, default)

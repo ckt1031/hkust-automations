@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cache
 
 import requests
 
@@ -19,7 +19,7 @@ def get_username():
     return me_info["mail"].split("@")[0]
 
 
-@lru_cache
+@cache
 def get_course_grades():
     username = get_username()
     token = get_usthing_private_graph_token()
@@ -30,7 +30,7 @@ def get_course_grades():
     return res.json()
 
 
-@lru_cache
+@cache
 def get_class_enrollments():
     username = get_username()
     token = get_usthing_private_graph_token()

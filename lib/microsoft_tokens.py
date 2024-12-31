@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cache
 
 import requests
 from loguru import logger
@@ -8,7 +8,7 @@ from lib.env import getenv
 TMP_FOLDER = "./tmp"
 
 
-@lru_cache
+@cache
 def get_me_info(token: str):
     url = "https://graph.microsoft.com/v1.0/me"
 
@@ -25,7 +25,7 @@ def get_me_info(token: str):
     return response.json()
 
 
-@lru_cache
+@cache
 def get_private_graph_token():
     client_id = getenv("MICROSOFT_CLIENT_ID")
     client_secret = getenv("MICROSOFT_CLIENT_SECRET")
@@ -55,7 +55,7 @@ def get_private_graph_token():
     return data["access_token"]
 
 
-@lru_cache
+@cache
 def get_usthing_private_graph_token():
     talentID = "c917f3e2-9322-4926-9bb3-daca730413ca"
     clientID = "b4bc4b9a-7162-44c5-bb50-fe935dce1f5a"
