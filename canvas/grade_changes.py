@@ -30,7 +30,7 @@ def check_grade_changes():
         assignment["id"] = str(assignment["id"])
 
         if (
-            assignment["submission"] is None
+            assignment.get("submission") is None
             or "grade" not in assignment["submission"]
             or assignment["submission"]["grade"] is None
         ):

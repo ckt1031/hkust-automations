@@ -29,9 +29,9 @@ def check_canvas_assignments():
     store = get_store_with_datetime(store_path)
 
     for assignment in assignments:
-        if not assignment["graded_submissions_exist"]:
-            logger.debug(f"Assignment {assignment['id']} has no graded submissions")
-            continue
+        # if not assignment["graded_submissions_exist"]:
+        #     logger.debug(f"Assignment {assignment['id']} has no graded submissions")
+        #     continue
 
         # Check if the assignment has already been recorded
         if str(assignment["id"]) in store:
