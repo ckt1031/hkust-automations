@@ -22,6 +22,8 @@ You will be given a list of messages from a channel and help people grab useful 
 - Ignore advertisements, promotions, and spam
 - Ignore vague and irrelevant information
 - Ignore celebrations and jokes
+- Ignore admiration and appreciation
+- Ignore all greetings and goodbyes between persons
 - Ignore all irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slang's
 - For important embeds, video and links, use markdown links, never use URL as the link text alone, use the title of the link [text](url)
     Include related details, like title, description if available
