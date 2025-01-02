@@ -43,6 +43,10 @@ def check_canvas_assignments():
             logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
             continue
 
+        if assignment["locked_for_user"]:
+            logger.warning(f"Assignment {assignment['id']} is locked, skipping")
+            continue
+
         # PHYS1112
         if (
             "not graded" in assignment["name"].lower()
