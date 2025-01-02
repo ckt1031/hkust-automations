@@ -39,9 +39,9 @@ def check_canvas_assignments():
             continue
 
         # Ignore if assignment has submissions
-        if assignment["has_submitted_submissions"]:
-            logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
-            continue
+        # if assignment["has_submitted_submissions"]:
+        #     logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
+        #     continue
 
         if assignment["locked_for_user"]:
             logger.warning(f"Assignment {assignment['id']} is locked, skipping")
