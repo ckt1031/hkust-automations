@@ -34,25 +34,26 @@ function_dict = {
     "exit": lambda: sys.exit(0),
 }
 
-if len(sys.argv) > 1:
-    short_code = sys.argv[1]
-    if short_code in function_dict:
-        function_dict[short_code]()
-    else:
-        raise ValueError("Invalid short code")
-    sys.exit(0)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        short_code = sys.argv[1]
+        if short_code in function_dict:
+            function_dict[short_code]()
+        else:
+            raise ValueError("Invalid short code")
+        sys.exit(0)
 
-for i, (name, func) in enumerate(function_dict.items(), 1):
-    print(f"[{i}] {name.replace('_', ' ').title()}")
+    for i, (name, func) in enumerate(function_dict.items(), 1):
+        print(f"[{i}] {name.replace('_', ' ').title()}")
 
-choice = input("\nEnter the number of the function you want to run: ")
+    choice = input("\nEnter the number of the function you want to run: ")
 
-if not choice.isdigit():
-    raise ValueError(f"Invalid choice: {choice}")
+    if not choice.isdigit():
+        raise ValueError(f"Invalid choice: {choice}")
 
-choice_index = int(choice) - 1
+    choice_index = int(choice) - 1
 
-if choice_index >= len(function_dict) or choice_index < 0:
-    raise ValueError(f"Invalid choice: {choice}")
+    if choice_index >= len(function_dict) or choice_index < 0:
+        raise ValueError(f"Invalid choice: {choice}")
 
-list(function_dict.values())[choice_index]()
+    list(function_dict.values())[choice_index]()
