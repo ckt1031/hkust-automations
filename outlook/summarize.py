@@ -62,6 +62,7 @@ def email_summarize():
 
     if llm_response.available:
         if llm_response.summary.startswith("{"):
+            print(llm_response.summary)
             raise ValueError("Response is not a string")
 
         headers_to_split_on = [

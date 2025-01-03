@@ -24,6 +24,7 @@ def generate_schema(system_message: str, user_message: str, schema):
             {"role": "user", "content": user_message.strip()},
         ],
         response_format=schema,
+        temperature=0.3,
     )
 
     res = completion.choices[0].message
@@ -49,6 +50,7 @@ def generate_chat_completion(system_message: str, user_message: str) -> str:
         ],
         stream=False,
         model=model,
+        temperature=0.3,
     )
 
     content = chat_completion.choices[0].message.content
