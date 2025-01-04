@@ -93,7 +93,7 @@ def check_discussions():
 
         # Run summarize, maximum 10 for each run
         for i in range(0, len(pending_summarize_comments), 10):
-            chunk = pending_summarize_comments[i : i + 10]
+            chunk = pending_summarize_comments[i: i + 10]
 
             logger.info(f"Summarizing {len(chunk)} discussions")
 
@@ -108,25 +108,25 @@ def check_discussions():
 
             if res is None:
                 logger.error(
-                    f"Error generating schema for {course['id']} ({len(chunk)} discussions) in chunk {i}"
+                    f"Error generating schema for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}"
                 )
                 continue
 
             logger.info(
-                f"Generated schema for {course['id']} ({len(chunk)} discussions) in chunk {i}"
+                f"Generated schema for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}"
             )
 
             ids_to_be_stored = res.accepted_ids + res.rejected_ids
 
             if len(ids_to_be_stored) == 0:
-                logger.warning("No discussions to store")
+                logger.info(f"No discussions to store for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}")
                 continue
 
             for discussion in ids_to_be_stored:
                 store[str(discussion)] = datetime.now(timezone.utc)
 
             if not res.has_summary:
-                logger.warning("No summary provided")
+                logger.warning(f"No summary provided for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}")
                 continue
 
             # Get course code from the course name, remove brackets and its content
