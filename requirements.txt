@@ -11,3 +11,4 @@ python-dateutil~=2.9.0.post0
 langchain-text-splitters~=0.3.4
 pydantic~=2.10.3
 tenacity~=9.0.0
+chevron~=0.14.0

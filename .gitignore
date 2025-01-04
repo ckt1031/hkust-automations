@@ -8,3 +8,6 @@ unexpected_sender.txt
 access_token.json
 .idea
 tmp
+dist
+build
+app.spec

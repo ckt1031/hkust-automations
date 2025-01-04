@@ -70,6 +70,12 @@ def get_discussion_topics(
 
 
 @cache
+def get_discussion_topic_data(course_id: str, topic_id: str) -> dict:
+    path = f"/courses/{course_id}/discussion_topics/{topic_id}"
+    return canvas_response(path)
+
+
+@cache
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
     path = f"/courses/{course_id}/discussion_topics/{topic_id}/view"
     return canvas_response(path)
