@@ -93,7 +93,7 @@ def check_discussions():
 
         # Run summarize, maximum 10 for each run
         for i in range(0, len(pending_summarize_comments), 10):
-            chunk = pending_summarize_comments[i: i + 10]
+            chunk = pending_summarize_comments[i : i + 10]
 
             logger.info(f"Summarizing {len(chunk)} discussions")
 
@@ -119,14 +119,18 @@ def check_discussions():
             ids_to_be_stored = res.accepted_ids + res.rejected_ids
 
             if len(ids_to_be_stored) == 0:
-                logger.info(f"No discussions to store for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}")
+                logger.info(
+                    f"No discussions to store for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}"
+                )
                 continue
 
             for discussion in ids_to_be_stored:
                 store[str(discussion)] = datetime.now(timezone.utc)
 
             if not res.has_summary:
-                logger.warning(f"No summary provided for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}")
+                logger.warning(
+                    f"No summary provided for {course['id']} ({len(chunk)} discussions) in chunk {i / 10}"
+                )
                 continue
 
             # Get course code from the course name, remove brackets and its content

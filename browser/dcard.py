@@ -25,8 +25,10 @@ def get_network_logs(driver: Chrome, url_filler: str):
 
     # Filter the log entries, starting with {dcard_paging_url}
     logs = [
-        entry for entry in logs
-        if entry["method"] == "Network.requestWillBeSent" and url_filler in entry["params"]["request"]["url"]
+        entry
+        for entry in logs
+        if entry["method"] == "Network.requestWillBeSent"
+        and url_filler in entry["params"]["request"]["url"]
     ]
 
     results = []
@@ -41,10 +43,7 @@ def get_network_logs(driver: Chrome, url_filler: str):
 
         body = json.loads(data["body"])
 
-        results.append({
-            "requestId": requestId,
-            "body": body
-        })
+        results.append({"requestId": requestId, "body": body})
 
     return results
 
@@ -87,7 +86,9 @@ def scrape_dcard():
         for log in paging_logs:
             body = log["body"]
             if "widgets" not in body:
-                logger.error(f"Request ID: {log['requestId']} does not contain any widgets")
+                logger.error(
+                    f"Request ID: {log['requestId']} does not contain any widgets"
+                )
                 continue
 
             # Process the entry
@@ -157,10 +158,10 @@ def scrape_dcard():
                 page_source = n.get_attribute("outerHTML")
 
                 post_list_item = {
-                    "id": post['id'],
-                    "title": post['title'],
+                    "id": post["id"],
+                    "title": post["title"],
                     "content": h.handle(page_source).strip(),
-                    "comments": []
+                    "comments": [],
                 }
 
             # Scroll to the bottom
@@ -168,7 +169,9 @@ def scrape_dcard():
 
             sleep(1)
 
-            dcard_comments_url = f"https://www.dcard.tw/service/api/v2/posts/{post['id']}/comments"
+            dcard_comments_url = (
+                f"https://www.dcard.tw/service/api/v2/posts/{post['id']}/comments"
+            )
 
             # Get the comments
             logs = get_network_logs(driver, dcard_comments_url)
@@ -178,7 +181,9 @@ def scrape_dcard():
 
                 for comment in comments:
                     if "content" not in comment:
-                        logger.error(f"Comment does not contain content (Req ID: {log['requestId']})")
+                        logger.error(
+                            f"Comment does not contain content (Req ID: {log['requestId']})"
+                        )
                         continue
 
                     post_list_item["comments"].append(
