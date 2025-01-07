@@ -2,6 +2,7 @@ import sys
 
 from loguru import logger
 
+from browser.reddit import check_reddit
 from canvas.announcements import check_canvas_announcements
 from canvas.assignments import check_canvas_assignments
 from canvas.discussions import check_discussions
@@ -33,6 +34,7 @@ function_dict = {
     "get_useful_discord_messages": get_useful_messages,
     "check_rss_news": check_rss_news,
     "check_letter_grade_change": check_letter_grade_change,
+    "check_reddit": check_reddit,
     "exit": lambda: sys.exit(0),
 }
 

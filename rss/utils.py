@@ -5,8 +5,8 @@ import trafilatura
 
 
 def parse_rss_feed(feed: str):
-    rss_feed = feedparser.parse(feed)
-    return rss_feed.entries
+    feedparser.USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    return feedparser.parse(feed, request_headers={"Connection": "keep-alive"})
 
 
 def extract_website(link: str):

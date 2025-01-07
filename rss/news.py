@@ -80,7 +80,7 @@ def check_rss_news():
         logger.info(f"Checking RSS: {rss}")
         data = parse_rss_feed(rss)
 
-        for item in data:
+        for item in data.entries:
             key = sha2_256(item["id"])
 
             if key in store:
