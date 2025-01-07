@@ -52,7 +52,15 @@ def handle_channel(channel: dict, messages: list) -> bool:
     user_prompts = ""
 
     for message in messages:
-        _draft = f"User: {message['author']['username']}\nContent: {message['content']}"
+        username = f"User: {message['author']['global_name']}"
+
+        if (
+            message["author"]["global_name"].lower()
+            != message["author"]["username"].lower()
+        ):
+            username += f" ({message['author']['username']})"
+
+        _draft = f"{username}\nContent: {message['content']}"
 
         if len(message["embeds"]) > 0:
             for embed in message["embeds"]:

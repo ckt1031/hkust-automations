@@ -29,6 +29,7 @@ You will be given a list of messages from a channel and help people grab useful 
 
 These messages are regarded as irrelevant. Make sure do not include these in the summary:
 
+- Some statement to users
 - Private, personal, sensitive information
 - Advertisements, promotions, and spam
 - Vague and irrelevant information

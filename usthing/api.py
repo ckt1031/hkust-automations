@@ -27,6 +27,7 @@ def get_course_grades():
     res = requests.get(
         url, headers={"Authorization": f"Bearer {token}", **HEADERS}, timeout=10
     )
+    res.raise_for_status()
     return res.json()
 
 
@@ -38,4 +39,5 @@ def get_class_enrollments():
     res = requests.get(
         url, headers={"Authorization": f"Bearer {token}", **HEADERS}, timeout=10
     )
+    res.raise_for_status()
     return res.json()
