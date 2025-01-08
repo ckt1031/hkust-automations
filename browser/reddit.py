@@ -169,4 +169,7 @@ def check_reddit():
 
         logger.success(f"Analyzed Reddit - {i + 1} to {i + 5}")
 
-    driver.quit()
+    try:
+        driver.quit()
+    except Exception as e:
+        logger.error(f"Failed to quit driver: {e}")

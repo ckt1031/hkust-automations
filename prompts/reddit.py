@@ -25,7 +25,7 @@ Reddit URL: https://www.reddit.com/r/HKUST/
 - The ID must be the post ID.
 - Select the most informative and important posts
 - Include the discussion ID
-- If the discussion is regarded as informative, but has not enough useful informative comments, mark it as pending reply.
+- If the discussion is regarded as informative, **but has not enough useful informative comments**, mark it as pending reply.
 - If the discussion is not informative, mark it as rejected.
 - If there are no any informative and accepted posts, mark has_summary as false and leave the summary empty.
 
