@@ -6,6 +6,7 @@ from browser.reddit import check_reddit
 from canvas.announcements import check_canvas_announcements
 from canvas.assignments import check_canvas_assignments
 from canvas.discussions import check_discussions
+from canvas.download_canvas_modules import download_canvas_modules
 from canvas.grade_changes import check_grade_changes
 from canvas.inbox import check_canvas_inbox
 from discord.grab_useful_messages import get_useful_messages
@@ -35,6 +36,7 @@ function_dict = {
     "check_rss_news": check_rss_news,
     "check_letter_grade_change": check_letter_grade_change,
     "check_reddit": check_reddit,
+    "download_canvas_modules": download_canvas_modules,
     "exit": lambda: sys.exit(0),
 }
 

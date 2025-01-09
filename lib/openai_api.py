@@ -7,7 +7,7 @@ from lib.env import getenv
 
 load_dotenv()
 
-client = OpenAI(
+openai_client = OpenAI(
     api_key=getenv("OPENAI_API_KEY"),
     base_url=getenv("OPENAI_API_BASE_URL", "https://api.openai.com/v1"),
 )
@@ -17,7 +17,7 @@ model = getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(10))
 def generate_schema(system_message: str, user_message: str, schema):
-    completion = client.beta.chat.completions.parse(
+    completion = openai_client.beta.chat.completions.parse(
         model=model,
         messages=[
             {"role": "system", "content": system_message.strip()},
@@ -43,7 +43,7 @@ def generate_schema(system_message: str, user_message: str, schema):
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(10))
 def generate_chat_completion(system_message: str, user_message: str) -> str:
-    chat_completion = client.chat.completions.create(
+    chat_completion = openai_client.chat.completions.create(
         messages=[
             {"role": "system", "content": system_message.strip()},
             {"role": "user", "content": user_message.strip()},

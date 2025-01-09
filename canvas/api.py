@@ -4,14 +4,12 @@ from urllib.parse import urlparse
 import requests
 from dotenv import load_dotenv
 from loguru import logger
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 from lib.env import getenv
 
 load_dotenv()
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def canvas_response(path: str, params=None) -> dict | list:
     if params is None:
         params = []
@@ -127,3 +125,15 @@ def get_conversations() -> list[dict]:
 @cache
 def get_conversation_detail(conversation_id: str) -> dict:
     return canvas_response(f"/conversations/{conversation_id}")
+
+
+def get_modules(course_id: str):
+    return canvas_response(f"/courses/{course_id}/modules")
+
+
+def get_module_items(course_id: str, module_id: str):
+    return canvas_response(f"/courses/{course_id}/modules/{module_id}/items")
+
+
+def get_single_module_item(course_id: str, page_url: str):
+    return canvas_response(f"/courses/{course_id}/pages/{page_url}")
