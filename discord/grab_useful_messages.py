@@ -54,10 +54,14 @@ def handle_channel(channel: dict, messages: list) -> bool:
     for message in messages:
         username = f"User: {message['author']['global_name']}"
 
-        if (
-            message["author"]["global_name"].lower()
-            != message["author"]["username"].lower()
-        ):
+        has_equal_global_name = (
+            (message["author"]["global_name"].lower()
+             != message["author"]["username"].lower())
+            if "global_name" in message["author"] and message["author"]["global_name"] is not None
+            else False
+        )
+
+        if has_equal_global_name:
             username += f" ({message['author']['username']})"
 
         _draft = f"{username}\nContent: {message['content']}"
