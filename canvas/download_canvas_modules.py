@@ -8,6 +8,7 @@ from slugify import slugify
 
 from canvas.api import (
     canvas_response,
+    get_courses,
     get_module_items,
     get_modules,
     get_single_module_item,
@@ -33,7 +34,27 @@ def save_module_item(course_id, name, data):
         f.write(data)
 
 
-def download_canvas_files(course_id: str, content_id: str, llm_model: str):
+def course_selector():
+    logger.info("Fetching courses...")
+
+    courses = get_courses()
+
+    for i, course in enumerate(courses, 1):
+        print(f"[{i}] {course['name'].strip()}")
+
+    choice = input("\nEnter the number of the course you want to download: ")
+
+    if not choice.isdigit():
+        raise ValueError(f"Invalid choice: {choice}")
+
+    choice_index = int(choice) - 1
+
+    return courses[choice_index]["id"]
+
+
+def download_canvas_files(
+    course_id: str, content_id: str, llm_model: str, download_mp4: bool
+):
     res = canvas_response(f"/courses/{course_id}/files/{content_id}")
 
     if not res:
@@ -42,6 +63,10 @@ def download_canvas_files(course_id: str, content_id: str, llm_model: str):
         )
 
     path = f"./dist/{course_id}/{res['filename']}"
+
+    if not download_mp4 and res["filename"].endswith(".mp4"):
+        logger.warning(f"Skipping: {res['filename']} as it is an MP4 file")
+        return
 
     # Check if file exists
     if os.path.exists(path):
@@ -82,27 +107,33 @@ def download_canvas_files(course_id: str, content_id: str, llm_model: str):
 
         with open(md_path, "w") as f:
             f.write(result.text_content)
-            logger.success(f"Converted file: {md_path}")
+            logger.success(f"Converted file: {res["filename"]}")
 
         os.remove(path)
 
 
 def download_canvas_modules():
-    course_id = input("Enter the course ID: ")
+    course_id = course_selector()
     llm_model = input("Enter the LLM model: ")
+    download_mp4 = input("Download MP4 files? (y/n): ")
+
+    download_mp4 = download_mp4.lower() == "y" or download_mp4.lower() == "yes"
 
     modules = get_modules(course_id)
 
     init_folder(course_id)
 
     for module in modules:
-        for items in get_module_items(course_id, module["id"]):
-            if "page_url" not in items and "url" in items and "/files/" in items["url"]:
+        for items in get_module_items(course_id, module["id"], module["items_count"]):
+            if items["type"] == "File":
                 # Run in file mode
-                download_canvas_files(course_id, items["content_id"], llm_model)
+                download_canvas_files(
+                    course_id, items["content_id"], llm_model, download_mp4
+                )
                 continue
 
-            if "page_url" not in items:
+            if items["type"] != "Page":
+                logger.warning(f"Skipping: {items['title']} as it is not a Page")
                 continue
 
             data = get_single_module_item(course_id, items["page_url"])

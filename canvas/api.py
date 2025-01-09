@@ -131,8 +131,11 @@ def get_modules(course_id: str):
     return canvas_response(f"/courses/{course_id}/modules")
 
 
-def get_module_items(course_id: str, module_id: str):
-    return canvas_response(f"/courses/{course_id}/modules/{module_id}/items")
+def get_module_items(course_id: str, module_id: str, per_page: int = 100):
+    return canvas_response(
+        f"/courses/{course_id}/modules/{module_id}/items",
+        params=[("per_page", per_page)],
+    )
 
 
 def get_single_module_item(course_id: str, page_url: str):
