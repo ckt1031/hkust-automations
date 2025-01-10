@@ -55,9 +55,12 @@ def handle_channel(channel: dict, messages: list) -> bool:
         username = f"User: {message['author']['global_name']}"
 
         has_equal_global_name = (
-            (message["author"]["global_name"].lower()
-             != message["author"]["username"].lower())
-            if "global_name" in message["author"] and message["author"]["global_name"] is not None
+            (
+                message["author"]["global_name"].lower()
+                != message["author"]["username"].lower()
+            )
+            if "global_name" in message["author"]
+            and message["author"]["global_name"] is not None
             else False
         )
 

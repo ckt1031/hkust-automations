@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
 
-from langchain_text_splitters import MarkdownHeaderTextSplitter
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 from loguru import logger
 
 from discord.webhook import send_discord_webhook
@@ -74,6 +77,14 @@ def email_summarize():
             headers_to_split_on=headers_to_split_on,
         )
         result = markdown_splitter.split_text(llm_response.summary)
+
+        chunk_size = 1900
+        chunk_overlap = 100
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
+
+        result = text_splitter.split_documents(result)
 
         for split in result:
             send_discord_webhook(
