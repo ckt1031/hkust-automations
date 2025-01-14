@@ -92,6 +92,25 @@ def get_assignment_groups(course_id: str) -> list:
     return canvas_response(path, params=params)
 
 
+def get_assignments(course_name: str, course_id: str) -> list:
+    assignments_groups = get_assignment_groups(course_id)
+
+    assignments = []
+
+    for group in assignments_groups:
+        if group["assignments"] is None:
+            continue
+
+        for assignment in group["assignments"]:
+            assignment["id"] = str(assignment["id"])
+            assignment["name"] = assignment["name"].strip()
+            assignment["course_name"] = course_name.strip()
+
+            assignments.append(assignment)
+
+    return assignments
+
+
 @cache
 def get_all_assignments_from_all_courses():
     courses = get_courses()
@@ -101,18 +120,9 @@ def get_all_assignments_from_all_courses():
     for course in courses:
         course_name: str = course["name"]
         course_id = str(course["id"])
-        assignments_groups = get_assignment_groups(course_id)
 
-        for group in assignments_groups:
-            if group["assignments"] is None:
-                continue
-
-            for assignment in group["assignments"]:
-                assignment["id"] = str(assignment["id"])
-                assignment["name"] = assignment["name"].strip()
-                assignment["course_name"] = course_name.strip()
-
-                assignments.append(assignment)
+        _assignments = get_assignments(course_name, course_id)
+        assignments.extend(_assignments)
 
     return assignments
 

@@ -8,13 +8,14 @@ from slugify import slugify
 
 from canvas.api import (
     canvas_response,
+    get_assignments,
     get_courses,
     get_module_items,
     get_modules,
     get_single_module_item,
 )
 from lib.env import getenv
-from lib.openai_api import openai_client
+from lib.openai_api import model, openai_client
 
 
 def init_folder(course_id):
@@ -23,15 +24,22 @@ def init_folder(course_id):
 
 
 def save_module_item(course_id, name, data):
+    if len(data.strip()) == 0:
+        logger.warning(f"Skipping empty module: {name}")
+        return
+
     name = slugify(name)
     path = f"./dist/{course_id}/{name}.md"
 
     if os.path.exists(path):
-        logger.warning(f"File: {name} already exists")
+        logger.info(f"File: {name} already exists")
         return
 
     with open(path, "w") as f:
         f.write(data)
+        f.close()
+
+    logger.success(f"Module Text: {name}")
 
 
 def course_selector():
@@ -49,12 +57,10 @@ def course_selector():
 
     choice_index = int(choice) - 1
 
-    return courses[choice_index]["id"]
+    return courses[choice_index]["id"], courses[choice_index]["name"]
 
 
-def download_canvas_files(
-    course_id: str, content_id: str, llm_model: str, download_mp4: bool
-):
+def download_canvas_files(course_id: str, content_id: str, download_mp4: bool):
     res = canvas_response(f"/courses/{course_id}/files/{content_id}")
 
     if not res:
@@ -102,7 +108,7 @@ def download_canvas_files(
             logger.warning(f"File: {md_path} already exists")
             return
 
-        md = MarkItDown(llm_model=llm_model, llm_client=openai_client)
+        md = MarkItDown(llm_model=model, llm_client=openai_client)
         result = md.convert(path)
 
         with open(md_path, "w") as f:
@@ -112,28 +118,30 @@ def download_canvas_files(
         os.remove(path)
 
 
-def download_canvas_modules():
-    course_id = course_selector()
-    llm_model = input("Enter the LLM model: ")
+def download_canvas_content():
+    course_id, course_name = course_selector()
+
+    logger.info(f"Selected course: {course_name} ({course_id})")
+
     download_mp4 = input("Download MP4 files? (y/n): ")
 
     download_mp4 = download_mp4.lower() == "y" or download_mp4.lower() == "yes"
 
     modules = get_modules(course_id)
 
+    # Create a folder for the course
     init_folder(course_id)
 
     for module in modules:
         for items in get_module_items(course_id, module["id"], module["items_count"]):
             if items["type"] == "File":
                 # Run in file mode
-                download_canvas_files(
-                    course_id, items["content_id"], llm_model, download_mp4
-                )
+                download_canvas_files(course_id, items["content_id"], download_mp4)
                 continue
 
             if items["type"] != "Page":
                 logger.warning(f"Skipping: {items['title']} as it is not a Page")
+                logger.debug(items)
                 continue
 
             data = get_single_module_item(course_id, items["page_url"])
@@ -142,6 +150,18 @@ def download_canvas_modules():
                 continue
 
             save_module_item(course_id, items["title"], html2text(data["body"]))
-            logger.success(f"Module Text: {items['title']}")
 
-    pass
+    assignments = get_assignments(course_name, course_id)
+
+    for assignment in assignments:
+        if assignment["locked_for_user"]:
+            logger.warning(f"Assignment {assignment['id']} is locked, skipping")
+            continue
+
+        desc = html2text(assignment["description"]) if assignment["description"] else ""
+
+        if len(desc.strip()) == 0:
+            logger.warning(f"Skipping empty assignment: {assignment['name']}")
+            continue
+
+        save_module_item(course_id, assignment["name"], desc)
