@@ -17,10 +17,55 @@ from canvas.api import (
 from lib.env import getenv
 from lib.openai_api import model, openai_client
 
+headers = {
+    "Authorization": f"Bearer {getenv("CANVAS_API_KEY")}",
+}
+
 
 def init_folder(course_id):
     if not os.path.exists(f"./dist/{course_id}"):
         os.makedirs(f"./dist/{course_id}")
+
+
+def handle_text_document(path):
+    md_path = ".".join(path.split(".")[:-1]) + ".md"
+
+    if os.path.exists(md_path):
+        logger.warning(f"File: {md_path} already exists")
+        return
+
+    md = MarkItDown(llm_model=model, llm_client=openai_client)
+    result = md.convert(path)
+
+    with open(md_path, "w") as f:
+        f.write(result.text_content)
+
+    os.remove(path)
+
+
+def download_attachments(course_id: str, attachments: list, convert_office_pdf: bool):
+    for attachment in attachments:
+        url = attachment["url"]
+
+        response = requests.get(url, headers=headers, timeout=15)
+
+        if response.status_code != 200:
+            raise Exception("Error fetching file", response.text)
+
+        logger.success(f"Downloaded file: {attachment['filename']}")
+
+        path = f"./dist/{course_id}/{attachment['filename']}"
+
+        with open(path, "wb") as f:
+            f.write(response.content)
+            f.close()
+
+        if convert_office_pdf and (
+            attachment["filename"].endswith(".pdf")
+            or attachment["filename"].endswith(".docx")
+            or attachment["filename"].endswith(".pptx")
+        ):
+            handle_text_document(path)
 
 
 def save_module_item(course_id, name, data):
@@ -60,7 +105,9 @@ def course_selector():
     return courses[choice_index]["id"], courses[choice_index]["name"]
 
 
-def download_canvas_files(course_id: str, content_id: str, download_mp4: bool):
+def download_canvas_files(
+    course_id: str, content_id: str, convert_office_pdf: bool, download_mp4: bool
+):
     res = canvas_response(f"/courses/{course_id}/files/{content_id}")
 
     if not res:
@@ -79,12 +126,6 @@ def download_canvas_files(course_id: str, content_id: str, download_mp4: bool):
         logger.warning(f"File: {res['filename']} already exists")
         return
 
-    CANVAS_API_KEY = getenv("CANVAS_API_KEY")
-
-    headers = {
-        "Authorization": f"Bearer {CANVAS_API_KEY}",
-    }
-
     url = res["url"]
 
     response = requests.get(url, headers=headers, timeout=15)
@@ -97,25 +138,12 @@ def download_canvas_files(course_id: str, content_id: str, download_mp4: bool):
     with open(path, "wb") as f:
         f.write(response.content)
 
-    if (
+    if convert_office_pdf and (
         res["filename"].endswith(".pdf")
         or res["filename"].endswith(".docx")
         or res["filename"].endswith(".pptx")
     ):
-        md_path = ".".join(path.split(".")[:-1]) + ".md"
-
-        if os.path.exists(md_path):
-            logger.warning(f"File: {md_path} already exists")
-            return
-
-        md = MarkItDown(llm_model=model, llm_client=openai_client)
-        result = md.convert(path)
-
-        with open(md_path, "w") as f:
-            f.write(result.text_content)
-            logger.success(f"Converted file: {res["filename"]}")
-
-        os.remove(path)
+        handle_text_document(path)
 
 
 def download_canvas_content():
@@ -124,8 +152,12 @@ def download_canvas_content():
     logger.info(f"Selected course: {course_name} ({course_id})")
 
     download_mp4 = input("Download MP4 files? (y/n): ")
+    convert_office_pdf = input("Convert Office/PDF files to markdown? (y/n): ")
 
     download_mp4 = download_mp4.lower() == "y" or download_mp4.lower() == "yes"
+    convert_office_pdf = (
+        convert_office_pdf.lower() == "y" or convert_office_pdf.lower() == "yes"
+    )
 
     modules = get_modules(course_id)
 
@@ -134,14 +166,21 @@ def download_canvas_content():
 
     for module in modules:
         for items in get_module_items(course_id, module["id"], module["items_count"]):
+            if items["type"] == "Assignment":
+                # Handle assignments separately
+                continue
+
             if items["type"] == "File":
                 # Run in file mode
-                download_canvas_files(course_id, items["content_id"], download_mp4)
+                download_canvas_files(
+                    course_id, items["content_id"], download_mp4, convert_office_pdf
+                )
                 continue
 
             if items["type"] != "Page":
-                logger.warning(f"Skipping: {items['title']} as it is not a Page")
-                logger.debug(items)
+                logger.warning(
+                    f"Unsupported module type: {items['type']} - {items['title']}"
+                )
                 continue
 
             data = get_single_module_item(course_id, items["page_url"])
@@ -154,7 +193,7 @@ def download_canvas_content():
     assignments = get_assignments(course_name, course_id)
 
     for assignment in assignments:
-        if assignment["locked_for_user"]:
+        if assignment["locked_for_user"] and "description" not in assignment:
             logger.warning(f"Assignment {assignment['id']} is locked, skipping")
             continue
 
@@ -165,3 +204,8 @@ def download_canvas_content():
             continue
 
         save_module_item(course_id, assignment["name"], desc)
+
+        if "attachments" in assignment["submission"]:
+            download_attachments(
+                course_id, assignment["submission"]["attachments"], convert_office_pdf
+            )
