@@ -31,10 +31,13 @@ These messages are regarded as irrelevant. Make sure do not include these in the
 
 - Some statement to users
 - Private, personal, sensitive information
+- Sharing of own scores
 - Advertisements, promotions, and spam
 - Vague and irrelevant information
 - Celebrations and jokes
 - Admiration and appreciation towards someone
+    Saying people god
+    Example case is HTGod (username: htgazurex1212)
 - Greetings and goodbyes between persons
 - Irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slang's
 """.strip()
