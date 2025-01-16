@@ -3,6 +3,7 @@ from functools import cache
 
 import requests
 
+from lib.config import BROWSER_USER_AGENT
 from lib.env import getenv
 
 DISCORD_API_BASE_URL = "https://discord.com/api/v10"
@@ -17,7 +18,7 @@ def get_discord_headers(ref: str):
         "Accept": "u=3, i",
         "Accept-Encoding": "gzip, deflate, br",
         "Accept-Language": "en-US,en;q=0.9",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Safari/605.1.15",
+        "User-Agent": BROWSER_USER_AGENT,
         "Connection": "keep-alive",
         "Referer": ref,
         "Sec-Fetch-Dest": "empty",

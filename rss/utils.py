@@ -3,9 +3,11 @@ import json
 import feedparser
 import trafilatura
 
+from lib.config import BROWSER_USER_AGENT
+
 
 def parse_rss_feed(feed: str):
-    feedparser.USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    feedparser.USER_AGENT = BROWSER_USER_AGENT
     return feedparser.parse(feed, request_headers={"Connection": "keep-alive"})
 
 
