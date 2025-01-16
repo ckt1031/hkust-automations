@@ -4,6 +4,7 @@ from html2text import html2text
 from loguru import logger
 
 from canvas.api import get_all_assignments_from_all_courses
+from canvas.config import ENDED_COURSES
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
@@ -29,30 +30,31 @@ def check_canvas_assignments():
     store = get_store_with_datetime(store_path)
 
     for assignment in assignments:
-        # if not assignment["graded_submissions_exist"]:
-        #     logger.debug(f"Assignment {assignment['id']} has no graded submissions")
-        #     continue
+        if assignment["course_code"] in ENDED_COURSES:
+            logger.debug(
+                f"Assignment {assignment['id']} is from an ended course, skipping"
+            )
+            continue
 
         # Check if the assignment has already been recorded
         if str(assignment["id"]) in store:
             logger.debug(f"Assignment {assignment['id']} was recorded, skipping")
             continue
 
-        # Ignore if assignment has submissions
-        # if assignment["has_submitted_submissions"]:
-        #     logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
-        #     continue
+        # Ignore if assignment has submitted submissions
+        if assignment["has_submitted_submissions"]:
+            logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
+            continue
+
+        # Check submission_types, if only ["none"] then skip
+        if assignment["submission_types"] == ["none"]:
+            logger.debug(
+                f"Assignment {assignment['id']} has no submission types, skipping"
+            )
+            continue
 
         if assignment["locked_for_user"]:
             logger.warning(f"Assignment {assignment['id']} is locked, skipping")
-            continue
-
-        # PHYS1112
-        if (
-            "not graded" in assignment["name"].lower()
-            or "tutorial" in assignment["name"].lower()
-        ):
-            logger.debug(f"Assignment {assignment['id']} will not be graded, skipping")
             continue
 
         embed = {
@@ -91,8 +93,6 @@ def check_canvas_assignments():
                 summary.summary_prompt, user_prompt
             ).strip()
             embed["description"] = llm_response
-
-            print(llm_response)
 
         send_discord_webhook(webhook_url, embed=embed)
 

@@ -4,6 +4,7 @@ from loguru import logger
 
 from browser.reddit import check_reddit
 from canvas.announcements import check_canvas_announcements
+from canvas.assignment_submission import check_canvas_assignments_submissions
 from canvas.assignments import check_canvas_assignments
 from canvas.discussions import check_discussions
 from canvas.download_canvas_content import download_canvas_content
@@ -31,6 +32,7 @@ function_dict = {
     "check_canvas_announcements": check_canvas_announcements,
     "check_canvas_inbox": check_canvas_inbox,
     "check_canvas_grades": check_grade_changes,
+    "check_canvas_assignments_submissions": check_canvas_assignments_submissions,
     "check_canvas_discussions": check_discussions,
     "get_useful_discord_messages": get_useful_messages,
     "check_rss_news": check_rss_news,

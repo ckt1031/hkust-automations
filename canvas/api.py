@@ -48,6 +48,8 @@ def get_courses() -> list:
             logger.debug(f"Course {course['id']} is restricted by date")
             continue
 
+        course["course_code"] = get_course_code(course["course_code"].strip())
+
         courses.append(course)
 
     return courses
@@ -92,7 +94,18 @@ def get_assignment_groups(course_id: str) -> list:
     return canvas_response(path, params=params)
 
 
-def get_assignments(course_name: str, course_id: str) -> list:
+def get_course_code(course_code: str) -> str:
+    # Example:
+    # course_code = "COMP1021 (L1)" -> "COMP1021"
+
+    # Check if course_code has brackets
+    if "(" in course_code:
+        return course_code.split(" ")[0]
+
+    return course_code.split(" ")[0]
+
+
+def get_assignments(course_name: str, course_code: str, course_id: str) -> list:
     assignments_groups = get_assignment_groups(course_id)
 
     assignments = []
@@ -105,6 +118,7 @@ def get_assignments(course_name: str, course_id: str) -> list:
             assignment["id"] = str(assignment["id"])
             assignment["name"] = assignment["name"].strip()
             assignment["course_name"] = course_name.strip()
+            assignment["course_code"] = get_course_code(course_code.strip())
 
             assignments.append(assignment)
 
@@ -118,10 +132,9 @@ def get_all_assignments_from_all_courses():
     assignments = []
 
     for course in courses:
-        course_name: str = course["name"]
         course_id = str(course["id"])
 
-        _assignments = get_assignments(course_name, course_id)
+        _assignments = get_assignments(course["name"], course["course_code"], course_id)
         assignments.extend(_assignments)
 
     return assignments

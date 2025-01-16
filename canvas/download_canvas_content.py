@@ -102,7 +102,11 @@ def course_selector():
 
     choice_index = int(choice) - 1
 
-    return courses[choice_index]["id"], courses[choice_index]["name"]
+    return (
+        courses[choice_index]["id"],
+        courses[choice_index]["name"],
+        courses[choice_index]["course_code"],
+    )
 
 
 def download_canvas_files(
@@ -147,7 +151,7 @@ def download_canvas_files(
 
 
 def download_canvas_content():
-    course_id, course_name = course_selector()
+    course_id, course_name, course_code = course_selector()
 
     logger.info(f"Selected course: {course_name} ({course_id})")
 
@@ -190,7 +194,7 @@ def download_canvas_content():
 
             save_module_item(course_id, items["title"], html2text(data["body"]))
 
-    assignments = get_assignments(course_name, course_id)
+    assignments = get_assignments(course_name, course_code, course_id)
 
     for assignment in assignments:
         if assignment["locked_for_user"] and "description" not in assignment:

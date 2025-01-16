@@ -6,6 +6,7 @@ from html2text import html2text
 from loguru import logger
 
 from canvas.api import get_courses, get_discussion_topic_view, get_discussion_topics
+from canvas.config import ENDED_COURSES
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
@@ -54,6 +55,12 @@ def check_discussions():
     store = get_store_with_datetime(store_path)
 
     for course in courses:
+        if course["course_code"] in ENDED_COURSES:
+            logger.debug(
+                f"Course {course['id']} ({course['course_code']}) is from an ended course, skipping"
+            )
+            continue
+
         logger.debug(f"Checking course {course['id']}")
 
         discussion_topics = get_discussion_topics(course["id"])

@@ -14,18 +14,19 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.12"
           cache: "pip"
 
       - run: pip install --upgrade -r requirements.txt
 
       - name: Run Script
         run: |
-          export LOGURU_LEVEL="INFO"
           python app.py check_rss_news
           python app.py get_useful_discord_messages
           python app.py check_letter_grade_change
+          python app.py check_canvas_assignments_submissions
         env:
+          LOGURU_LEVEL: "INFO"
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
           OPENAI_API_MODEL: ${{ secrets.OPENAI_API_MODEL }}
