@@ -2,7 +2,7 @@ name: Hourly Run
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 * * * *"
+    - cron: "20 * * * *"
 
 jobs:
   Script:
@@ -27,6 +27,9 @@ jobs:
           python app.py check_canvas_assignments_submissions
         env:
           LOGURU_LEVEL: "INFO"
+
+          CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
+
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
           OPENAI_API_MODEL: ${{ secrets.OPENAI_API_MODEL }}
