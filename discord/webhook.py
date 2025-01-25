@@ -1,38 +1,28 @@
-import os
-import shelve
 from datetime import datetime, timedelta
 from time import sleep
 
 import requests
+from cachetools import TTLCache
 from loguru import logger
 
-SHELVE_PATH = "./tmp/discord"
-
-
-def ensure_tmp_dir():
-    if not os.path.exists("./tmp"):
-        os.makedirs("./tmp")
+cache = TTLCache(maxsize=10, ttl=60)
 
 
 def get_cooldown_status():
-    ensure_tmp_dir()
+    expiry = cache.get("remaining_expiry", datetime.now().isoformat())
+    expiry = datetime.fromisoformat(expiry)
 
-    with shelve.open(SHELVE_PATH) as db:
-        expiry = db.get("remaining_expiry", datetime.now().isoformat())
-        expiry = datetime.fromisoformat(expiry)
-
-        data = {
-            "cooldown_required": db.get("cooldown_required", False),
-            "remaining_expiry": expiry,
-        }
+    data = {
+        "cooldown_required": cache.get("cooldown_required", False),
+        "remaining_expiry": expiry,
+    }
 
     return data
 
 
 def set_cooldown_status(cooldown_required: bool, remaining_expiry: datetime):
-    with shelve.open(SHELVE_PATH) as db:
-        db["cooldown_required"] = cooldown_required
-        db["remaining_expiry"] = remaining_expiry.isoformat()
+    cache["cooldown_required"] = cooldown_required
+    cache["remaining_expiry"] = remaining_expiry.isoformat()
 
 
 def send_discord_webhook(
