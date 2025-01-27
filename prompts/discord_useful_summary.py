@@ -1,43 +1,54 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DiscordSummarySchema(BaseModel):
-    available: bool
-    summary: str
+    available: bool = Field(
+        ...,
+        description="""
+        Whether there are valuable messages to summarize
+        Leave this as false if:
+            There are no any valuable messages,
+            All messages are irrelevant,
+            All messages are unspecific and unclear waiting for more information.
+        """.strip(),
+    )
+    summary: str = Field(
+        ...,
+        description="""
+        Markdown format, it must be a string, not array or list or JSON.
+        Empty if there are no valuable messages to summarize or available is false
+        """.strip(),
+    )
 
 
 discord_summary_prompts = """
-You are a chat summarize bot.
-You will be given a list of messages from a channel and help people grab useful information.
+You are a chat summarize bot. Grab useful information from messages given.
 
-# Instructions
+# Summary
 
+- Concrete and specific.
 - Include the most important information.
-- Bullet points with bolded short title in markdown in summary, straight to the point.
 - Include date and time of specific dated information.
-- Summary must be concrete and specific.
-- Ensure points are clear, understandable and specific.
-- No usernames in the summary.
+- Bullet points with bolded short title in markdown, straight to the point. They should be clear, understandable and specific.
+- Do not include usernames.
 - For important embeds, video and links, use markdown links, never use URL as the link text alone, use the title of the link [text](url).
-    Include related details, like title, description if available.
-- Leave available as false and summary as empty if:
-    There are no any valuable messages.
-    All messages are irrelevant.
-    All messages are unspecific and unclear waiting for more information.
-    
-# Not Important
+    Include related details, like title, description if necessary.
+- Never include unknown or unexplainable content.
 
-These messages are regarded as irrelevant. Make sure do not include these in the summary:
+# Insignificant Messages
 
-- Some statement to users
-- Private, personal, sensitive information
+These messages are regarded as irrelevant.
+Make sure do not include these in the summary:
+
 - Sharing of own scores
+- Some statement to users
+- Greetings and goodbyes between persons
+- Private, personal, sensitive information
 - Advertisements, promotions, and spam
 - Vague and irrelevant information
 - Celebrations and jokes
 - Admiration and appreciation towards someone
     Saying people god
     Example case is HTGod (username: htgazurex1212)
-- Greetings and goodbyes between persons
 - Irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slang's
 """.strip()
