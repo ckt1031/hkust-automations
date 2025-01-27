@@ -2,7 +2,6 @@ from functools import cache
 
 import requests
 from loguru import logger
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 from lib.env import getenv
 
@@ -10,7 +9,6 @@ TMP_FOLDER = "./tmp"
 
 
 @cache
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def get_me_info(token: str):
     url = "https://graph.microsoft.com/v1.0/me"
 
@@ -28,7 +26,6 @@ def get_me_info(token: str):
 
 
 @cache
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def get_private_graph_token():
     client_id = getenv("MICROSOFT_CLIENT_ID")
     client_secret = getenv("MICROSOFT_CLIENT_SECRET")
@@ -59,7 +56,6 @@ def get_private_graph_token():
 
 
 @cache
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def get_usthing_private_graph_token():
     talentID = "c917f3e2-9322-4926-9bb3-daca730413ca"
     clientID = "b4bc4b9a-7162-44c5-bb50-fe935dce1f5a"
