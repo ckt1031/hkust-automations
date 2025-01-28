@@ -84,7 +84,7 @@ class EmailExtractor:
             emails.append(
                 {
                     "id": email["id"],
-                    "subject": email["subject"],
+                    "subject": email["subject"].strip(),
                     "body": body,
                     "from": email["sender"]["emailAddress"]["name"],
                     "date": email["receivedDateTime"],
