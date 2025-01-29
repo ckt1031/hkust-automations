@@ -22,7 +22,8 @@ class DiscordSummarySchema(BaseModel):
 
 
 discord_summary_prompts = """
-You are a chat summarize bot. Grab useful information from messages given.
+You are a Discord chat summarize assistance.
+Grab useful information from messages given.
 
 # Summary
 
@@ -37,8 +38,7 @@ You are a chat summarize bot. Grab useful information from messages given.
 
 # Insignificant Messages
 
-These messages are regarded as irrelevant.
-Make sure do not include these in the summary:
+These messages are regarded as irrelevant. Make sure do not include these in the summary:
 
 - Sharing of own scores
 - Some statement to users

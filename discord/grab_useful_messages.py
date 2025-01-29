@@ -14,24 +14,30 @@ from prompts.discord_useful_summary import DiscordSummarySchema, discord_summary
 server_channel_list = {
     # HKUST FYS Discord Server
     "880301598981648416": [
-        "880301599665295414",  # atrium-gossip 吹水場
-        "880301599665295415",  # freshmen-新生討論區
-        "881790721298952203",  # studying讀書研習坊
-        # "881792090722426880",  # work-experience搵工上班族
-        "881792090722426880",  # campus-affairs校務關注組
-        "880326266719465482",  # campus-news校園動態牆
+        "880301599665295414",  # 吹水場
+        "880301599665295415",  # 新生討論區
+        "881790721298952203",  # 讀書研習坊
+        "881792090722426880",  # 搵工上班族
+        "1174738355922157688", # 校務關注組
+        "880326266719465482",  # 校園動態牆
     ]
 }
 
 
 def purify_message_content(message: str):
-    # Replace all emojis with a space
+    """
+    Replace all emojis with a space
+    """
+
     message = re.sub(r"<a?:\w+:\d+>", " ", message)
 
     return message
 
 
 def filter_messages(messages: list) -> list:
+    """
+    Filter off bot messages and purify the message content
+    """
     filtered_messages = []
 
     for message in messages:
@@ -52,20 +58,21 @@ def handle_channel(channel: dict, messages: list) -> bool:
     user_prompts = ""
 
     for message in messages:
-        username = f"User: {message['author']['global_name']}"
+        author = message["author"]
+        username = f"User: {author['global_name']}"
 
         has_equal_global_name = (
             (
-                message["author"]["global_name"].lower()
-                != message["author"]["username"].lower()
+                author["global_name"].lower()
+                != author["username"].lower()
             )
-            if "global_name" in message["author"]
-            and message["author"]["global_name"] is not None
+            if "global_name" in author
+            and author["global_name"] is not None
             else False
         )
 
         if has_equal_global_name:
-            username += f" ({message['author']['username']})"
+            username += f" ({author['username']})"
 
         _draft = f"{username}\nContent: {message['content']}"
 
@@ -91,9 +98,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
     )
 
     if not response.available or len(response.summary) == 0:
-        logger.info(
-            f"No valuable message to summarize and construct points for {channel['name']} in {channel['guild']["name"]}"
-        )
+        logger.info(f"No valuable message for {channel['name']} ({channel['guild']["name"]})")
         return False
 
     embed = {
@@ -101,7 +106,6 @@ def handle_channel(channel: dict, messages: list) -> bool:
         "description": response.summary.rstrip(),
         "url": f"https://discord.com/channels/{channel['guild_id']}/{channel['id']}",
         "footer": {
-            # Guild name
             "text": channel["guild"]["name"],
         },
     }
@@ -160,7 +164,7 @@ def get_useful_messages():
                     final_checking_messages.append(message)
 
             if len(final_checking_messages) == 0:
-                logger.info("No valuable message to summarize and construct points.")
+                logger.info(f"No valuable message for {channel_info['name']} ({guild['name']})")
                 continue
 
             status = handle_channel(channel_info, final_checking_messages)
@@ -171,13 +175,11 @@ def get_useful_messages():
                 save_store_with_datetime(store_path, store)
 
                 logger.success(
-                    f"Successfully summarized and constructed points for {channel_info['name']}"
+                    f"Successfully summarized {channel_info['name']}"
                 )
 
-            logger.debug(
-                "Sleeping for 5 seconds before getting messages from the next channel, wait for it..."
-            )
+            logger.debug("Sleeping for 5 seconds to cooldown...")
 
             time.sleep(5)
 
-    logger.success("Discord channels have been checked and summarized")
+    logger.success("All Discord channels have been checked and summarized")
