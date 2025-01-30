@@ -18,7 +18,7 @@ server_channel_list = {
         "880301599665295415",  # 新生討論區
         "881790721298952203",  # 讀書研習坊
         "881792090722426880",  # 搵工上班族
-        "1174738355922157688", # 校務關注組
+        "1174738355922157688",  # 校務關注組
         "880326266719465482",  # 校園動態牆
     ]
 }
@@ -62,12 +62,8 @@ def handle_channel(channel: dict, messages: list) -> bool:
         username = f"User: {author['global_name']}"
 
         has_equal_global_name = (
-            (
-                author["global_name"].lower()
-                != author["username"].lower()
-            )
-            if "global_name" in author
-            and author["global_name"] is not None
+            (author["global_name"].lower() != author["username"].lower())
+            if "global_name" in author and author["global_name"] is not None
             else False
         )
 
@@ -98,7 +94,9 @@ def handle_channel(channel: dict, messages: list) -> bool:
     )
 
     if not response.available or len(response.summary) == 0:
-        logger.info(f"No valuable message for {channel['name']} ({channel['guild']["name"]})")
+        logger.info(
+            f"No valuable message for {channel['name']} ({channel['guild']["name"]})"
+        )
         return False
 
     embed = {
@@ -164,7 +162,9 @@ def get_useful_messages():
                     final_checking_messages.append(message)
 
             if len(final_checking_messages) == 0:
-                logger.info(f"No valuable message for {channel_info['name']} ({guild['name']})")
+                logger.info(
+                    f"No valuable message for {channel_info['name']} ({guild['name']})"
+                )
                 continue
 
             status = handle_channel(channel_info, final_checking_messages)
@@ -174,9 +174,7 @@ def get_useful_messages():
 
                 save_store_with_datetime(store_path, store)
 
-                logger.success(
-                    f"Successfully summarized {channel_info['name']}"
-                )
+                logger.success(f"Successfully summarized {channel_info['name']}")
 
             logger.debug("Sleeping for 5 seconds to cooldown...")
 

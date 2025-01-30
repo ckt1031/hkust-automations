@@ -3,6 +3,7 @@ from time import sleep
 
 from bs4 import BeautifulSoup
 from loguru import logger
+from seleniumbase import Driver
 
 from browser.chrome import get_driver
 from discord.webhook import send_discord_webhook
@@ -18,11 +19,7 @@ def remove_excessive_whitespace(text):
     return " ".join(text.split())
 
 
-def scrape_reddit(driver, link: str) -> dict[str] or None:
-    import undetected_chromedriver as Chrome
-
-    driver: Chrome = driver
-
+def scrape_reddit(driver: Driver, link: str) -> dict[str] | None:
     driver.get(link)
 
     # Wait for the page to load
