@@ -38,7 +38,7 @@ def canvas_response(path: str, params=None) -> dict | list:
 
 @cache
 def get_courses() -> list:
-    response: list[dict] = canvas_response("/courses")
+    response: list[dict] = canvas_response("/users/self/favorites/courses")
 
     courses = []
 
