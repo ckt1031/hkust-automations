@@ -4,6 +4,7 @@ from loguru import logger
 
 from browser.reddit import check_reddit
 from canvas.announcements import check_canvas_announcements
+from canvas.assignment_quizzes_table import print_assignments_quizzes_table
 from canvas.assignment_submission import check_canvas_assignments_submissions
 from canvas.assignments import check_canvas_assignments
 from canvas.discussions import check_discussions
@@ -39,6 +40,7 @@ function_dict = {
     "check_letter_grade_change": check_letter_grade_change,
     "check_reddit": check_reddit,
     "download_canvas_content": download_canvas_content,
+    "print_assignments_quizzes_table": print_assignments_quizzes_table,
     "exit": lambda: sys.exit(0),
 }
 

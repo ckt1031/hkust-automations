@@ -9,24 +9,10 @@ from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 
 
-def check_canvas_assignments_submissions():
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
-    user_id = getenv("DISCORD_USER_ID")
-
-    if webhook_url is None:
-        raise ValueError("DISCORD_WEBHOOK_URL_CANVAS is not set")
-
-    if user_id is None:
-        raise ValueError("DISCORD_USER_ID is not set")
-
+def get_assignment_submissions():
     assignments = get_all_assignments_from_all_courses()
 
-    store_path = "canvas_assignment_submission_reminder.json"
-    store = get_store_with_datetime(store_path)
-
-    if len(assignments) == 0:
-        logger.success("No assignments to check")
-        return
+    results = []
 
     for assignment in assignments:
         if assignment["course_code"] in ENDED_COURSES:
@@ -50,11 +36,6 @@ def check_canvas_assignments_submissions():
             )
             continue
 
-        # No due date
-        if assignment["due_at"] is None:
-            logger.debug(f"Assignment {assignment['id']} has no due date, skipping")
-            continue
-
         # Check submission_types, if only ["none"] then skip
         if assignment["submission_types"] == ["none"]:
             logger.debug(
@@ -62,12 +43,42 @@ def check_canvas_assignments_submissions():
             )
             continue
 
-        # Check if due date is not under 24 hours
+        results.append(assignment)
+
+    return results
+
+
+def check_canvas_assignments_submissions():
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
+    user_id = getenv("DISCORD_USER_ID")
+
+    if webhook_url is None:
+        raise ValueError("DISCORD_WEBHOOK_URL_CANVAS is not set")
+
+    if user_id is None:
+        raise ValueError("DISCORD_USER_ID is not set")
+
+    assignments = get_assignment_submissions()
+
+    store_path = "canvas_assignment_submission_reminder.json"
+    store = get_store_with_datetime(store_path)
+
+    if len(assignments) == 0:
+        logger.success("No assignments to check")
+        return
+
+    for assignment in assignments:
+        # No due date
+        if assignment["due_at"] is None:
+            logger.debug(f"Assignment {assignment['id']} has no due date, skipping")
+            continue
+
+        # Check if due date is not under 48 hours
         due_at = datetime.fromisoformat(assignment["due_at"])
 
-        if due_at - datetime.now(timezone.utc) > timedelta(days=1):
+        if due_at - datetime.now(timezone.utc) > timedelta(days=2):
             logger.debug(
-                f"Assignment {assignment['id']} is not due within 24 hours, skipping"
+                f"Assignment {assignment['id']} is not due within 48 hours, skipping"
             )
             continue
 
