@@ -61,6 +61,7 @@ def check_canvas_assignments():
             "title": f"New Assignment: {assignment['name']}",
             "url": assignment["html_url"],
             "footer": {"text": assignment["course_name"]},
+            "color": 0x93B6FF,
         }
 
         if assignment["due_at"] is not None:

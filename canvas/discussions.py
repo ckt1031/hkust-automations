@@ -148,6 +148,7 @@ def check_discussions():
                 "title": f"Discussions for {course_code}",
                 "description": res.summary,
                 "footer": {"text": course["name"].strip()},
+                "color": 0xFF5DB6,
             }
 
             send_discord_webhook(webhook, embed=embed)

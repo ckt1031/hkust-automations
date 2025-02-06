@@ -106,6 +106,7 @@ def handle_channel(channel: dict, messages: list) -> bool:
         "footer": {
             "text": channel["guild"]["name"],
         },
+        "color": 0x4950FE,
     }
 
     send_discord_webhook(webhook_url, embed=embed)

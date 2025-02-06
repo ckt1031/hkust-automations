@@ -57,6 +57,7 @@ def check_canvas_inbox():
                 "name": conversation["participants"][0]["name"],
                 "icon_url": conversation["avatar_url"],
             },
+            "color": 0xFF5DB6,
         }
 
         send_discord_webhook(webhook_url, embed=embed)

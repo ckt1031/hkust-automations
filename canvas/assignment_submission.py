@@ -80,6 +80,7 @@ def check_canvas_assignments_submissions():
             "description": "This assignment has not been submitted yet, please complete it before the due date.",
             "url": assignment["html_url"],
             "footer": {"text": assignment["course_name"]},
+            "color": 0xFF492F,
         }
 
         message = f"<@{user_id}>"
