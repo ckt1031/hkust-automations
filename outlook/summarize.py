@@ -15,12 +15,38 @@ from outlook.store import prune_email_store
 from prompts.email_summarize import EmailSummarySchema, email_summary_prompt
 
 
-def email_summarize():
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_EMAILS")
+def split_text_and_send_to_discord(text: str, webhook_url: str):
+    headers_to_split_on = [
+        ("##", "Header 2"),
+        ("###", "Header 3"),
+    ]
+    markdown_splitter = MarkdownHeaderTextSplitter(
+        strip_headers=False,
+        headers_to_split_on=headers_to_split_on,
+    )
+    result = markdown_splitter.split_text(text)
 
-    if webhook_url is None:
+    chunk_size = 1900
+    chunk_overlap = 100
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
+
+    result = text_splitter.split_documents(result)
+
+    for split in result:
+        send_discord_webhook(
+            webhook_url, message=split.page_content, username="HKUST Email"
+        )
+
+
+def email_summarize():
+    webhook_url_email = getenv("DISCORD_WEBHOOK_URL_EMAILS")
+    webhook_url_events = getenv("DISCORD_WEBHOOK_URL_EMAILS_EVENTS")
+
+    if webhook_url_email is None or webhook_url_events is None:
         raise ValueError(
-            "DISCORD_WEBHOOK_URL_EMAILS is not provided in the environment variables"
+            "DISCORD_WEBHOOK_URL_EMAILS and DISCORD_WEBHOOK_URL_EMAILS_EVENTS must be set"
         )
 
     # Initialize the email client
@@ -64,31 +90,20 @@ def email_summarize():
     )
 
     if llm_response.available:
-        if llm_response.summary.startswith("{"):
-            raise ValueError("Response is not a string")
-
-        headers_to_split_on = [
-            ("##", "Header 2"),
-            ("###", "Header 3"),
+        texts = [
+            [llm_response.important_message_summary, webhook_url_email],
+            [llm_response.event_summary, webhook_url_events],
         ]
-        markdown_splitter = MarkdownHeaderTextSplitter(
-            strip_headers=False,
-            headers_to_split_on=headers_to_split_on,
-        )
-        result = markdown_splitter.split_text(llm_response.summary)
 
-        chunk_size = 1900
-        chunk_overlap = 100
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
+        for d in texts:
+            if len(d[0]) == 0:
+                logger.info("No text to send to Discord")
+                continue
 
-        result = text_splitter.split_documents(result)
+            if d[0].startswith("{"):
+                raise ValueError("Response is not a valid string content")
 
-        for split in result:
-            send_discord_webhook(
-                webhook_url, message=split.page_content, username="HKUST Email"
-            )
+            split_text_and_send_to_discord(d[0].strip(), d[1])
 
         logger.success("Email summary sent to Discord")
 

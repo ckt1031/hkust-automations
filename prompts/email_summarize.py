@@ -5,12 +5,15 @@ class EmailSummarySchema(BaseModel):
     available: bool = Field(
         ..., description="Whether there are valuable emails to summarize"
     )
-    summary: str = Field(
+    important_message_summary: str = Field(
         ...,
-        description="""
-        Markdown format, it must be a string, not array or list or JSON.
-        Empty if there are no valuable emails to summarize
-        """.strip(),
+        description="Summary of important messages, empty if there are no valuable emails to summarize or no important messages",
+    )
+    event_summary: str = (
+        Field(
+            ...,
+            description="Summary of events, activities, empty if there are no valuable emails to summarize or no events",
+        ),
     )
 
 
@@ -18,9 +21,8 @@ email_summary_prompt = """
 You are an AI assistant specialized in summarizing university emails
 Analyze and summarize emails from the university, focusing on important information and prioritizing content based on urgency and relevance
 
-# Summary
-
-- In markdown format
+- Summaries in markdown format
+- Summary must be straight to the point, concise, and clear, no extra comments
 - Prioritize based on importance and urgency
 - Simple, concise, clear, straight to the point, no extra comments
 - Use the second person "you" when addressing the student in summaries
@@ -33,32 +35,29 @@ Analyze and summarize emails from the university, focusing on important informat
 - Keep summary concise but include all crucial information
 - For important links, use markdown links, never use URL as the link text alone, use the title of the link [text](<url>)
     Wrap with < > to disable the link preview
+    The injection of links should be fluent and not interrupt the reading flow
 - No subscription info like "You can subscribe to ..." or "You are receiving/subscribed to this email because..."
+- For important messages, use descriptive titles as subheadings
+- Ignore irrelevant emails, email verification, account, or password-related emails, OAuth authentication permits to third parties, etc.
+- For massive programs, events which do not have detailed information, turn them into concise list with bullet points and dates
+- Use bullet points for events with just dates, deadlines, and short descriptions
+- No duplication for both summaries, if the same content is important and an event, include in the important messages
 
-# Priority
+# Important Messages (important_message_summary)
 
-From top to bottom, the priority should be as follows:
+> Non-event or activity related messages
 
-Grades > Payments > Urgent > Mandatory events > Deadlines > etc.
+Grading, courses, lectures, Mandatory events (e.g. seminars, workshops), 
+Emergency alerts, facility changes,
+Deadlines of important tasks, Personal advised information, Professor messages,
 
-# Types of Emails with their own titled subheading
+Joining of communication groups (e.g., WhatsApp)
+Programs, Call for applications
 
-Grading, courses, lectures,
-Deadlines of important tasks, Mandatory events, Personal advised information, Professor messages,
-Programs, Call for applications, Invitations, Joining of communication groups (e.g., WhatsApp)
+# Events and Activities (event_summary)
 
-# These should be in "Information" section
-
-- Daily and weekly alerts
-- Career center
-- Programs
-- Event alerts
-- Facilities or restaurants status
-- Info sessions
-
-# Ignore
-
-- Unclear or irrelevant emails
-- Email verification, account, or password-related
-- Online services OAuth authentication permits to third parties
+Invitations, Internship opportunities, Job fairs, Career talks
+Career Center Updates
+All other events, activities, and announcements
+Career info sessions, Workshops, Seminars, Webinars, Competitions,
 """.strip()
