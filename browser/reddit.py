@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from time import sleep
 
 from bs4 import BeautifulSoup
 from loguru import logger
@@ -27,9 +26,9 @@ def scrape_reddit(driver: Driver, link: str) -> dict[str] | None:
 
     # Scroll down to load comments
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    sleep(2)
+    driver.sleep(2)
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    sleep(2)
+    driver.sleep(2)
 
     # Obtain page source
     html = driver.page_source
