@@ -91,9 +91,12 @@ def check_course_wait_list():
     #     "COMP2711": 2
     # }
 
-    for waitlist in waitlists:
+    courses = []
 
+    for waitlist in waitlists:
         key = waitlist["crseCode"]
+
+        courses.append(key)
 
         # Situation 1: The course is not in the store but new course is added to the waitlist
         if store.get(key) is None:
@@ -118,15 +121,6 @@ def check_course_wait_list():
 
             message = f"{key} updated in the waitlist, current position: {waitlist['waitPosition']}"
 
-        # Situation 3: The course is in the store but the course is removed from the waitlist
-        # If the course is removed from the waitlist, the position will be -1
-        elif waitlist["waitPosition"] == -1:
-            logger.info(f"{key} is removed from the waitlist")
-
-            del store[key]
-
-            message = f"{key} removed from the waitlist"
-
         # If the course is in the store and the position is not updated, do nothing
         else:
             logger.info(f"{key} is in the waitlist, no update needed")
@@ -137,6 +131,22 @@ def check_course_wait_list():
 
         # Send the embed to Discord
         send_discord_webhook(webhook_url, message=message)
+
+    # Situation 3: The course is in the store but the course is removed from the waitlist
+    store_keys = list(store.keys())
+    for key in store_keys:
+        if key not in courses:
+            logger.info(f"{key} is removed from the waitlist")
+
+            del store[key]
+
+            message = f"{key} removed from the waitlist"
+
+            # Add mention to the end of the message
+            message += f" <@{user_id}>"
+
+            # Send the embed to Discord
+            send_discord_webhook(webhook_url, message=message)
 
     save_store(store_path, store)
 
