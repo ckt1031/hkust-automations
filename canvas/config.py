@@ -6,7 +6,7 @@ ENDED_COURSES = [
     "LANG1402",
     "MATH1013",
     # START of 2024-2025 Winter Semester
-    # "COMP1029C",
-    # "COMP1022J",
-    # "COMP1022V",
+    "COMP1029C",
+    "COMP1022J",
+    "COMP1022V",
 ]
