@@ -14,6 +14,7 @@ from canvas.inbox import check_canvas_inbox
 from discord.grab_useful_messages import get_useful_messages
 from outlook.summarize import email_summarize
 from rss.news import check_rss_news
+from usthing.course_wait_list import check_course_wait_list
 from usthing.letter_grade_change import check_letter_grade_change
 
 # Remove loggers time, level
@@ -41,6 +42,7 @@ function_dict = {
     "check_reddit": check_reddit,
     "download_canvas_content": download_canvas_content,
     "print_assignments_quizzes_table": print_assignments_quizzes_table,
+    "check_course_wait_list": check_course_wait_list,
     "exit": lambda: sys.exit(0),
 }
 
