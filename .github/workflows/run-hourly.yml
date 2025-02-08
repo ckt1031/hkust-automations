@@ -26,6 +26,7 @@ jobs:
           # uv run app.py get_useful_discord_messages
           uv run app.py check_letter_grade_change
           uv run app.py check_canvas_assignments_submissions
+          uv run app.py check_course_wait_list
         env:
           LOGURU_LEVEL: "INFO"
 
