@@ -39,6 +39,7 @@ Analyze and summarize university emails, extracting key information and prioriti
     - Use a numbered list for each item under this subheading.
     - If only one information item, summarize it directly without a list or the subheading.
 - Use markdown links [Link Text](<URL>) for important links.
+    - For email addresses, do not use mailto:, just show the email address.
 - Exclude subscription information (e.g., "You can subscribe...", "You are receiving this email because...").
 - For important messages, create descriptive subheadings based on the message content.
 - Ignore irrelevant emails (e.g., email verifications, account/password related emails, OAuth permissions).
