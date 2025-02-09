@@ -45,7 +45,8 @@ Analyze and summarize university emails, extracting key information and prioriti
 - Ignore irrelevant emails (e.g., email verifications, account/password related emails, OAuth permissions).
 - For large programs or events without detailed information, summarize them as a concise bulleted list with dates.
 - Use bullet points for events with dates, deadlines, and brief descriptions.
-- Avoid duplicating information between summaries. If content is both important and event-related, include it in the important messages section.
+- Avoid duplicating information between important and event summaries.
+    - If content is both important and event-related, include it in the important messages section only.
 
 # Summary Sections
 
