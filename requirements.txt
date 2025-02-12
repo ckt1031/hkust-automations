@@ -11,7 +11,6 @@ python-dateutil~=2.9.0.post0
 langchain-text-splitters~=0.3.4
 pydantic~=2.10.3
 chevron~=0.14.0
-seleniumbase~=4.34.4
 beautifulsoup4~=4.12.3
 python-slugify~=8.0.4
 markitdown~=0.0.1a3

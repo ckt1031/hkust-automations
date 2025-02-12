@@ -2,7 +2,6 @@ import sys
 
 from loguru import logger
 
-from browser.reddit import check_reddit
 from canvas.announcements import check_canvas_announcements
 from canvas.assignment_quizzes_table import print_assignments_quizzes_table
 from canvas.assignment_submission import check_canvas_assignments_submissions
@@ -13,6 +12,7 @@ from canvas.grade_changes import check_grade_changes
 from canvas.inbox import check_canvas_inbox
 from discord.grab_useful_messages import get_useful_messages
 from outlook.summarize import email_summarize
+from reddit.check import check_reddit
 from rss.news import check_rss_news
 from usthing.course_wait_list import check_course_wait_list
 from usthing.letter_grade_change import check_letter_grade_change

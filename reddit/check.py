@@ -1,71 +1,76 @@
 from datetime import datetime, timezone
 
-from bs4 import BeautifulSoup
+import html2text
 from loguru import logger
-from seleniumbase import Driver
+from pydantic import BaseModel
 
-from browser.chrome import get_driver
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_schema
 from prompts.reddit import RedditMassPostsResponse, reddit_prompts
 from rss.news import exceed_maximum_check_days
-from rss.utils import parse_rss_feed
+from rss.utils import extract_website, parse_rss_feed
 
 
-def remove_excessive_whitespace(text):
-    return " ".join(text.split())
+def extract_content_from_url(text: str) -> str:
+    class Schema(BaseModel):
+        article_urls: list[str]
+
+    prompt = """Extract article URL from the text, it must be valid articles or some website which has information.
+    Non-article URL is not allowed, e.g. image, video, youtube, twitter, etc.
+    """
+
+    res = generate_schema(
+        system_message=prompt,
+        user_message=text,
+        schema=Schema,
+    )
+
+    article_urls = res.article_urls
+
+    if not article_urls:
+        return ""
+
+    c = ""
+
+    for url in article_urls:
+        logger.info(f"Extracted article URL: {url}")
+
+        article = extract_website(url)
+        text = article["raw_text"]
+
+        c += f"Title: {article['title']}\nContent: {text}\n"
+
+    return c
 
 
-def scrape_reddit(driver: Driver, link: str) -> dict[str] | None:
-    driver.get(link)
+def extract_content_with_comments(url: str) -> str:
+    feed_url = url + ".rss"
 
-    # Wait for the page to load
-    driver.implicitly_wait(5)
+    feed_data = parse_rss_feed(feed_url)
 
-    # Scroll down to load comments
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    driver.sleep(2)
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    driver.sleep(2)
-
-    # Obtain page source
-    html = driver.page_source
-
-    # Get <shreddit-post> elements
-    bs = BeautifulSoup(html, "html.parser")
-
-    # Get the post
-    post = bs.find("shreddit-post")
-
-    if post is None:
-        logger.info(f"No post found: {link}")
-        return
+    if not feed_data or len(feed_data.entries) == 0:
+        logger.info("No new entries found")
+        return ""
 
     content = ""
-    comments = ""
 
-    # content is under text-neutral-content div tag
-    content_element = post.find("div", class_="text-neutral-content")
+    is_first = True
 
-    if content_element is not None:
-        content = content_element.text.replace("Read more", "").strip()
+    for entry in feed_data.entries:
+        summary = html2text.html2text(entry.summary)
 
-    # Get Multiple shreddit-comment
-    shreddit_comment = bs.find_all("shreddit-comment")
+        if is_first:
+            content += f"Post: {entry.title}\nComment: "
+            is_first = False
+            continue
 
-    if shreddit_comment is not None:
-        for comment in shreddit_comment:
-            # Assuming the text is within a <p> tag inside each 'shreddit-comment'
-            comment_text = comment.find("p").get_text() if comment.find("p") else ""
-            comments += comment_text + "\n"
+        content += f"{summary}\n"
 
-    return {
-        "title": driver.title.replace(" : r/HKUST", ""),
-        "content": remove_excessive_whitespace(content),
-        "comments": remove_excessive_whitespace(comments),
-    }
+    article_content = extract_content_from_url(content)
+
+    return f"{article_content}\n{content}"
 
 
 def check_reddit():
@@ -87,12 +92,10 @@ def check_reddit():
         f"Found {len(feed_data)} entries in Reddit - {feed_data['feed']['title']}"
     )
 
-    driver = get_driver()
-
-    scraped_reddit = []
-
     store_path = "reddit.json"
     store = get_store_with_datetime(store_path)
+
+    reddit_posts: list[dict] = []
 
     for entry in feed_data.entries:
         # Check the date first
@@ -108,32 +111,34 @@ def check_reddit():
             logger.info(f"Reddit already scraped: {entry.link}, skip")
             continue
 
-        logger.debug(f"Checking Reddit - {entry.link}")
+        logger.info(f"Checking Reddit: {entry.link}")
 
-        # Extract the website
-        data = scrape_reddit(driver, entry.link)
+        e = extract_content_with_comments(entry.link)
 
-        if data is None:
+        if not e:
             continue
 
-        logger.success(f"Scraped Reddit - {data['title']}")
+        logger.success
 
-        scraped_reddit.append({**data, "link": entry.link})
+        reddit_posts.append(
+            {
+                "url": entry.link,
+                "content": e,
+            }
+        )
 
-    # Chunk into 5 and analyze
-    for i in range(0, len(scraped_reddit), 5):
+    for i in range(0, len(reddit_posts), 5):
         user_prompt = f"Reddit Analysis - {i + 1} to {i + 5}\n\n"
-        for data in scraped_reddit[i : i + 5]:
+        for data in reddit_posts[i : i + 5]:
             _id = (
-                data["link"]
+                data["url"]
                 .replace("https://www.reddit.com/r/HKUST/comments/", "")
                 .split("/")[0]
             )
 
-            user_prompt += f"Title: {data['title']}\n"
-            user_prompt += f"ID: {_id}\n"
-            user_prompt += f"Content: {data['content']}\n"
-            user_prompt += f"Comments: {data['comments']}\n\n"
+            user_prompt += (
+                f"URL: {data['url']}\nID: {_id}\nContent: {data['content']}\n\n"
+            )
 
         res = generate_schema(reddit_prompts, user_prompt, RedditMassPostsResponse)
 
@@ -150,8 +155,6 @@ def check_reddit():
         logger.success(f"We have stored {len(ids_to_save)} Reddit posts")
 
         if res.has_summary:
-            logger.info(f"Summary: {res.summary}")
-
             discord_embed = {
                 "title": "Reddit Summary",
                 "description": res.summary,
@@ -164,8 +167,3 @@ def check_reddit():
         save_store_with_datetime(store_path, store)
 
         logger.success(f"Analyzed Reddit - {i + 1} to {i + 5}")
-
-    try:
-        driver.quit()
-    except Exception as e:
-        logger.error(f"Failed to quit driver: {e}")
