@@ -35,12 +35,15 @@ def extract_content_from_url(text: str) -> str:
     c = ""
 
     for url in article_urls:
-        logger.info(f"Extracted article URL: {url}")
+        try:
+            logger.info(f"Extracted article URL: {url}")
 
-        article = extract_website(url)
-        text = article["raw_text"]
+            article = extract_website(url)
+            text = article["raw_text"]
 
-        c += f"Title: {article['title']}\nContent: {text}\n"
+            c += f"Title: {article['title']}\nContent: {text}\n"
+        except Exception as e:
+            logger.error(f"Failed to extract article URL: {url}, error: {e}")
 
     return c
 
