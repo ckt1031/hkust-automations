@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from enum import Enum
 
 from loguru import logger
 
@@ -26,13 +25,7 @@ def exceed_maximum_check_days(date: str) -> bool:
     return (now - ms) > MAXIMUM_CHECK_DAYS * 24 * 60 * 60
 
 
-class RSSItemStatus(Enum):
-    OK = 0
-    SKIP = 1
-    FAIL = 2
-
-
-def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
+def check_single_rss_item(webhook: str, rss_item) -> bool:
     link = rss_item["link"]
 
     try:
@@ -42,7 +35,7 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
 
         if exceed_maximum_check_days(article["date"]):
             logger.info(f"Article is too old: {article['date']}, skip")
-            return RSSItemStatus.SKIP
+            return False
 
         user_prompt = f"Date: {article["date"]}\nTitle: {article["title"]}\nContent: {article['raw_text']}"
 
@@ -57,10 +50,10 @@ def check_single_rss_item(webhook: str, rss_item) -> RSSItemStatus:
 
         send_discord_webhook(webhook, embed=embed, username="HKUST News")
 
-        return RSSItemStatus.OK
+        return True
     except Exception as e:
         logger.error(f"Failed to extract website and summarize content: {link}\n", e)
-        return RSSItemStatus.FAIL
+        return False
 
 
 def check_rss_news():
@@ -89,12 +82,10 @@ def check_rss_news():
 
             status = check_single_rss_item(webhook_url, item)
 
-            if status == RSSItemStatus.FAIL:
-                continue
+            if status:
+                store[key] = datetime.now(timezone.utc)
 
-            store[key] = datetime.now(timezone.utc)
-
-            logger.success(f"RSS item checked: {item['link']}")
+                logger.success(f"RSS item checked: {item['link']}")
 
     save_store_with_datetime(store_path, store)
 
