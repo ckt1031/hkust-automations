@@ -53,4 +53,4 @@ Reddit URL: https://www.reddit.com/r/HKUST/
     Wrap with < > to disable the link preview
     For email addresses, do not use mailto: links, simple show the address and do not display as links, e.g. office@example.com instead of [office@example.com](mailto:office@example.com)
 - Exclude Non-Main Ideas, no words or phrases like "more info on xxx," "help from xxx," or "ask help." unless they are relevant to the main idea.
-""".strip()
+"""

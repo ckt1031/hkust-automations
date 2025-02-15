@@ -9,4 +9,4 @@ Summarize the content provided by the user, simple, clear, concise and straight 
 - For important links, use markdown links with text, never use URL as the link text alone, use the title of the link [text](<url>)
     Wrap with < > to disable the link preview
 - Exclude Non-Main Ideas, no words or phrases like "more info on xxx," "help from xxx," or "ask help." unless they are relevant to the main idea.
-""".strip()
+"""

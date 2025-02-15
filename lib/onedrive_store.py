@@ -5,7 +5,7 @@ import requests
 from loguru import logger
 
 from lib.env import getenv
-from lib.microsoft_tokens import get_private_graph_token
+from lib.microsoft_tokens import get_own_app_private_graph_token
 
 
 def drive_api(method="GET", path="", data=None):
@@ -13,7 +13,7 @@ def drive_api(method="GET", path="", data=None):
 
     headers = {
         "Accept": "application/json",
-        "Authorization": f"Bearer {get_private_graph_token()}",
+        "Authorization": f"Bearer {get_own_app_private_graph_token()}",
         "Content-Type": "application/json",
     }
 

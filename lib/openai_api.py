@@ -1,10 +1,7 @@
-from dotenv import load_dotenv
 from loguru import logger
 from openai import OpenAI
 
 from lib.env import getenv
-
-load_dotenv()
 
 openai_client = OpenAI(
     api_key=getenv("OPENAI_API_KEY"),

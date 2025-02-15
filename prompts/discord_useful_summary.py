@@ -51,4 +51,4 @@ These messages are regarded as irrelevant. Make sure do not include these in the
     Saying people god
     Example case is HTGod (username: htgazurex1212)
 - Irrelevant information, GIFs, and emojis, like :place_of_worship:, some joke or some unknown terms, abbreviations or slang's
-""".strip()
+"""

@@ -3,9 +3,8 @@ import string
 
 import html2text
 import requests
-from loguru import logger
 
-from lib.microsoft_tokens import get_private_graph_token
+from lib.microsoft_tokens import get_own_app_private_graph_token
 from lib.utils import remove_css_and_scripts
 
 
@@ -27,7 +26,7 @@ def remove_excessive_spaces(text: str):
 
 class EmailExtractor:
     def __init__(self):
-        self.access_token = get_private_graph_token()
+        self.access_token = get_own_app_private_graph_token()
 
         headers = {
             "Authorization": f"Bearer {self.access_token}",

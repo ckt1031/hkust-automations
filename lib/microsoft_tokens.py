@@ -8,7 +8,6 @@ from lib.env import getenv
 TMP_FOLDER = "./tmp"
 
 
-@cache
 def get_me_info(token: str):
     url = "https://graph.microsoft.com/v1.0/me"
 
@@ -26,7 +25,7 @@ def get_me_info(token: str):
 
 
 @cache
-def get_private_graph_token():
+def get_own_app_private_graph_token():
     client_id = getenv("MICROSOFT_CLIENT_ID")
     client_secret = getenv("MICROSOFT_CLIENT_SECRET")
     refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
@@ -45,7 +44,7 @@ def get_private_graph_token():
         "refresh_token": refresh_token,
     }
 
-    response = requests.post(url, data=payload, timeout=15)
+    response = requests.post(url, data=payload, timeout=5)
 
     if response.status_code != 200:
         raise Exception("Error getting Microsoft access token: " + response.text)

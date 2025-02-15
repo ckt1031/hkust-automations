@@ -67,7 +67,6 @@ def get_guild_info(server_id: str) -> dict:
     return response.json()
 
 
-@cache
 def get_channel_info(server_id: str, channel_id: str) -> dict:
     headers = get_discord_headers(
         f"https://discord.com/channels/{server_id}/{channel_id}"

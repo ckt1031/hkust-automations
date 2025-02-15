@@ -56,4 +56,4 @@ Content Examples: Grades, courses, lectures, mandatory events (seminars, worksho
 
 Summaries of invitations, opportunities, and announcements related to events and activities.
 Content Examples: Internships, job fairs, career talks, career center updates, career info sessions, workshops, seminars, webinars, competitions, and other events.
-""".strip()
+"""

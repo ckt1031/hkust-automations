@@ -52,4 +52,4 @@ HKUST Canvas discussion URL: https://canvas.ust.hk/courses/{{ COURSE_ID }}/discu
 - For important links, use markdown links with text, never use URL as the link text alone, use the title of the link [text](<url>)
     Wrap with < > to disable the link preview
 - Exclude Non-Main Ideas, no words or phrases like "more info on xxx," "help from xxx," or "ask help." unless they are relevant to the main idea.
-""".strip()
+"""
