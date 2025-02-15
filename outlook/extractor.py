@@ -7,7 +7,6 @@ from loguru import logger
 
 from lib.microsoft_tokens import get_private_graph_token
 from lib.utils import remove_css_and_scripts
-from outlook.store import check_email_sender
 
 
 def remove_non_ascii(text: str):
@@ -64,14 +63,6 @@ class EmailExtractor:
         emails = []
 
         for email in self.fetch_emails():
-            send_address = email["sender"]["emailAddress"]["address"]
-
-            if not check_email_sender(send_address):
-                logger.info(
-                    f"Not from the expected sender ({send_address}): {email['subject']}"
-                )
-                continue
-
             txt = html2text.HTML2Text()
             txt.ignore_emphasis = True
             txt.ignore_images = True

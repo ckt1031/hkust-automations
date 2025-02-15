@@ -17,10 +17,6 @@ class EmailSummarySchema(BaseModel):
     )
 
 
-# Group general information items under a `## Information` subheading if multiple items exist.
-# Use a numbered list for each item under this subheading.
-# If only one information item, summarize it directly without a list or the subheading.
-
 email_summary_prompt = """
 You are an AI assistant specialized in summarizing university emails.
 Analyze and summarize university emails, extracting key information and prioritizing urgent and relevant content for students.
@@ -43,6 +39,7 @@ Analyze and summarize university emails, extracting key information and prioriti
 - Exclude subscription information (e.g., "You can subscribe...", "You are receiving this email because...").
 - For important messages, create descriptive subheadings based on the message content.
 - Ignore irrelevant emails (e.g., email verifications, account/password related emails, OAuth permissions).
+- Ignore advertisements from non-university organizations, unless they are important.
 - For large programs or events without detailed information, summarize them as a concise bulleted list with dates.
 - Use bullet points for events with dates, deadlines, and brief descriptions.
 - Avoid duplicating information between important and event summaries.
