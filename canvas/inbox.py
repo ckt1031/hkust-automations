@@ -44,6 +44,9 @@ def check_canvas_inbox():
 
         detail = get_conversation_detail(conversation["id"])
 
+        if "context_name" not in conversation or conversation["context_name"] is None:
+            conversation["context_name"] = "Canvas"
+
         content = f"Context: {conversation["context_name"]}\nTitle: {conversation['subject']}\nContent: {detail["messages"][0]["body"]}"
         llm_response = generate_chat_completion(summary_prompt, content)
 

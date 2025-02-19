@@ -25,14 +25,15 @@ def get_me_info(token: str):
 
 
 @cache
-def get_own_app_private_graph_token():
+def get_own_app_private_graph_token() -> str:
     client_id = getenv("MICROSOFT_CLIENT_ID")
     client_secret = getenv("MICROSOFT_CLIENT_SECRET")
     refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
 
     if not refresh_token or not client_id or not client_secret:
-        logger.error("Microsoft refresh token, client ID, or client secret is not set")
-        return
+        raise Exception(
+            "Microsoft refresh token, client ID, or client secret is not set"
+        )
 
     url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 
@@ -49,13 +50,11 @@ def get_own_app_private_graph_token():
     if response.status_code != 200:
         raise Exception("Error getting Microsoft access token: " + response.text)
 
-    data: dict = response.json()
-
-    return data["access_token"]
+    return response.json()["access_token"]
 
 
 @cache
-def get_usthing_private_graph_token():
+def get_usthing_private_graph_token() -> str:
     talentID = "c917f3e2-9322-4926-9bb3-daca730413ca"
     clientID = "b4bc4b9a-7162-44c5-bb50-fe935dce1f5a"
 
@@ -77,6 +76,4 @@ def get_usthing_private_graph_token():
             "Error getting USTHing Microsoft access token: " + response.text
         )
 
-    data: dict = response.json()
-
-    return data["access_token"]
+    return response.json()["access_token"]
