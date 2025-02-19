@@ -1,7 +1,6 @@
 from functools import cache
 
 import requests
-from loguru import logger
 
 from lib.env import getenv
 
