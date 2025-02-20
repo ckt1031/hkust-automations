@@ -2,60 +2,33 @@ from datetime import datetime, timezone
 
 import html2text
 from loguru import logger
-from pydantic import BaseModel
 
 from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_schema
+from lib.utils import extract_content_from_url
 from prompts.reddit import RedditMassPostsResponse, reddit_prompts
 from rss.news import exceed_maximum_check_days
-from rss.utils import extract_website, parse_rss_feed
+from rss.utils import parse_rss_feed
 
 
-def extract_content_from_url(text: str) -> str:
-    class Schema(BaseModel):
-        article_urls: list[str]
+def extract_reddit_content_with_comments(link: str) -> str | None:
+    feed_link = link + ".rss"
 
-    prompt = """Extract article URL from the text, it must be valid articles or some website which has information.
-    Non-article URL is not allowed, e.g. image, video, youtube, twitter, etc.
-    """
-
-    res = generate_schema(
-        system_message=prompt,
-        user_message=text,
-        schema=Schema,
-    )
-
-    article_urls = res.article_urls
-
-    if not article_urls:
-        return ""
-
-    c = ""
-
-    for url in article_urls:
-        try:
-            logger.info(f"Extracted article URL: {url}")
-
-            article = extract_website(url)
-            text = article["raw_text"]
-
-            c += f"Title: {article['title']}\nContent: {text}\n"
-        except Exception as e:
-            logger.error(f"Failed to extract article URL: {url}, error: {e}")
-
-    return c
-
-
-def extract_content_with_comments(url: str) -> str:
-    feed_url = url + ".rss"
-
-    feed_data = parse_rss_feed(feed_url)
+    feed_data = parse_rss_feed(feed_link)
 
     if not feed_data or len(feed_data.entries) == 0:
-        logger.info("No new entries found")
-        return ""
+        logger.info(f"No reddit comments found for {link}")
+        return None
+
+    # Since the RSS will return the post and comments, we need to extract the comments
+    # But we want to get posts with comments, but ignore posts without comments
+
+    # If it has only one entry, it is a post without comments
+    if len(feed_data.entries) == 1:
+        logger.info(f"No comments found for {link}")
+        return None
 
     content = ""
 
@@ -80,19 +53,19 @@ def check_reddit():
     webhook = getenv("DISCORD_WEBHOOK_URL_REDDIT")
 
     if not webhook:
-        logger.error("DISCORD_WEBHOOK_URL_REDDIT not set")
-        return
+        raise ValueError("DISCORD_WEBHOOK_URL_REDDIT not set")
 
-    feed_url = "https://www.reddit.com/r/HKUST/.rss"
+    reddit_link = "https://www.reddit.com/r/HKUST"
+    feed_link = f"{reddit_link}.rss"
 
-    feed_data = parse_rss_feed(feed_url)
+    feed_data = parse_rss_feed(feed_link)
 
-    if not feed_data or len(feed_data) == 0:
+    if not feed_data or len(feed_data.entries) == 0:
         logger.info("No new entries found")
         return
 
     logger.info(
-        f"Found {len(feed_data)} entries in Reddit - {feed_data['feed']['title']}"
+        f"Found {len(feed_data.entries)} entries in Reddit - {feed_data.feed.title}"
     )
 
     store_path = "reddit.json"
@@ -100,48 +73,45 @@ def check_reddit():
 
     reddit_posts: list[dict] = []
 
+    # Stage 1: Store information of posts and comments to memory
     for entry in feed_data.entries:
         # Check the date first
         if exceed_maximum_check_days(entry.published):
             logger.info(f"Reddit too old: {entry.link}, skip")
             continue
 
-        _id = entry.link.replace("https://www.reddit.com/r/HKUST/comments/", "").split(
-            "/"
-        )[0]
+        reddit_post_id = entry.link.replace(f"{reddit_link}/comments/", "").split("/")[
+            0
+        ]
 
-        if f"https://www.reddit.com/r/HKUST/comments/{_id}" in store:
+        if f"{reddit_link}/comments/{reddit_post_id}" in store:
             logger.info(f"Reddit already scraped: {entry.link}, skip")
             continue
 
         logger.info(f"Checking Reddit: {entry.link}")
 
-        e = extract_content_with_comments(entry.link)
+        reddit_full_content = extract_reddit_content_with_comments(entry.link)
 
-        if not e:
+        if not reddit_full_content or len(reddit_full_content) == 0:
+            logger.info(f"No content found for {entry.link}, skip")
             continue
-
-        logger.success
 
         reddit_posts.append(
             {
-                "url": entry.link,
-                "content": e,
+                "id": reddit_post_id,
+                "link": entry.link,
+                "content": reddit_full_content,
             }
         )
 
     for i in range(0, len(reddit_posts), 5):
         user_prompt = f"Reddit Analysis - {i + 1} to {i + 5}\n\n"
-        for data in reddit_posts[i : i + 5]:
-            _id = (
-                data["url"]
-                .replace("https://www.reddit.com/r/HKUST/comments/", "")
-                .split("/")[0]
-            )
 
-            user_prompt += (
-                f"URL: {data['url']}\nID: {_id}\nContent: {data['content']}\n\n"
-            )
+        # Generate the user prompt
+        for data in reddit_posts[i : i + 5]:
+            user_prompt += f"""ID: {data['id']}
+            Link: {data['link']}
+            Content: {data['content']}\n\n"""
 
         res = generate_schema(reddit_prompts, user_prompt, RedditMassPostsResponse)
 
@@ -152,17 +122,16 @@ def check_reddit():
         ids_to_save = res.accepted_ids + res.rejected_ids
 
         for _id in ids_to_save:
-            link = f"https://www.reddit.com/r/HKUST/comments/{_id}"
+            link = f"{reddit_link}/comments/{_id}"
             store[link] = datetime.now(tz=timezone.utc)
 
         logger.success(f"We have stored {len(ids_to_save)} Reddit posts")
 
-        if res.has_summary:
+        if res.has_summary and len(res.summary) > 0:
             discord_embed = {
-                "title": "Reddit Summary",
+                "title": res.whole_title,
                 "description": res.summary,
-                # Red
-                "color": 0xFF0000,
+                "color": 0xFF0000,  # Red
             }
 
             send_discord_webhook(webhook, embed=discord_embed, username="HKUST Reddit")

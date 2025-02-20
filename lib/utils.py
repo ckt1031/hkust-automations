@@ -3,6 +3,11 @@ import re
 from datetime import timezone
 
 from dateutil import parser
+from loguru import logger
+from pydantic import BaseModel
+
+from lib.openai_api import generate_schema
+from rss.utils import extract_website
 
 
 def sha2_256(text: str) -> str:
@@ -38,3 +43,38 @@ def remove_css_and_scripts(raw_html: str) -> str:
     # Remove script tags
     raw_html = re.sub(r"<script.*?>.*?</script>", "", raw_html, flags=re.DOTALL)
     return raw_html
+
+
+def extract_content_from_url(original_content: str) -> str:
+    class Schema(BaseModel):
+        article_urls: list[str]
+
+    prompt = """Extract article URL from the text, it must be valid articles or some website which has information.
+    Non-article URL is not allowed, e.g. image, video, youtube, twitter, etc.
+    """
+
+    res = generate_schema(
+        system_message=prompt,
+        user_message=original_content,
+        schema=Schema,
+    )
+
+    article_urls = res.article_urls
+
+    if not article_urls:
+        return ""
+
+    content = ""
+
+    for url in article_urls:
+        try:
+            logger.info(f"Extracted article URL: {url}")
+
+            article = extract_website(url)
+            text = article["raw_text"]
+
+            content += f"Title: {article['title']}\nContent: {text}\n"
+        except Exception as e:
+            logger.error(f"Failed to extract article URL: {url}, error: {e}")
+
+    return content

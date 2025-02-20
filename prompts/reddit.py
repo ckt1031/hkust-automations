@@ -5,6 +5,7 @@ class RedditMassPostsResponse(BaseModel):
     accepted_ids: list[str]
     rejected_ids: list[str]
     pending_reply_ids: list[str]
+    whole_title: str
     summary: str
     has_summary: bool
 
@@ -39,6 +40,12 @@ Reddit URL: https://www.reddit.com/r/HKUST/
 - Swearing, irrelevant, resource seeking, blaming.
 - Technical issues like can't login, can't access, etc.
 - Criticisms, complaints, and rants.
+
+# Whole Title
+
+- Very short title under 15 words for summary to be shown in Discord embed
+- Straightforward
+- Relevant to the content
 
 # Summary
 
