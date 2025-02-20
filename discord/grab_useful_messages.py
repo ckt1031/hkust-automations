@@ -55,7 +55,7 @@ def filter_messages(messages: list) -> list:
 def handle_channel(channel: dict, messages: list) -> bool:
     webhook_url = getenv("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
 
-    user_prompts = ""
+    scraped_messages = ""
 
     for message in messages:
         author = message["author"]
@@ -87,10 +87,12 @@ def handle_channel(channel: dict, messages: list) -> bool:
                     if "description" in embed:
                         _draft += f"({embed['description']})"
 
-        user_prompts += _draft + "\n\n"
+        scraped_messages += _draft + "\n\n"
 
     response = generate_schema(
-        discord_summary_prompts, user_prompts, DiscordSummarySchema
+        system_message=discord_summary_prompts,
+        user_message=scraped_messages,
+        schema=DiscordSummarySchema,
     )
 
     if not response.available or len(response.summary) == 0:
@@ -114,13 +116,11 @@ def handle_channel(channel: dict, messages: list) -> bool:
     return True
 
 
-def get_useful_messages():
+def check_discord_servers():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY")
 
     if webhook_url is None:
-        raise ValueError(
-            "DISCORD_WEBHOOK_URL_DISCORD_SUMMARY is not provided in the environment variables"
-        )
+        raise ValueError("DISCORD_WEBHOOK_URL_DISCORD_SUMMARY is not set")
 
     store_path = "discord_channel_summary.json"
     store = get_store_with_datetime(store_path)
@@ -133,7 +133,7 @@ def get_useful_messages():
             channel_info["guild"] = guild
 
             logger.info(
-                f"GET messages from \"{channel_info['name']}\" in \"{guild['name']}\""
+                f"Getting messages from \"{channel_info['name']}\" in \"{guild['name']}\""
             )
 
             messages = get_channel_messages(
@@ -146,7 +146,7 @@ def get_useful_messages():
             # Timestamp checking
             current_time = datetime.now(tz=timezone.utc)
 
-            previous_checked_date: datetime = (
+            previous_checked_date: datetime | None = (
                 store[channel_info["id"]] if channel_info["id"] in store else None
             )
 
@@ -163,8 +163,8 @@ def get_useful_messages():
                     final_checking_messages.append(message)
 
             if len(final_checking_messages) == 0:
-                logger.info(
-                    f"No valuable message for {channel_info['name']} ({guild['name']})"
+                logger.warning(
+                    f"No valuable messages from {channel_info['name']} ({guild['name']})"
                 )
                 continue
 
