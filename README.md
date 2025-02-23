@@ -1,6 +1,6 @@
-# HKUST Information Push
+# HKUST Automations
 
-A set of tools to push information to HKUST students.
+A set of automations to simplify daily tasks.
 
 We currently support pushing information to Discord via webhooks, other platforms can be added in the future.
 
