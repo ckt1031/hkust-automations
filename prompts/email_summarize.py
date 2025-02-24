@@ -44,6 +44,8 @@ Analyze and summarize university emails, extracting key information and prioriti
     - Link text must not be the URL itself, but a descriptive text.
     - The links must be valid and accessible, without random newlines or spaces.
     - For email addresses, do not use mailto:, just show the email address.
+        - Example: For inquiries, contact enggexplore@ust.hk
+        - Do not use [enggexplore@ust.hk](mailto:enggexplore@ust.hk) or mailto:enggexplore@ust.hk
 - Exclude subscription information (e.g., "You can subscribe...", "You are receiving this email because...").
 - For important messages, create descriptive subheadings based on the message content.
 - Ignore irrelevant emails (e.g., email verifications, account/password related emails, OAuth permissions).
