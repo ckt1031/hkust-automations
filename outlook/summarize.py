@@ -43,21 +43,21 @@ def split_text_and_send_to_discord(text: str, webhook_url: str):
 def email_summarize():
     webhook_url_email = getenv("DISCORD_WEBHOOK_URL_EMAILS")
     webhook_url_events = getenv("DISCORD_WEBHOOK_URL_EMAILS_EVENTS")
+    webhook_url_opportunities = getenv("DISCORD_WEBHOOK_URL_EMAILS_OPPORTUNITIES")
 
-    if webhook_url_email is None or webhook_url_events is None:
-        raise ValueError(
-            "DISCORD_WEBHOOK_URL_EMAILS and DISCORD_WEBHOOK_URL_EMAILS_EVENTS must be set"
-        )
+    if (
+        webhook_url_email is None
+        or webhook_url_events is None
+        or webhook_url_opportunities is None
+    ):
+        raise ValueError("All email webhooks must be set")
 
-    # Initialize the email client
-    extractor = EmailExtractor()
-    emails = extractor.extract_emails()
+    # Extract emails
+    emails = EmailExtractor().extract_emails()
 
-    # YYYY-MM-DD
-    today_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    today_day = datetime.now().strftime("%A")  # Monday, Tuesday, etc.
-
-    email_user_prompt = f"Date: {today_date}\nWeekday: {today_day}\n\n---\n\n"
+    # YYYY-MM-DD (Weekday)
+    today_date = datetime.now().strftime("%Y-%m-%d (%A)")
+    email_user_prompt = f"Date: {today_date}\n\n---\n\n"
 
     store_path = "email_record.json"
     store = get_store_with_datetime(store_path)
@@ -86,24 +86,27 @@ def email_summarize():
 
     # Call the LLM model to summarize the emails
     llm_response = generate_schema(
-        email_summary_prompt, email_user_prompt, EmailSummarySchema
+        system_message=email_summary_prompt,
+        user_message=email_user_prompt,
+        schema=EmailSummarySchema,
     )
 
     if llm_response.available:
-        texts = [
-            [llm_response.important_message_summary, webhook_url_email],
+        summaries = [
             [llm_response.event_summary, webhook_url_events],
+            [llm_response.important_message_summary, webhook_url_email],
+            [llm_response.program_opportunities_summary, webhook_url_opportunities],
         ]
 
-        for d in texts:
-            if len(d[0]) == 0:
+        for summary_data in summaries:
+            if len(summary_data[0]) == 0:
                 logger.info("No text to send to Discord")
                 continue
 
-            if d[0].startswith("{"):
+            if summary_data[0].startswith("{"):
                 raise ValueError("Response is not a valid string content")
 
-            split_text_and_send_to_discord(d[0].strip(), d[1])
+            split_text_and_send_to_discord(summary_data[0].strip(), summary_data[1])
 
         logger.success("Email summary sent to Discord")
 
