@@ -3,7 +3,7 @@ import os
 import requests
 from html2text import html2text
 from loguru import logger
-from markitdown import MarkItDown
+from mistralai import Mistral
 from slugify import slugify
 
 from canvas.api import (
@@ -15,37 +15,75 @@ from canvas.api import (
     get_single_module_item,
 )
 from lib.env import getenv
-from lib.openai_api import model, openai_client
+from lib.openai_api import generate_chat_completion
 
 headers = {
     "Authorization": f"Bearer {getenv("CANVAS_API_KEY")}",
 }
 
 
-def init_folder(course_id):
-    if not os.path.exists(f"./dist/{course_id}"):
-        os.makedirs(f"./dist/{course_id}")
+def init_folder(course_code):
+    if not os.path.exists(f"./dist/{course_code}"):
+        os.makedirs(f"./dist/{course_code}")
 
 
-def handle_text_document(path):
+def handle_text_document(file_name: str, path: str):
     md_path = ".".join(path.split(".")[:-1]) + ".md"
 
     if os.path.exists(md_path):
         logger.warning(f"File: {md_path} already exists")
         return
 
-    md = MarkItDown(llm_model=model, llm_client=openai_client)
-    result = md.convert(path)
+    api_key = getenv("MISTRAL_API_KEY")
+
+    client = Mistral(api_key=api_key)
+
+    uploaded_pdf = client.files.upload(
+        file={
+            "file_name": file_name,
+            "content": open(path, "rb"),
+        },
+        purpose="ocr",
+    )
+    signed_url = client.files.get_signed_url(file_id=uploaded_pdf.id)
+    ocr_response = client.ocr.process(
+        model="mistral-ocr-latest",
+        document={
+            "type": "document_url",
+            "document_url": signed_url.url,
+        },
+        include_image_base64=False,
+    )
+
+    text = ""
+
+    for page in ocr_response.pages:
+        text += page.markdown
+
+    final_text = generate_chat_completion(
+        system_message="""
+        Your task is to finalize and clean up the markdown which is generated from the OCR process and extract the text from the document.
+        Please remove any unnecessary text, and ensure that the markdown is clean and readable.
+        Format the text in a way that it is easy to read and understand.
+        """,
+        user_message=text,
+    )
 
     with open(md_path, "w") as f:
-        f.write(result.text_content)
+        f.write(final_text)
+        f.close()
 
-    os.remove(path)
 
-
-def download_attachments(course_id: str, attachments: list, convert_office_pdf: bool):
+def download_attachments(course_code: str, attachments: list, convert_office_pdf: bool):
     for attachment in attachments:
         url = attachment["url"]
+        path = f"./dist/{course_code}/{attachment['filename']}"
+
+        # Check if the Markdown file was handled
+        md_path = ".".join(path.split(".")[:-1]) + ".md"
+        if os.path.exists(md_path):
+            logger.warning(f"File: {md_path} already exists")
+            return
 
         response = requests.get(url, headers=headers, timeout=15)
 
@@ -53,8 +91,6 @@ def download_attachments(course_id: str, attachments: list, convert_office_pdf: 
             raise Exception("Error fetching file", response.text)
 
         logger.success(f"Downloaded file: {attachment['filename']}")
-
-        path = f"./dist/{course_id}/{attachment['filename']}"
 
         with open(path, "wb") as f:
             f.write(response.content)
@@ -65,16 +101,19 @@ def download_attachments(course_id: str, attachments: list, convert_office_pdf: 
             or attachment["filename"].endswith(".docx")
             or attachment["filename"].endswith(".pptx")
         ):
-            handle_text_document(path)
+            handle_text_document(attachment["filename"], path)
+
+            # Remove the file after conversion
+            os.remove(path)
 
 
-def save_module_item(course_id, name, data):
+def save_module_item(course_code: str, name: str, data: str):
     if len(data.strip()) == 0:
         logger.warning(f"Skipping empty module: {name}")
         return
 
     name = slugify(name)
-    path = f"./dist/{course_id}/{name}.md"
+    path = f"./dist/{course_code}/{name}.md"
 
     if os.path.exists(path):
         logger.info(f"File: {name} already exists")
@@ -110,7 +149,7 @@ def course_selector():
 
 
 def download_canvas_files(
-    course_id: str, content_id: str, convert_office_pdf: bool, download_mp4: bool
+    course_id: str, course_code: str, content_id: str, convert_office_pdf: bool
 ):
     res = canvas_response(f"/courses/{course_id}/files/{content_id}")
 
@@ -119,13 +158,9 @@ def download_canvas_files(
             f"Failed to download file: {content_id} from course: {course_id}"
         )
 
-    path = f"./dist/{course_id}/{res['filename']}"
+    path = f"./dist/{course_code}/{res['filename']}"
 
-    if not download_mp4 and res["filename"].endswith(".mp4"):
-        logger.warning(f"Skipping: {res['filename']} as it is an MP4 file")
-        return
-
-    # Check if file exists
+    # Check if a file exists
     if os.path.exists(path):
         logger.warning(f"File: {res['filename']} already exists")
         return
@@ -147,7 +182,10 @@ def download_canvas_files(
         or res["filename"].endswith(".docx")
         or res["filename"].endswith(".pptx")
     ):
-        handle_text_document(path)
+        handle_text_document(res["filename"], path)
+
+        # Remove the file after conversion
+        os.remove(path)
 
 
 def download_canvas_content():
@@ -155,10 +193,8 @@ def download_canvas_content():
 
     logger.info(f"Selected course: {course_name} ({course_id})")
 
-    download_mp4 = input("Download MP4 files? (y/n): ")
     convert_office_pdf = input("Convert Office/PDF files to markdown? (y/n): ")
 
-    download_mp4 = download_mp4.lower() == "y" or download_mp4.lower() == "yes"
     convert_office_pdf = (
         convert_office_pdf.lower() == "y" or convert_office_pdf.lower() == "yes"
     )
@@ -166,7 +202,7 @@ def download_canvas_content():
     modules = get_modules(course_id)
 
     # Create a folder for the course
-    init_folder(course_id)
+    init_folder(course_code)
 
     for module in modules:
         for items in get_module_items(course_id, module["id"], module["items_count"]):
@@ -177,7 +213,10 @@ def download_canvas_content():
             if items["type"] == "File":
                 # Run in file mode
                 download_canvas_files(
-                    course_id, items["content_id"], download_mp4, convert_office_pdf
+                    course_id,
+                    course_code,
+                    items["content_id"],
+                    convert_office_pdf,
                 )
                 continue
 
@@ -192,7 +231,18 @@ def download_canvas_content():
             if data is None or "body" not in data:
                 continue
 
-            save_module_item(course_id, items["title"], html2text(data["body"]))
+            # Use LLM to generate content
+            text_body = generate_chat_completion(
+                system_message="""
+                Extract the text from the Canvas page and format it in a way that is easy to read and understand.
+                The content should be clean and readable.
+                The original version could be HTML, so make sure to convert it to markdown.
+                Your task is to finalize and clean up the markdown which is generated from the Canvas page.
+                """,
+                user_message=data["body"],
+            )
+
+            save_module_item(course_code, items["title"], text_body)
 
     assignments = get_assignments(course_name, course_code, course_id)
 
@@ -207,9 +257,11 @@ def download_canvas_content():
             logger.warning(f"Skipping empty assignment: {assignment['name']}")
             continue
 
-        save_module_item(course_id, assignment["name"], desc)
+        save_module_item(course_code, assignment["name"], desc)
 
         if "attachments" in assignment["submission"]:
             download_attachments(
-                course_id, assignment["submission"]["attachments"], convert_office_pdf
+                course_code,
+                assignment["submission"]["attachments"],
+                convert_office_pdf,
             )
