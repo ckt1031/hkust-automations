@@ -26,6 +26,13 @@ def init_folder(course_code):
     if not os.path.exists(f"./dist/{course_code}"):
         os.makedirs(f"./dist/{course_code}")
 
+    # Add Markdown and Files folder
+    if not os.path.exists(f"./dist/{course_code}/Markdown"):
+        os.makedirs(f"./dist/{course_code}/Markdown")
+
+    if not os.path.exists(f"./dist/{course_code}/Files"):
+        os.makedirs(f"./dist/{course_code}/Files")
+
 
 def handle_text_document(file_name: str, path: str):
     md_path = ".".join(path.split(".")[:-1]) + ".md"
@@ -77,7 +84,7 @@ def handle_text_document(file_name: str, path: str):
 def download_attachments(course_code: str, attachments: list, convert_office_pdf: bool):
     for attachment in attachments:
         url = attachment["url"]
-        path = f"./dist/{course_code}/{attachment['filename']}"
+        path = f"./dist/{course_code}/Files/{attachment['filename']}"
 
         # Check if the Markdown file was handled
         md_path = ".".join(path.split(".")[:-1]) + ".md"
@@ -101,10 +108,10 @@ def download_attachments(course_code: str, attachments: list, convert_office_pdf
             or attachment["filename"].endswith(".docx")
             or attachment["filename"].endswith(".pptx")
         ):
-            handle_text_document(attachment["filename"], path)
-
-            # Remove the file after conversion
-            os.remove(path)
+            handle_text_document(
+                attachment["filename"],
+                f"./dist/{course_code}/Markdown/{attachment['filename']}",
+            )
 
 
 def save_module_item(course_code: str, name: str, data: str):
@@ -113,7 +120,7 @@ def save_module_item(course_code: str, name: str, data: str):
         return
 
     name = slugify(name)
-    path = f"./dist/{course_code}/{name}.md"
+    path = f"./dist/{course_code}/Markdown/{name}.md"
 
     if os.path.exists(path):
         logger.info(f"File: {name} already exists")
@@ -158,7 +165,7 @@ def download_canvas_files(
             f"Failed to download file: {content_id} from course: {course_id}"
         )
 
-    path = f"./dist/{course_code}/{res['filename']}"
+    path = f"./dist/{course_code}/Files/{res['filename']}"
 
     # Check if a file exists
     if os.path.exists(path):
@@ -183,9 +190,6 @@ def download_canvas_files(
         or res["filename"].endswith(".pptx")
     ):
         handle_text_document(res["filename"], path)
-
-        # Remove the file after conversion
-        os.remove(path)
 
 
 def download_canvas_content():
