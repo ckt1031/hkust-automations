@@ -26,6 +26,7 @@ def remove_excessive_spaces(text: str):
 
 class EmailExtractor:
     def __init__(self):
+        self.ms_base_url = "https://graph.microsoft.com/v1.0"
         self.access_token = get_own_app_private_graph_token()
 
         headers = {
@@ -37,7 +38,7 @@ class EmailExtractor:
         self.session.headers.update(headers)
 
     def get_inbox_folder_id(self):
-        url = "https://graph.microsoft.com/v1.0/me/mailFolders/inbox"
+        url = f"{self.ms_base_url}/me/mailFolders/inbox"
 
         response = self.session.get(url)
 
@@ -49,7 +50,7 @@ class EmailExtractor:
     def fetch_emails(self):
         inbox_id = self.get_inbox_folder_id()
 
-        url = f"https://graph.microsoft.com/v1.0/me/mailFolders/{inbox_id}/messages?$select=sender,subject,body,receivedDateTime"
+        url = f"{self.ms_base_url}/me/mailFolders/{inbox_id}/messages?$select=sender,subject,body,receivedDateTime"
 
         response = self.session.get(url)
 
