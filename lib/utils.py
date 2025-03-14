@@ -9,7 +9,7 @@ from dateutil import parser
 from loguru import logger
 from pydantic import BaseModel
 
-from lib.config import BROWSER_USER_AGENT
+from lib.config import BROWSER_USER_AGENT, MAXIMUM_RSS_CHECK_DAYS
 from lib.openai_api import generate_schema
 
 
@@ -83,15 +83,12 @@ def extract_content_from_url(original_content: str) -> str:
     return content
 
 
-MAXIMUM_CHECK_DAYS = 5
-
-
 def exceed_maximum_check_days(date: str) -> bool:
     ms = get_ms(date)
 
     now = datetime.now(timezone.utc).timestamp()
 
-    return (now - ms) > MAXIMUM_CHECK_DAYS * 24 * 60 * 60
+    return (now - ms) > MAXIMUM_RSS_CHECK_DAYS * 24 * 60 * 60
 
 
 def parse_rss_feed(feed: str):
