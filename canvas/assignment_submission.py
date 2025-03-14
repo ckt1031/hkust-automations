@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 from loguru import logger
 
 from canvas.api import get_all_assignments_from_all_courses
-from canvas.config import ENDED_COURSES
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
@@ -15,12 +14,6 @@ def get_assignment_submissions():
     results = []
 
     for assignment in assignments:
-        if assignment["course_code"] in ENDED_COURSES:
-            logger.debug(
-                f"Assignment {assignment['id']} is from an ended course, skipping"
-            )
-            continue
-
         if assignment["locked_for_user"]:
             logger.warning(f"Assignment {assignment['id']} is locked, skipping")
             continue

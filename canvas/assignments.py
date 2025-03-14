@@ -4,7 +4,6 @@ from html2text import html2text
 from loguru import logger
 
 from canvas.api import get_all_assignments_from_all_courses
-from canvas.config import ENDED_COURSES
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
@@ -30,12 +29,6 @@ def check_canvas_assignments():
     store = get_store_with_datetime(store_path)
 
     for assignment in assignments:
-        if assignment["course_code"] in ENDED_COURSES:
-            logger.debug(
-                f"Assignment {assignment['id']} is from an ended course, skipping"
-            )
-            continue
-
         # Check if the assignment has already been recorded
         if str(assignment["id"]) in store:
             logger.debug(f"Assignment {assignment['id']} was recorded, skipping")
