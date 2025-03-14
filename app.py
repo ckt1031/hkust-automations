@@ -6,12 +6,10 @@ from canvas.announcements import check_canvas_announcements
 from canvas.assignment_quizzes_table import print_assignments_quizzes_table
 from canvas.assignment_submission import check_canvas_assignments_submissions
 from canvas.assignments import check_canvas_assignments
-from canvas.discussions import check_discussions
 from canvas.download_canvas_content import download_canvas_content
 from canvas.grade_changes import check_grade_changes
 from canvas.inbox import check_canvas_inbox
 from outlook.summarize import email_summarize
-from reddit.check import check_reddit
 from usthing.course_wait_list import check_course_wait_list
 from usthing.letter_grade_change import check_letter_grade_change
 
@@ -33,9 +31,7 @@ function_dict = {
     "check_canvas_inbox": check_canvas_inbox,
     "check_canvas_grades": check_grade_changes,
     "check_canvas_assignments_submissions": check_canvas_assignments_submissions,
-    "check_canvas_discussions": check_discussions,
     "check_letter_grade_change": check_letter_grade_change,
-    "check_reddit": check_reddit,
     "download_canvas_content": download_canvas_content,
     "print_assignments_quizzes_table": print_assignments_quizzes_table,
     "check_course_wait_list": check_course_wait_list,
