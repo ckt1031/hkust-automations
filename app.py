@@ -10,7 +10,6 @@ from canvas.discussions import check_discussions
 from canvas.download_canvas_content import download_canvas_content
 from canvas.grade_changes import check_grade_changes
 from canvas.inbox import check_canvas_inbox
-from discord.grab_useful_messages import check_discord_servers
 from outlook.summarize import email_summarize
 from reddit.check import check_reddit
 from usthing.course_wait_list import check_course_wait_list
@@ -35,7 +34,6 @@ function_dict = {
     "check_canvas_grades": check_grade_changes,
     "check_canvas_assignments_submissions": check_canvas_assignments_submissions,
     "check_canvas_discussions": check_discussions,
-    "check_discord_servers": check_discord_servers,
     "check_letter_grade_change": check_letter_grade_change,
     "check_reddit": check_reddit,
     "download_canvas_content": download_canvas_content,

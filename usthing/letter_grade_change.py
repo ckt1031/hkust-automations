@@ -1,6 +1,6 @@
 from loguru import logger
 
-from discord.webhook import send_discord_webhook
+from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
 from usthing.api import get_course_grades

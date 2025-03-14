@@ -5,7 +5,7 @@ from loguru import logger
 
 from canvas.api import get_all_assignments_from_all_courses
 from canvas.config import ENDED_COURSES
-from discord.webhook import send_discord_webhook
+from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion

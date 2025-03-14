@@ -6,7 +6,7 @@ from langchain_text_splitters import (
 )
 from loguru import logger
 
-from discord.webhook import send_discord_webhook
+from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_schema
