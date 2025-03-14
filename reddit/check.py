@@ -7,10 +7,12 @@ from discord.webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_schema
-from lib.utils import extract_content_from_url
+from lib.utils import (
+    exceed_maximum_check_days,
+    extract_content_from_url,
+    parse_rss_feed,
+)
 from prompts.reddit import RedditMassPostsResponse, reddit_prompts
-from rss.news import exceed_maximum_check_days
-from rss.utils import parse_rss_feed
 
 
 def extract_reddit_content_with_comments(link: str) -> str | None:

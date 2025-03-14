@@ -1,13 +1,16 @@
 import hashlib
+import json
 import re
-from datetime import timezone
+from datetime import datetime, timezone
 
+import feedparser
+import trafilatura
 from dateutil import parser
 from loguru import logger
 from pydantic import BaseModel
 
+from lib.config import BROWSER_USER_AGENT
 from lib.openai_api import generate_schema
-from rss.utils import extract_website
 
 
 def sha2_256(text: str) -> str:
@@ -78,3 +81,35 @@ def extract_content_from_url(original_content: str) -> str:
             logger.error(f"Failed to extract article URL: {url}, error: {e}")
 
     return content
+
+
+MAXIMUM_CHECK_DAYS = 5
+
+
+def exceed_maximum_check_days(date: str) -> bool:
+    ms = get_ms(date)
+
+    now = datetime.now(timezone.utc).timestamp()
+
+    return (now - ms) > MAXIMUM_CHECK_DAYS * 24 * 60 * 60
+
+
+def parse_rss_feed(feed: str):
+    feedparser.USER_AGENT = BROWSER_USER_AGENT
+    return feedparser.parse(feed, request_headers={"Connection": "keep-alive"})
+
+
+def extract_website(link: str):
+    downloaded = trafilatura.fetch_url(link)
+    json_data = trafilatura.extract(
+        downloaded,
+        output_format="json",
+        with_metadata=True,
+    )
+
+    if json_data is None:
+        raise ValueError("No content extracted from the website")
+
+    # Each item
+    # title, link, summary, published, id, author
+    return json.loads(json_data)

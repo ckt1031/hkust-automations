@@ -24,7 +24,6 @@ jobs:
       - name: Run Script
         run: |
           uv run app.py check_reddit
-          uv run app.py check_rss_news
           uv run app.py check_canvas_discussions
           uv run app.py check_canvas_assignments_submissions
         env:
