@@ -27,6 +27,7 @@ jobs:
           uv run app.py check_canvas_assignments_submissions
         env:
           LOGURU_LEVEL: "INFO"
+          CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}
 
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
