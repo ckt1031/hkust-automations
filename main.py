@@ -2,16 +2,16 @@ import sys
 
 from loguru import logger
 
-from canvas.announcements import check_canvas_announcements
-from canvas.assignment_quizzes_table import print_assignments_quizzes_table
-from canvas.assignment_submission import check_canvas_assignments_submissions
-from canvas.assignments import check_canvas_assignments
-from canvas.download_canvas_content import download_canvas_content
-from canvas.grade_changes import check_grade_changes
-from canvas.inbox import check_canvas_inbox
-from outlook.summarize import email_summarize
-from usthing.course_wait_list import check_course_wait_list
-from usthing.letter_grade_change import check_letter_grade_change
+from lib.canvas.announcements import check_canvas_announcements
+from lib.canvas.assignment_quizzes_table import print_assignments_quizzes_table
+from lib.canvas.assignment_submission import check_canvas_assignments_submissions
+from lib.canvas.assignments import check_canvas_assignments
+from lib.canvas.download_canvas_content import download_canvas_content
+from lib.canvas.grade_changes import check_grade_changes
+from lib.canvas.inbox import check_canvas_inbox
+from lib.outlook.summarize import email_summarize
+from lib.usthing.course_wait_list import check_course_wait_list
+from lib.usthing.letter_grade_change import check_letter_grade_change
 
 # Remove loggers time, level
 logger.remove()

@@ -1,9 +1,9 @@
 from loguru import logger
+from usthing.api import get_class_enrollments
 
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store, save_store
-from usthing.api import get_class_enrollments
 
 
 def check_course_wait_list():

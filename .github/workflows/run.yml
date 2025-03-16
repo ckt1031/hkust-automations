@@ -21,7 +21,7 @@ jobs:
       - run: uv pip install -r requirements.txt
 
       - name: Run Script
-        run: uv run app.py all
+        run: uv run main.py all
         env:
           LOGURU_LEVEL: "INFO"
           CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}

@@ -1,14 +1,14 @@
 from datetime import datetime, timezone
 
+from canvas.api import get_all_assignments_from_all_courses
 from html2text import html2text
 from loguru import logger
+from prompts import summary
 
-from canvas.api import get_all_assignments_from_all_courses
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
-from prompts import summary
 
 
 def check_canvas_assignments():

@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
+from canvas.api import get_all_assignments_from_all_courses
 from loguru import logger
 
-from canvas.api import get_all_assignments_from_all_courses
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime

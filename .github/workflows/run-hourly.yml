@@ -22,9 +22,9 @@ jobs:
 
       - name: Run Script
         run: |
-          uv run app.py check_course_wait_list
-          uv run app.py check_letter_grade_change
-          uv run app.py check_canvas_assignments_submissions
+          uv run main.py check_course_wait_list
+          uv run main.py check_letter_grade_change
+          uv run main.py check_canvas_assignments_submissions
         env:
           LOGURU_LEVEL: "INFO"
           CANVAS_API_KEY: ${{ secrets.CANVAS_API_KEY }}

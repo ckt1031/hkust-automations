@@ -1,7 +1,6 @@
+from canvas.assignment_submission import get_assignment_submissions
 from loguru import logger
 from prettytable import PrettyTable
-
-from canvas.assignment_submission import get_assignment_submissions
 
 
 def print_assignments_quizzes_table():
