@@ -5,21 +5,12 @@ class EmailSummarySchema(BaseModel):
     available: bool = Field(
         ..., description="Whether there are valuable emails to summarize"
     )
-    important_message_summary: str = Field(
-        ...,
-        description="Summary of important messages",
+    info_summary: str = Field(
+        ..., description="Important messages and general information"
     )
-    event_summary: str = (
-        Field(
-            ...,
-            description="Summary of events, activities",
-        ),
-    )
-    program_opportunities_summary: str = (
-        Field(
-            ...,
-            description="Summary of program and opportunities",
-        ),
+    event_summary: str = Field(..., description="Events and activities")
+    opportunities_summary: str = Field(
+        ..., description="Summary of program and opportunities"
     )
 
 
@@ -30,12 +21,15 @@ Analyze and summarize university emails, extracting key information and prioriti
 # Summary Format
 
 - Markdown format for summaries.
+- Focus on main body.
+    There are reply references if the email is a reply, do not summarize them and do not summary previous replies.
 - Prioritize important and urgent information.
 - Include all crucial information while keeping summaries concise.
 - Keep summaries simple, concise, clear, and direct. No extra comments.
 - Address the student using "you" in summaries.
 - Bold important words, dates, times, and locations using asterisks (*).
 - Use descriptive subheadings (using ##) based on the email content, instead of generic titles.
+    - Discrete and specific subheadings are preferred.
     - Example: Use ## Grade for COMP1021 Released instead of ## Grades.
 - Group general information items under a `## Information` subheading if multiple items exist.
     - Use a numbered list for each item under this subheading.
@@ -43,6 +37,7 @@ Analyze and summarize university emails, extracting key information and prioriti
 - Use markdown links [Link Text](<URL in single line>) for important links.
     - Link text must not be the URL itself, but a descriptive text.
     - The links must be valid and accessible, without random newlines or spaces.
+    - Make sure to wrap the URL in angle brackets (<>) and keep it in a single line.
     - For email addresses, do not use mailto:, just show the email address.
         - Example: For inquiries, contact enggexplore@ust.hk
         - Do not use [enggexplore@ust.hk](mailto:enggexplore@ust.hk) or mailto:enggexplore@ust.hk

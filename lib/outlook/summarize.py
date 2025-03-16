@@ -57,7 +57,7 @@ def email_summarize():
 
     # YYYY-MM-DD (Weekday)
     today_date = datetime.now().strftime("%Y-%m-%d (%A)")
-    email_user_prompt = f"Date: {today_date}\n\n---\n\n"
+    email_user_prompt = f"Current Date: {today_date}\n\n"
 
     store_path = "email_record.json"
     store = get_store_with_datetime(store_path)
@@ -76,7 +76,18 @@ def email_summarize():
             )
             continue
 
-        email_user_prompt += f"Subject: {email['subject']}\nFrom: {email['from']}\nBody:\n\n{email['body']}\n\n---\n\n"
+        prompt = f"Subject: {email['subject']}\nFrom: {email['from']}\nDate: {email['date']}\nMain body:\n\n--- Main Body START ---\n\n{email['body']}\n\n--- Main Body END ---"
+
+        if email["is_reply"]:
+            prompt += "\n\nThis is a reply email. Previous replies:"
+            for reply in email["replies_body"]:
+                prompt += f"\n\n-- Reply START --\n\nReceived on {reply['date']}\n\n{reply['body']}\n\n-- Reply END --"
+
+        index = len(checking_emails) + 1
+        email_user_prompt += (
+            f"--- Email {index} START ---\n\n{prompt}\n\n--- Email {index} END ---\n\n"
+        )
+
         checking_emails.append(email)
 
     # If there are no unchecked emails, exit the program
@@ -93,9 +104,9 @@ def email_summarize():
 
     if llm_response.available:
         summaries = [
+            [llm_response.info_summary, webhook_url_email],
             [llm_response.event_summary, webhook_url_events],
-            [llm_response.important_message_summary, webhook_url_email],
-            [llm_response.program_opportunities_summary, webhook_url_opportunities],
+            [llm_response.opportunities_summary, webhook_url_opportunities],
         ]
 
         for summary_data in summaries:
