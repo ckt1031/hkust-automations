@@ -36,7 +36,7 @@ def is_recorded(data: list[dict[str, datetime]], item_id: str):
     return False
 
 
-def get_store(path: str):
+def get_store(path: str) -> dict[str, str]:
     default = {}
 
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
@@ -47,14 +47,12 @@ def get_store(path: str):
         logger.debug(f"Store file not found: {path}, returning default")
         return default
 
-    if response.status_code >= 400:
+    if response.status_code >= 300:
         raise Exception(f"Error getting store file: {response.text}")
-
-    data: dict[str, str] = response.json()
 
     logger.debug(f"Loaded store file: {path}")
 
-    return data
+    return response.json()
 
 
 def save_store(path: str, d: dict | list):

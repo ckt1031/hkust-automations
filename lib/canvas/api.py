@@ -7,6 +7,17 @@ from loguru import logger
 from lib.env import getenv
 
 
+def get_course_code(course_code: str) -> str:
+    # Example:
+    # course_code = "COMP1021 (L1)" -> "COMP1021"
+
+    # Check if course_code has brackets
+    if "(" in course_code:
+        return course_code.split(" ")[0]
+
+    return course_code.split(" ")[0]
+
+
 def canvas_response(path: str, params=None) -> dict | list:
     if params is None:
         params = []
@@ -66,13 +77,11 @@ def get_discussion_topics(
 
 
 def get_discussion_topic_data(course_id: str, topic_id: str) -> dict:
-    path = f"/courses/{course_id}/discussion_topics/{topic_id}"
-    return canvas_response(path)
+    return canvas_response(f"/courses/{course_id}/discussion_topics/{topic_id}")
 
 
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
-    path = f"/courses/{course_id}/discussion_topics/{topic_id}/view"
-    return canvas_response(path)
+    return canvas_response(f"/courses/{course_id}/discussion_topics/{topic_id}/view")
 
 
 def get_assignment_groups(course_id: str) -> list:
@@ -85,17 +94,6 @@ def get_assignment_groups(course_id: str) -> list:
     ]
 
     return canvas_response(path, params=params)
-
-
-def get_course_code(course_code: str) -> str:
-    # Example:
-    # course_code = "COMP1021 (L1)" -> "COMP1021"
-
-    # Check if course_code has brackets
-    if "(" in course_code:
-        return course_code.split(" ")[0]
-
-    return course_code.split(" ")[0]
 
 
 @cache
@@ -128,8 +126,11 @@ def get_all_assignments_from_all_courses():
     for course in courses:
         course_id = str(course["id"])
 
-        _assignments = get_assignments(course["name"], course["course_code"], course_id)
-        assignments.extend(_assignments)
+        fetched_assignment = get_assignments(
+            course["name"], course["course_code"], course_id
+        )
+
+        assignments.extend(fetched_assignment)
 
     return assignments
 
