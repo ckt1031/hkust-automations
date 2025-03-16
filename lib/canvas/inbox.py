@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta, timezone
 
-from canvas.api import get_conversation_detail, get_conversations
 from loguru import logger
-from prompts.summary import summary_prompt
 
+from lib.canvas.api import get_conversation_detail, get_conversations
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
+from lib.prompts.summary import summary_prompt
 
 
 def check_canvas_inbox():

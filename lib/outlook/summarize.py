@@ -5,14 +5,14 @@ from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
 from loguru import logger
-from outlook.extractor import EmailExtractor
-from outlook.store import prune_email_store
-from prompts.email_summarize import EmailSummarySchema, email_summary_prompt
 
 from lib.discord_webhook import send_discord_webhook
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_schema
+from lib.outlook.extractor import EmailExtractor
+from lib.outlook.store import prune_email_store
+from lib.prompts.email_summarize import EmailSummarySchema, email_summary_prompt
 
 
 def split_text_and_send_to_discord(text: str, webhook_url: str):

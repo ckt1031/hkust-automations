@@ -18,13 +18,7 @@ logger.remove()
 logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 function_dict = {
-    "all": lambda: [
-        email_summarize(),
-        check_canvas_inbox(),
-        check_canvas_assignments(),
-        check_canvas_announcements(),
-        check_grade_changes(),
-    ],
+    "all": lambda: print("Running all tasks..."),
     "email_summarize": email_summarize,
     "check_canvas_assignments": check_canvas_assignments,
     "check_canvas_announcements": check_canvas_announcements,
@@ -41,23 +35,34 @@ function_dict = {
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         short_code = sys.argv[1]
+
+        # If the short_code is all, run all tasks, but prevent the user from running the exit task
+        if short_code == "all":
+            for name, func in function_dict.items():
+                if name != "exit":
+                    func()
+
+            # Exit after running all tasks
+            sys.exit(0)
+
         if short_code in function_dict:
             function_dict[short_code]()
         else:
             raise ValueError("Invalid short code")
+
         sys.exit(0)
 
     for i, (name, func) in enumerate(function_dict.items(), 1):
         print(f"[{i}] {name.replace('_', ' ').title()}")
 
-    choice = input("\nEnter the number of the function you want to run: ")
+    choice = input("\nEnter the number of the task you want to run: ")
 
     if not choice.isdigit():
-        raise ValueError(f"Invalid choice: {choice}")
+        raise ValueError(f"Invalid task: {choice}")
 
     choice_index = int(choice) - 1
 
     if choice_index >= len(function_dict) or choice_index < 0:
-        raise ValueError(f"Invalid choice: {choice}")
+        raise ValueError(f"Invalid task: {choice}")
 
     list(function_dict.values())[choice_index]()

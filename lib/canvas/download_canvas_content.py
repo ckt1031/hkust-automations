@@ -1,7 +1,12 @@
 import os
 
 import requests
-from canvas.api import (
+from html2text import html2text
+from loguru import logger
+from mistralai import Mistral
+from slugify import slugify
+
+from lib.canvas.api import (
     canvas_response,
     get_assignments,
     get_courses,
@@ -9,11 +14,6 @@ from canvas.api import (
     get_modules,
     get_single_module_item,
 )
-from html2text import html2text
-from loguru import logger
-from mistralai import Mistral
-from slugify import slugify
-
 from lib.env import getenv
 from lib.openai_api import generate_chat_completion
 
