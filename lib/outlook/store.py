@@ -3,20 +3,25 @@ from datetime import datetime, timedelta, timezone
 from loguru import logger
 
 
-def prune_email_store(data: dict[str, datetime]):
+def prune_email_store(data: dict[str, datetime]) -> dict[str, datetime]:
     """
-    Prune the email store to remove emails older than 7
-    days
-    """
+    Prunes the email store to remove emails older than 7 days.
+    Creates a new dictionary containing only emails within the last 7 days.
 
-    new_list = data.copy()
+    Args:
+        data: A dictionary where keys are email IDs (str) and values are
+            datetimes (datetime) representing the email's timestamp.
+
+    Returns:
+        A new dictionary containing only the emails that are not older than 7 days.
+    """
+    new_dict = {}
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=7)
 
     for item_id, value in data.items():
-        # If the email is older than 7 days, remove it
-        if value < (datetime.now(timezone.utc) - timedelta(days=7)):
-            # Remove the email from the list
-            del new_list[item_id]
-
+        if value >= cutoff_date:  # Keep emails that are *not* older than 7 days
+            new_dict[item_id] = value
+        else:
             logger.debug(f"Email {item_id} removed from the store (older than 7 days)")
 
-    return new_list
+    return new_dict
