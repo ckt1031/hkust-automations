@@ -51,8 +51,7 @@ def convert_safelinks_from_text(text: str) -> str:
         return decoded_url if decoded_url else safe_link
 
     # Use re.sub to find all Safe Links and replace them with the decoded URLs.
-    processed_text = re.sub(safe_link_pattern, replace_safe_link, text)
-    return processed_text
+    return re.sub(safe_link_pattern, replace_safe_link, text)
 
 
 def process_html_to_text(html: str) -> str:
@@ -72,13 +71,13 @@ class EmailExtractor:
         self.ms_base_url = "https://graph.microsoft.com/v1.0"
         self.access_token = get_own_app_private_graph_token()
 
-        headers = {
-            "Authorization": f"Bearer {self.access_token}",
-            "Content-Type": "application/json",
-        }
-
         self.session = requests.Session()
-        self.session.headers.update(headers)
+        self.session.headers.update(
+            {
+                "Authorization": f"Bearer {self.access_token}",
+                "Content-Type": "application/json",
+            }
+        )
 
     def get_inbox_folder_id(self):
         url = f"{self.ms_base_url}/me/mailFolders/inbox"
@@ -145,9 +144,11 @@ class EmailExtractor:
         emails = []
 
         for email in self.fetch_emails():
-            is_reply = "singleValueExtendedProperties" in email
-            replies_body = []
             unique_body = process_html_to_text(email["uniqueBody"]["content"])
+
+            # Replies to the email
+            replies_body = None
+            is_reply = "singleValueExtendedProperties" in email
 
             # If email is a reply, fetch more details
             if is_reply:
@@ -155,15 +156,17 @@ class EmailExtractor:
 
                 # Remove the original email from the replies, one with the same id
                 replies = [reply for reply in replies if reply["id"] != email["id"]]
-                for reply in replies:
-                    replies_body.append(
-                        {
-                            "date": reply["receivedDateTime"],
-                            "body": process_html_to_text(
-                                reply["uniqueBody"]["content"]
-                            ),
-                        }
-                    )
+
+                replies_body = [
+                    {
+                        "id": reply["id"],
+                        "subject": reply["subject"].strip(),
+                        "from": reply["sender"]["emailAddress"]["name"],
+                        "date": reply["receivedDateTime"],
+                        "body": process_html_to_text(reply["uniqueBody"]["content"]),
+                    }
+                    for reply in replies
+                ]
 
             emails.append(
                 {
@@ -171,7 +174,7 @@ class EmailExtractor:
                     "subject": email["subject"].strip(),
                     "from": email["sender"]["emailAddress"]["name"],
                     "date": email["receivedDateTime"],
-                    "body": unique_body,
+                    "body": unique_body.strip(),
                     "is_reply": is_reply,
                     "replies_body": replies_body,
                 }
