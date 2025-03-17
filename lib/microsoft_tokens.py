@@ -4,8 +4,6 @@ import requests
 
 from lib.env import getenv
 
-TMP_FOLDER = "./tmp"
-
 
 def get_me_info(token: str):
     url = "https://graph.microsoft.com/v1.0/me"
