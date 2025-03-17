@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 
-import html2text
 from loguru import logger
 
 from lib.canvas.api import get_courses, get_discussion_topics
@@ -9,17 +8,14 @@ from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
 from lib.prompts.summary import summary_prompt
+from lib.utils import process_html_to_text
 
 
 def handle_single_announcement(course: dict, topic: dict):
     webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
-    txt = html2text.HTML2Text()
-    txt.ignore_emphasis = True
-    txt.ignore_images = True
-
     # Convert HTML to plain text
-    raw_text = txt.handle(topic["message"])
+    raw_text = process_html_to_text(topic["message"])
 
     content = f"Course: {course['name']}\nTitle: {topic['title']}\nContent: {raw_text}"
 

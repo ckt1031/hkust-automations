@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 
-from html2text import html2text
 from loguru import logger
 
 from lib.canvas.api import get_all_assignments_from_all_courses
@@ -9,6 +8,7 @@ from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_chat_completion
 from lib.prompts import summary
+from lib.utils import process_html_to_text
 
 
 def check_canvas_assignments():
@@ -80,7 +80,7 @@ def check_canvas_assignments():
             assignment["description"] is not None
             and len(assignment["description"].strip()) > 0
         ):
-            assignment["description"] = html2text(assignment["description"])
+            assignment["description"] = process_html_to_text(assignment["description"])
             user_prompt = f"Name: {assignment['name']}\nCourse: {assignment['course_name']}\nDescription: {assignment['description']}"
 
             llm_response = generate_chat_completion(
