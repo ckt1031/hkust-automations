@@ -1,3 +1,4 @@
+import textwrap
 from datetime import datetime, timezone
 
 from langchain_text_splitters import (
@@ -76,17 +77,30 @@ def email_summarize():
             )
             continue
 
-        prompt = f"Subject: {email['subject']}\nFrom: {email['from']}\nDate: {email['date']}\nMain body:\n\n--- Main Body START ---\n\n{email['body']}\n\n--- Main Body END ---"
+        # Basic information about the email
+        prompt = (
+            f"Subject: {email['subject']}\nFrom: {email['from']}\nDate: {email['date']}"
+        )
+        # Main body
+        prompt += (
+            f"\n\n--- Main Body START ---\n\n{email['body']}\n\n--- Main Body END ---"
+        )
 
-        if email["is_reply"]:
-            prompt += "\n\nThis is a reply email. Previous replies:"
+        if email["is_reply"] and len(email["replies_body"]) > 0:
+            # Add the replies to the email
             for reply in email["replies_body"]:
-                prompt += f"\n\n-- Reply START --\n\nReceived on {reply['date']}\n\n{reply['body']}\n\n-- Reply END --"
+                # Label the reply number for LLM to understand the context
+                index = email["replies_body"].index(reply) + 1
+                reply_content = f"Subject: {reply['subject']}\nFrom: {reply['from']}\nDate: {reply['date']}\n\n{reply['body']}"
+
+                # Wrap it up
+                reply_content = f"\n\n--- Reply {index} START ---\n\n{reply_content}\n\n--- Reply {index} END ---"
+
+                # Indent the reply content
+                prompt += textwrap.indent(reply_content, "    ")
 
         index = len(checking_emails) + 1
-        email_user_prompt += (
-            f"--- Email {index} START ---\n\n{prompt}\n\n--- Email {index} END ---\n\n"
-        )
+        email_user_prompt += f"==== Email {index} START ====\n\n{prompt}\n\n==== Email {index} END ====\n\n"
 
         checking_emails.append(email)
 
