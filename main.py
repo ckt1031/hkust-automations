@@ -5,7 +5,7 @@ from loguru import logger
 from lib.canvas.announcements import check_canvas_announcements
 from lib.canvas.assignment_submission import check_canvas_assignments_submissions
 from lib.canvas.assignments import check_canvas_assignments
-from lib.canvas.grade_changes import check_grade_changes
+from lib.canvas.grade_changes import check_canvas_grade_changes
 from lib.canvas.inbox import check_canvas_inbox
 from lib.outlook.summarize import email_summarize
 from lib.usthing.course_wait_list import check_course_wait_list
@@ -21,7 +21,7 @@ function_dict = {
     "check_canvas_assignments": check_canvas_assignments,
     "check_canvas_announcements": check_canvas_announcements,
     "check_canvas_inbox": check_canvas_inbox,
-    "check_canvas_grades": check_grade_changes,
+    "check_canvas_grades": check_canvas_grade_changes,
     "check_canvas_assignments_submissions": check_canvas_assignments_submissions,
     "check_letter_grade_change": check_letter_grade_change,
     "check_course_wait_list": check_course_wait_list,

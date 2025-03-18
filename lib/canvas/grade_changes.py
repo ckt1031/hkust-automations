@@ -13,7 +13,7 @@ from lib.onedrive_store import get_store, save_store
 # }
 
 
-def check_grade_changes():
+def check_canvas_grade_changes():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
@@ -52,8 +52,8 @@ def check_grade_changes():
             )
             continue
 
-        original_field = "```diff\n- " + store[course_id][assignment["id"]] + "\n```"
-        new_field = "```diff\n+ " + assignment["submission"]["grade"] + "\n```"
+        original_field = f"```diff\n- {store[course_id][assignment['id']]}\n```"
+        new_field = f"```diff\n+ {assignment['submission']['grade']}\n```"
 
         embed = {
             "title": f"Grade change for {assignment['name']}",
