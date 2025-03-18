@@ -28,14 +28,6 @@ def drive_api(method="GET", path="", data=None):
     return response
 
 
-def is_recorded(data: list[dict[str, datetime]], item_id: str):
-    for item in data:
-        if item.get(str(item_id)):
-            return True
-
-    return False
-
-
 def get_store(path: str) -> dict[str, str]:
     default = {}
 

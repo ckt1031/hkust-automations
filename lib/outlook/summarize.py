@@ -137,8 +137,7 @@ def email_summarize():
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in checking_emails:
-        current_time = datetime.now(tz=timezone.utc)
-        store[email["id"]] = current_time
+        store[email["id"]] = datetime.now(tz=timezone.utc)
 
     # Save the email store
     save_store_with_datetime(store_path, store)

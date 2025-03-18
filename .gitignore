@@ -1,15 +1,5 @@
 .venv
-.env*
 .env
-!.env.example
-*.db
 **/__pycache__/
-unexpected_sender.txt
-access_token.json
 .idea
-tmp
-dist
-build
-app.spec
-downloaded_files
 .DS_Store

@@ -1,7 +1,7 @@
 import re
 import urllib.parse
 
-import html2text
+from html2text import HTML2Text
 from loguru import logger
 
 
@@ -50,7 +50,7 @@ def convert_safelinks_from_text(text: str) -> str:
 
 
 def process_html_to_text(html: str) -> str:
-    txt = html2text.HTML2Text(bodywidth=0)
+    txt = HTML2Text(bodywidth=0)
     txt.ignore_emphasis = True
     txt.ignore_images = True
 

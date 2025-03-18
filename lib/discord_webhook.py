@@ -9,20 +9,15 @@ cache = TTLCache(maxsize=10, ttl=60)
 
 
 def get_cooldown_status():
-    expiry = cache.get("remaining_expiry", datetime.now().isoformat())
-    expiry = datetime.fromisoformat(expiry)
-
-    data = {
-        "cooldown_required": cache.get("cooldown_required", False),
-        "remaining_expiry": expiry,
+    return {
+        "required": cache.get("required", False),
+        "expiry": cache.get("expiry", datetime.now()),
     }
 
-    return data
 
-
-def set_cooldown_status(cooldown_required: bool, remaining_expiry: datetime):
-    cache["cooldown_required"] = cooldown_required
-    cache["remaining_expiry"] = remaining_expiry.isoformat()
+def set_cooldown_status(required: bool, expiry: datetime):
+    cache["required"] = required
+    cache["expiry"] = expiry
 
 
 def send_discord_webhook(
@@ -31,22 +26,19 @@ def send_discord_webhook(
     embed: dict | None = None,
     username="School",
 ):
-    cooldown_status = get_cooldown_status()
+    now = datetime.now()
+    status = get_cooldown_status()
 
-    if (
-        cooldown_status["cooldown_required"]
-        and cooldown_status["remaining_expiry"] > datetime.now()
-    ):
-        seconds_left = (
-            cooldown_status["remaining_expiry"] - datetime.now()
-        ).total_seconds()
+    if status["required"] and (status["expiry"] > now):
+        seconds_left: timedelta = status["expiry"] - now
+        seconds_left = seconds_left.total_seconds()
 
-        logger.debug(
-            f"Discord webhook rate limit reached, sleeping for {seconds_left}s"
-        )
+        logger.debug(f"Discord ratelimit reached, sleeping for {seconds_left}s")
 
+        # Sleep for the remaining cooldown time
         sleep(seconds_left)
 
+        # Reset the cooldown status
         set_cooldown_status(False, datetime.now())
 
     data = {"content": message, "username": username}
@@ -59,7 +51,7 @@ def send_discord_webhook(
 
     if response.status_code != 204:
         raise ValueError(
-            f"Discord webhook returned status code {response.status_code}",
+            f"Discord webhook request failed {response.status_code}",
             response.text,
         )
 
@@ -70,8 +62,6 @@ def send_discord_webhook(
     if remaining is None or reset_after is None:
         return
 
-    remaining = int(remaining)
-
-    if remaining == 1:
-        expiry = datetime.now() + timedelta(seconds=float(reset_after))
-        set_cooldown_status(True, expiry)
+    if int(remaining) == 1:
+        expiry = now + timedelta(seconds=float(reset_after))
+        set_cooldown_status(required=True, expiry=expiry)
