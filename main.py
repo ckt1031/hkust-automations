@@ -2,14 +2,16 @@ import sys
 
 from loguru import logger
 
-from lib.canvas.announcements import check_canvas_announcements
-from lib.canvas.assignment_submission import check_canvas_assignments_submissions
-from lib.canvas.assignments import check_canvas_assignments
-from lib.canvas.grade_changes import check_canvas_grade_changes
-from lib.canvas.inbox import check_canvas_inbox
-from lib.outlook.summarize import email_summarize
-from lib.usthing.course_wait_list import check_course_wait_list
-from lib.usthing.letter_grade_change import check_letter_grade_change
+from lib.canvas import (
+    notify_canvas_new_announcements,
+    notify_canvas_new_assignments,
+    notify_canvas_new_canvas_assignments_submissions,
+    notify_canvas_new_canvas_grades,
+    notify_canvas_new_canvas_inbox,
+)
+from lib.outlook.summarize import summarize_outlook
+from lib.usthing.course_wait_list import notify_course_wait_list
+from lib.usthing.letter_grade_change import notify_letter_grade_change
 
 # Remove loggers time, level
 logger.remove()
@@ -17,14 +19,14 @@ logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
 function_dict = {
     "all": lambda: print("Running all tasks..."),
-    "email_summarize": email_summarize,
-    "check_canvas_assignments": check_canvas_assignments,
-    "check_canvas_announcements": check_canvas_announcements,
-    "check_canvas_inbox": check_canvas_inbox,
-    "check_canvas_grades": check_canvas_grade_changes,
-    "check_canvas_assignments_submissions": check_canvas_assignments_submissions,
-    "check_letter_grade_change": check_letter_grade_change,
-    "check_course_wait_list": check_course_wait_list,
+    "summarize_outlook": summarize_outlook,
+    "notify_canvas_new_assignments": notify_canvas_new_assignments,
+    "notify_canvas_new_announcements": notify_canvas_new_announcements,
+    "notify_canvas_new_canvas_inbox": notify_canvas_new_canvas_inbox,
+    "notify_canvas_new_canvas_grades": notify_canvas_new_canvas_grades,
+    "notify_canvas_new_canvas_assignments_submissions": notify_canvas_new_canvas_assignments_submissions,
+    "notify_letter_grade_change": notify_letter_grade_change,
+    "notify_course_wait_list": notify_course_wait_list,
     "exit": lambda: sys.exit(0),
 }
 

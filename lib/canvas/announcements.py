@@ -52,7 +52,7 @@ def handle_single_announcement(course: dict, topic: dict):
     logger.success(f"Announcement {topic['id']} has been sent to Discord")
 
 
-def check_canvas_announcements():
+def notify_canvas_new_announcements():
     webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook is None:

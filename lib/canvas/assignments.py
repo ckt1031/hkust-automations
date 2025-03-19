@@ -11,7 +11,7 @@ from lib.prompts import summary
 from lib.utils import process_html_to_text
 
 
-def check_canvas_assignments():
+def notify_canvas_new_assignments():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:

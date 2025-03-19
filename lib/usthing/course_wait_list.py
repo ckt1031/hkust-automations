@@ -6,7 +6,7 @@ from lib.onedrive_store import get_store, save_store
 from lib.usthing.api import get_class_enrollments
 
 
-def check_course_wait_list():
+def notify_course_wait_list():
     user_id = getenv("DISCORD_USER_ID")
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 

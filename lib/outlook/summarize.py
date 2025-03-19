@@ -41,7 +41,7 @@ def split_text_and_send_to_discord(text: str, webhook_url: str):
         )
 
 
-def email_summarize():
+def summarize_outlook():
     webhook_url_email = getenv("DISCORD_WEBHOOK_URL_EMAILS")
     webhook_url_events = getenv("DISCORD_WEBHOOK_URL_EMAILS_EVENTS")
     webhook_url_opportunities = getenv("DISCORD_WEBHOOK_URL_EMAILS_OPPORTUNITIES")

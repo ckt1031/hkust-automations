@@ -10,7 +10,7 @@ from lib.openai_api import generate_chat_completion
 from lib.prompts.summary import summary_prompt
 
 
-def check_canvas_inbox():
+def notify_canvas_new_canvas_inbox():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:

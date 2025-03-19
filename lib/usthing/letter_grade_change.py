@@ -6,7 +6,7 @@ from lib.onedrive_store import get_store, save_store
 from lib.usthing.api import get_course_grades
 
 
-def check_letter_grade_change():
+def notify_letter_grade_change():
     data = get_course_grades()
 
     store_path = "letter_grade_change.json"

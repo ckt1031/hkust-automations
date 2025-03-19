@@ -13,7 +13,7 @@ from lib.onedrive_store import get_store, save_store
 # }
 
 
-def check_canvas_grade_changes():
+def notify_canvas_new_canvas_grades():
     webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
 
     if webhook_url is None:
