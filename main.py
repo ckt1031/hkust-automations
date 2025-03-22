@@ -17,8 +17,19 @@ from lib.usthing.letter_grade_change import notify_letter_grade_change
 logger.remove()
 logger.add(sys.stdout, format="{time}: [<level>{level}</level>] {message}")
 
+
+def run_all():
+    print("Running all tasks...")
+
+    for name, func in function_dict.items():
+        if name != "exit" and name != "all":
+            func()
+
+    sys.exit(0)  # Exit after running all tasks
+
+
 function_dict = {
-    "all": lambda: print("Running all tasks..."),
+    "all": run_all,
     "summarize_outlook": summarize_outlook,
     "notify_canvas_new_assignments": notify_canvas_new_assignments,
     "notify_canvas_new_announcements": notify_canvas_new_announcements,
@@ -34,15 +45,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         short_code = sys.argv[1]
 
-        # If the short_code is all, run all tasks, but prevent the user from running the exit task
-        if short_code == "all":
-            for name, func in function_dict.items():
-                if name != "exit":
-                    func()
-
-            # Exit after running all tasks
-            sys.exit(0)
-
         if short_code in function_dict:
             function_dict[short_code]()
         else:
@@ -54,6 +56,9 @@ if __name__ == "__main__":
         print(f"[{i}] {name.replace('_', ' ').title()}")
 
     choice = input("\nEnter the number of the task you want to run: ")
+
+    # Print new line
+    print()
 
     if not choice.isdigit():
         raise ValueError(f"Invalid task: {choice}")
