@@ -12,12 +12,7 @@ def notify_letter_grade_change():
     store_path = "letter_grade_change.json"
     store = get_store(store_path)
 
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
-
-    if webhook_url is None:
-        raise ValueError(
-            "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
-        )
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
 
     grades = data["stdtInfo"][0]["stdtCourseGrade"]
 

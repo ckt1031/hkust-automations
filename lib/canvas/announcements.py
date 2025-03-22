@@ -12,7 +12,7 @@ from lib.utils import process_html_to_text
 
 
 def handle_single_announcement(course: dict, topic: dict):
-    webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
+    webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
 
     # Convert HTML to plain text
     raw_text = process_html_to_text(topic["message"])
@@ -53,13 +53,6 @@ def handle_single_announcement(course: dict, topic: dict):
 
 
 def notify_canvas_new_announcements():
-    webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS")
-
-    if webhook is None:
-        raise ValueError(
-            "DISCORD_WEBHOOK_URL_CANVAS is not provided in the environment variables"
-        )
-
     courses = get_courses()
 
     store_path = "canvas_announcement_record.json"

@@ -42,16 +42,12 @@ def split_text_and_send_to_discord(text: str, webhook_url: str):
 
 
 def summarize_outlook():
-    webhook_url_email = getenv("DISCORD_WEBHOOK_URL_EMAILS")
-    webhook_url_events = getenv("DISCORD_WEBHOOK_URL_EMAILS_EVENTS")
-    webhook_url_opportunities = getenv("DISCORD_WEBHOOK_URL_EMAILS_OPPORTUNITIES")
-
-    if (
-        webhook_url_email is None
-        or webhook_url_events is None
-        or webhook_url_opportunities is None
-    ):
-        raise ValueError("All email webhooks must be set")
+    # Get the webhook URLs
+    webhook_url_email = getenv("DISCORD_WEBHOOK_URL_EMAILS", required=True)
+    webhook_url_events = getenv("DISCORD_WEBHOOK_URL_EMAILS_EVENTS", required=True)
+    webhook_url_opportunities = getenv(
+        "DISCORD_WEBHOOK_URL_EMAILS_OPPORTUNITIES", required=True
+    )
 
     # Extract emails
     emails = EmailExtractor().extract_emails()

@@ -42,14 +42,8 @@ def get_assignment_submissions():
 
 
 def notify_canvas_new_canvas_assignments_submissions():
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS")
-    user_id = getenv("DISCORD_USER_ID")
-
-    if webhook_url is None:
-        raise ValueError("DISCORD_WEBHOOK_URL_CANVAS is not set")
-
-    if user_id is None:
-        raise ValueError("DISCORD_USER_ID is not set")
+    discord_user_id = getenv("DISCORD_USER_ID", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
 
     assignments = get_assignment_submissions()
 
@@ -87,7 +81,7 @@ def notify_canvas_new_canvas_assignments_submissions():
             "color": 0xFF492F,
         }
 
-        message = f"<@{user_id}>"
+        message = f"<@{discord_user_id}>"
 
         send_discord_webhook(webhook_url, message=message, embed=embed)
 
