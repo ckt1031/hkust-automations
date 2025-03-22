@@ -48,7 +48,7 @@ def notify_canvas_new_canvas_grades():
 
         if store[course_id][assignment["id"]] == assignment["submission"]["grade"]:
             logger.debug(
-                f"Grade for assignment {assignment['id']} in course {course_id} has not changed ({assignment['submission']['grade']}/{assignment['points_possible']})"
+                f"Assignment {assignment['id']} ({course_id}) grade has no change"
             )
             continue
 
@@ -75,9 +75,7 @@ def notify_canvas_new_canvas_grades():
 
         send_discord_webhook(webhook_url, embed=embed, username="Canvas")
 
-        logger.success(
-            f"Grade for assignment {assignment['id']} in course {course_id} has changed from {store[course_id][assignment['id']]} to {assignment['submission']['grade']}"
-        )
+        logger.success(f"New assignment grade for {assignment['id']} ({course_id})")
 
         store[course_id][assignment["id"]] = assignment["submission"]["grade"]
 

@@ -106,7 +106,7 @@ def summarize_outlook():
 
     # If there are no unchecked emails, exit the program
     if len(checking_emails) == 0:
-        logger.success("No unchecked emails found")
+        logger.success("No new emails to summarize")
         return
 
     # Call the LLM model to summarize the emails
