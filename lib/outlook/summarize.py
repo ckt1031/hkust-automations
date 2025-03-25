@@ -105,6 +105,8 @@ def summarize_outlook():
         logger.success("No new emails to summarize")
         return
 
+    exit()
+
     # Call the LLM model to summarize the emails
     llm_response = generate_schema(
         system_message=email_summary_prompt,
