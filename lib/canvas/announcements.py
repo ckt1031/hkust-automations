@@ -12,7 +12,7 @@ from lib.utils import process_html_to_text
 
 
 def handle_single_announcement(course: dict, topic: dict):
-    webhook = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     # Convert HTML to plain text
     raw_text = process_html_to_text(topic["message"])

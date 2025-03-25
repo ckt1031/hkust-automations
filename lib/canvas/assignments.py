@@ -12,7 +12,7 @@ from lib.utils import process_html_to_text
 
 
 def notify_canvas_new_assignments():
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     assignments = get_all_assignments_from_all_courses()
 

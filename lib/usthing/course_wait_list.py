@@ -8,7 +8,7 @@ from lib.usthing.api import get_class_enrollments
 
 def notify_course_wait_list():
     user_id = getenv("DISCORD_USER_ID", required=True)
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     data = get_class_enrollments()
     waitlists = data["stdtInfo"][0]["studentClassWaitlist"]

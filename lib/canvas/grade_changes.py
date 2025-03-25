@@ -14,7 +14,7 @@ from lib.onedrive_store import get_store, save_store
 
 
 def notify_canvas_new_canvas_grades():
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     store_path = "canvas_grade_changes.json"
     store = get_store(store_path)

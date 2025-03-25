@@ -43,11 +43,9 @@ def split_text_and_send_to_discord(text: str, webhook_url: str):
 
 def summarize_outlook():
     # Get the webhook URLs
-    webhook_url_email = getenv("DISCORD_WEBHOOK_URL_EMAILS", required=True)
-    webhook_url_events = getenv("DISCORD_WEBHOOK_URL_EMAILS_EVENTS", required=True)
-    webhook_url_opportunities = getenv(
-        "DISCORD_WEBHOOK_URL_EMAILS_OPPORTUNITIES", required=True
-    )
+    webhook_url_info = getenv("DISCORD_WEBHOOK_EMAIL_INFO", required=True)
+    webhook_url_events = getenv("DISCORD_WEBHOOK_EMAIL_EVENT", required=True)
+    webhook_url_program = getenv("DISCORD_WEBHOOK_EMAIL_PROGRAM", required=True)
 
     # Extract emails
     emails = EmailExtractor().extract_emails()
@@ -116,9 +114,9 @@ def summarize_outlook():
 
     if llm_response.available:
         summaries = [
-            [llm_response.info_summary, webhook_url_email],
+            [llm_response.info_summary, webhook_url_info],
             [llm_response.event_summary, webhook_url_events],
-            [llm_response.opportunities_summary, webhook_url_opportunities],
+            [llm_response.opportunities_summary, webhook_url_program],
         ]
 
         for summary_data in summaries:

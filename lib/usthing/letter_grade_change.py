@@ -12,7 +12,7 @@ def notify_letter_grade_change():
     store_path = "letter_grade_change.json"
     store = get_store(store_path)
 
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     grades = data["stdtInfo"][0]["stdtCourseGrade"]
 

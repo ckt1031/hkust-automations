@@ -43,7 +43,7 @@ def get_assignment_submissions():
 
 def notify_canvas_new_canvas_assignments_submissions():
     discord_user_id = getenv("DISCORD_USER_ID", required=True)
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     assignments = get_assignment_submissions()
 

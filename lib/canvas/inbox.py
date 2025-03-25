@@ -11,7 +11,7 @@ from lib.prompts.summary import summary_prompt
 
 
 def notify_canvas_new_canvas_inbox():
-    webhook_url = getenv("DISCORD_WEBHOOK_URL_CANVAS", required=True)
+    webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
     conversations = get_conversations()
 
