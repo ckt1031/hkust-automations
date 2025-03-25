@@ -52,9 +52,9 @@ def summarize_outlook():
     # Extract emails
     emails = EmailExtractor().extract_emails()
 
-    # YYYY-MM-DD (Weekday)
-    today_date = datetime.now().strftime("%Y-%m-%d (%A)")
-    email_user_prompt = f"Current Date: {today_date}\n\n"
+    # YYYY-MM-DD HH:MM:SS (Day)
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S (%A)")
+    email_user_prompt = f"Current Datetime: {current_datetime}\n\n"
 
     store_path = "email_record.json"
     store = get_store_with_datetime(store_path)
