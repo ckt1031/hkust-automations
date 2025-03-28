@@ -19,23 +19,25 @@ def get_username():
     return me_info["mail"].split("@")[0]
 
 
-@cache
-def get_course_grades():
+def _make_usthing_request(endpoint: str):
     username = get_username()
     token = get_usthing_private_graph_token()
     headers = {"Authorization": f"Bearer {token}", **HEADERS}
-    url = f"{MS_API_BASE_URL}/sis/stdt_courses?userName={username}"
-    res = requests.get(url, headers=headers, timeout=10)
-    res.raise_for_status()
-    return res.json()
+    url = f"{MS_API_BASE_URL}{endpoint}?userName={username}"
+    try:
+        res = requests.get(url, headers=headers, timeout=10)
+        res.raise_for_status()
+        return res.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
+
+
+@cache
+def get_course_grades():
+    return _make_usthing_request("/sis/stdt_courses")
 
 
 @cache
 def get_class_enrollments():
-    username = get_username()
-    token = get_usthing_private_graph_token()
-    url = f"{MS_API_BASE_URL}/sis/stdt_class_enrl?userName={username}"
-    headers = {"Authorization": f"Bearer {token}", **HEADERS}
-    res = requests.get(url, headers=headers, timeout=10)
-    res.raise_for_status()
-    return res.json()
+    return _make_usthing_request("/sis/stdt_class_enrl")

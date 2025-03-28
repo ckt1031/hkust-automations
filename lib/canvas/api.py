@@ -18,7 +18,7 @@ def get_course_code(course_code: str) -> str:
     return course_code.split(" ")[0]
 
 
-def canvas_response(path: str, params=None) -> dict | list:
+def _make_canvas_request(path: str, params=None) -> dict | list:
     if params is None:
         params = []
 
@@ -46,7 +46,7 @@ def canvas_response(path: str, params=None) -> dict | list:
 
 @cache
 def get_courses() -> list:
-    response: list[dict] = canvas_response("/users/self/favorites/courses")
+    response: list[dict] = _make_canvas_request("/users/self/favorites/courses")
 
     courses = []
 
@@ -73,15 +73,17 @@ def get_discussion_topics(
 
     path = f"/courses/{course_id}/discussion_topics"
 
-    return canvas_response(path, params=params)
+    return _make_canvas_request(path, params=params)
 
 
 def get_discussion_topic_data(course_id: str, topic_id: str) -> dict:
-    return canvas_response(f"/courses/{course_id}/discussion_topics/{topic_id}")
+    return _make_canvas_request(f"/courses/{course_id}/discussion_topics/{topic_id}")
 
 
 def get_discussion_topic_view(course_id: str, topic_id: str) -> dict:
-    return canvas_response(f"/courses/{course_id}/discussion_topics/{topic_id}/view")
+    return _make_canvas_request(
+        f"/courses/{course_id}/discussion_topics/{topic_id}/view"
+    )
 
 
 def get_assignment_groups(course_id: str) -> list:
@@ -93,7 +95,7 @@ def get_assignment_groups(course_id: str) -> list:
         ("include[]", "submission"),
     ]
 
-    return canvas_response(path, params=params)
+    return _make_canvas_request(path, params=params)
 
 
 @cache
@@ -136,23 +138,23 @@ def get_all_assignments_from_all_courses():
 
 
 def get_conversations() -> list[dict]:
-    return canvas_response("/conversations")
+    return _make_canvas_request("/conversations")
 
 
 def get_conversation_detail(conversation_id: str) -> dict:
-    return canvas_response(f"/conversations/{conversation_id}")
+    return _make_canvas_request(f"/conversations/{conversation_id}")
 
 
 def get_modules(course_id: str):
-    return canvas_response(f"/courses/{course_id}/modules")
+    return _make_canvas_request(f"/courses/{course_id}/modules")
 
 
 def get_module_items(course_id: str, module_id: str, per_page: int = 100):
-    return canvas_response(
+    return _make_canvas_request(
         f"/courses/{course_id}/modules/{module_id}/items",
         params=[("per_page", per_page)],
     )
 
 
 def get_single_module_item(course_id: str, page_url: str):
-    return canvas_response(f"/courses/{course_id}/pages/{page_url}")
+    return _make_canvas_request(f"/courses/{course_id}/pages/{page_url}")
