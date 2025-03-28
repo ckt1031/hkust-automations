@@ -23,10 +23,9 @@ def get_username():
 def get_course_grades():
     username = get_username()
     token = get_usthing_private_graph_token()
+    headers = {"Authorization": f"Bearer {token}", **HEADERS}
     url = f"{MS_API_BASE_URL}/sis/stdt_courses?userName={username}"
-    res = requests.get(
-        url, headers={"Authorization": f"Bearer {token}", **HEADERS}, timeout=10
-    )
+    res = requests.get(url, headers=headers, timeout=10)
     res.raise_for_status()
     return res.json()
 
@@ -36,8 +35,7 @@ def get_class_enrollments():
     username = get_username()
     token = get_usthing_private_graph_token()
     url = f"{MS_API_BASE_URL}/sis/stdt_class_enrl?userName={username}"
-    res = requests.get(
-        url, headers={"Authorization": f"Bearer {token}", **HEADERS}, timeout=10
-    )
+    headers = {"Authorization": f"Bearer {token}", **HEADERS}
+    res = requests.get(url, headers=headers, timeout=10)
     res.raise_for_status()
     return res.json()
