@@ -13,7 +13,7 @@ from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.openai_api import generate_schema
 from lib.outlook.extractor import EmailExtractor
 from lib.outlook.store import prune_email_store
-from lib.prompts.email_summarize import EmailSummarySchema, email_summary_prompt
+from lib.prompts.email_summary import EmailSummarySchema, email_summary_prompt
 
 
 def split_text_and_send_to_discord(text: str, webhook_url: str):
