@@ -1,4 +1,5 @@
 import re
+import sys
 import urllib.parse
 
 from html2text import HTML2Text
@@ -61,3 +62,10 @@ def process_html_to_text(html: str) -> str:
     final_text = convert_safelinks_from_text(final_text)
 
     return final_text
+
+
+def check_if_arg_exists(arg: str) -> bool:
+    """
+    Check if the argument exists in the command line arguments.
+    """
+    return arg in sys.argv

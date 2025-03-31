@@ -14,6 +14,7 @@ from lib.openai_api import generate_schema
 from lib.outlook.extractor import EmailExtractor
 from lib.outlook.store import prune_email_store
 from lib.prompts.email_summary import EmailSummarySchema, email_summary_prompt
+from lib.utils import check_if_arg_exists
 
 
 def split_text_and_send_to_discord(text: str, webhook_url: str):
@@ -42,6 +43,11 @@ def split_text_and_send_to_discord(text: str, webhook_url: str):
 
 
 def summarize_outlook():
+    """
+    Summarize Outlook emails and send the summary to Discord.
+
+    Debug mode: All emails are passed to the LLM for summarization, saved to local txt files, but it will not send to Discord and save to the database.
+    """
     # Get the webhook URLs
     webhook_url_info = getenv("DISCORD_WEBHOOK_EMAIL_INFO", required=True)
     webhook_url_events = getenv("DISCORD_WEBHOOK_EMAIL_EVENT", required=True)
@@ -61,11 +67,14 @@ def summarize_outlook():
 
     checking_emails = []
 
+    # Is Debugging
+    is_debug = check_if_arg_exists("--debug")
+
     # Check if some email is checked
     for email in emails:
         checked = email["id"] in store
 
-        if checked:
+        if checked and not is_debug:
             logger.debug(
                 f"Email {email['id']} ({email['subject']}) was checked, skipping"
             )
@@ -122,18 +131,36 @@ def summarize_outlook():
                 logger.info("No text to send to Discord")
                 continue
 
-            if summary_data[0].startswith("{"):
-                raise ValueError("Response is not a valid string content")
+            # if summary_data[0].startswith("{"):
+            #     raise ValueError("Response is not a valid string content")
 
-            split_text_and_send_to_discord(summary_data[0].strip(), summary_data[1])
+            # Send the summary to Discord if not in debug mode
+            if not is_debug:
+                split_text_and_send_to_discord(summary_data[0].strip(), summary_data[1])
 
-        logger.success("Email summary sent to Discord")
+        # Save debug summaries to local txt files
+        if is_debug:
+            text = f"""
+-- Info Summary Debugging ---
+{llm_response.info_summary.strip()}
+-- Event Summary Debugging ---
+{llm_response.event_summary.strip()}
+-- Opportunities Summary Debugging ---
+{llm_response.opportunities_summary.strip()}
+            """
+            with open("./debug/email_summary.txt", "w") as f:
+                f.write(text.strip())
+
+            logger.success("Debug summaries saved to debug_email_summary.txt")
+
+        # logger.success("Email summary sent to Discord")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in checking_emails:
         store[email["id"]] = datetime.now(tz=timezone.utc)
 
-    # Save the email store
-    save_store_with_datetime(store_path, store)
+    # Save the email store only if not in debug mode
+    if not is_debug:
+        save_store_with_datetime(store_path, store)
 
     logger.success(f"{len(checking_emails)} Outlook emails are checked")

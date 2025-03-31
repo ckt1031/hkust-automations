@@ -42,9 +42,15 @@ function_dict = {
 }
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        short_code = sys.argv[1]
+    short_code = ""
 
+    # We check args without starting with "--"
+    for arg in sys.argv[1:]:
+        if not arg.startswith("--"):
+            short_code = arg
+            break
+
+    if len(short_code) > 0:
         if short_code in function_dict:
             function_dict[short_code]()
         else:
