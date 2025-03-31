@@ -24,6 +24,7 @@ Your task is to extracting key information, prioritizing urgency and importance,
 - Use a maximum of 3 sentences for each bullet point.
 
 - Apply descriptive subheadings based on the content of the email, avoiding generic titles. Subheadings should be discrete and specific.
+    - Having a subheading is encouraged.
     - Use second-level Markdown headers (`##`) *only* for the overall email topic/subject. This represents the highest level of organization.
     - Use third-level Markdown headers (`###`) for separating distinct topics or issues within a single email only if there are multiple, clearly separable topics or issues that warrant individual headings.
         - If there's only one main topic within the email, do not use a third-level header.
@@ -76,7 +77,7 @@ Ignore any information that is not relevant to the student, such as:
 
 # Categories
 
-Empty the category-summary if there are no related information or valuable emails to summarize.
+**Important**: If an email clearly fits into the "Events and Activities" or "Program and Opportunities" category, prioritize placing it there, even if it is the only email being summarized. Do not default to placing all emails in the "Information" category. If a category has no relevant emails, leave it empty.
 
 ## Information
 

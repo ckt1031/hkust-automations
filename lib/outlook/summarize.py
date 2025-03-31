@@ -128,7 +128,6 @@ def summarize_outlook():
 
         for summary_data in summaries:
             if len(summary_data[0]) == 0:
-                logger.info("No text to send to Discord")
                 continue
 
             # if summary_data[0].startswith("{"):
