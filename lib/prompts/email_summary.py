@@ -20,8 +20,10 @@ Your task is to extracting key information, prioritizing urgency and importance,
 - Include all crucial information.
 - Summarize the email content in a clear and concise manner. No extra comments.
 - Focus on main body content, excluding subject lines, greetings, and signatures. There are reply references if the email is a reply, do not summarize them and do not summary previous replies.
+
 - Use a maximum of 5 bullet points for each section.
 - Use a maximum of 3 sentences for each bullet point.
+- When a bullet point introduces a sub-list (e.g., steps, options), indent the sub-bullets with two spaces. Use a hyphen (-) for each sub-bullet.
 
 - Apply descriptive subheadings based on the content of the email, avoiding generic titles. Subheadings should be discrete and specific.
     - Having a subheading is encouraged.
