@@ -62,14 +62,15 @@ def notify_canvas_new_announcements():
         discussion_topics = get_discussion_topics(course["id"], only_announcements=True)
 
         for topic in discussion_topics:
-            if topic["posted_at"] is None:
-                logger.warning(f"Announcement {topic['id']} has no posted_at, skipping")
-                continue
-
-            posted_at = datetime.fromisoformat(topic["posted_at"])
-
             # Check if the announcement has been longer than 3 days
-            if posted_at < (datetime.now(timezone.utc) - timedelta(days=3)):
+            if (
+                "posted_at" in topic
+                and type(topic["posted_at"]) is str
+                and (
+                    datetime.fromisoformat(topic["posted_at"])
+                    < (datetime.now(timezone.utc) - timedelta(days=3))
+                )
+            ):
                 logger.debug(
                     f"Announcement {topic['id']} has been posted longer than 3 days, skipping"
                 )
