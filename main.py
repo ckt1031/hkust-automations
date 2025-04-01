@@ -5,9 +5,9 @@ from loguru import logger
 from lib.canvas import (
     notify_canvas_new_announcements,
     notify_canvas_new_assignments,
-    notify_canvas_new_canvas_assignments_submissions,
     notify_canvas_new_canvas_grades,
     notify_canvas_new_canvas_inbox,
+    notify_incomplete_assignments,
 )
 from lib.outlook.summarize import summarize_outlook
 from lib.usthing.course_wait_list import notify_course_wait_list
@@ -35,7 +35,7 @@ function_dict = {
     "notify_canvas_new_announcements": notify_canvas_new_announcements,
     "notify_canvas_new_canvas_inbox": notify_canvas_new_canvas_inbox,
     "notify_canvas_new_canvas_grades": notify_canvas_new_canvas_grades,
-    "notify_canvas_new_canvas_assignments_submissions": notify_canvas_new_canvas_assignments_submissions,
+    "notify_incomplete_assignments": notify_incomplete_assignments,
     "notify_letter_grade_change": notify_letter_grade_change,
     "notify_course_wait_list": notify_course_wait_list,
     "exit": lambda: sys.exit(0),

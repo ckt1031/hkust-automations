@@ -41,7 +41,7 @@ def get_assignment_submissions():
     return results
 
 
-def notify_canvas_new_canvas_assignments_submissions():
+def notify_incomplete_assignments():
     discord_user_id = getenv("DISCORD_USER_ID", required=True)
     webhook_url = getenv("DISCORD_WEBHOOK_CANVAS", required=True)
 
