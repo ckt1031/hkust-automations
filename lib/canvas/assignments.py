@@ -4,10 +4,11 @@ from loguru import logger
 
 from lib.api.canvas import get_all_assignments_from_all_courses
 from lib.api.discord import send_discord_webhook
-from lib.api.openai import generate_chat_completion
+from lib.api.microsoft import MicrosoftGraphAPI
+from lib.api.openai import generate_chat_completion, generate_schema
 from lib.env import getenv
 from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
-from lib.prompts import summary
+from lib.prompts import canvas_assigmnet_todo, summary
 from lib.utils import process_html_to_text
 
 
@@ -86,6 +87,60 @@ def notify_canvas_new_assignments():
             embed["description"] = llm_response
 
         send_discord_webhook(webhook_url, embed=embed)
+
+        # Prepare LLM prompt to check if should add to Todo
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        user_prompt = f"""
+Assignment Name: {assignment['name']}
+Course Name: {assignment['course_name']}
+Submission Types: {','.join(assignment['submission_types'])}
+Due Date: {assignment['due_at'] if assignment['due_at'] else 'None'}
+Description: {assignment['description'] if assignment['description'] else 'None'}
+Today's Date: {today}
+"""
+
+        # Check with LLM if should add to Todo
+        try:
+            todo_check = generate_schema(
+                canvas_assigmnet_todo.canvas_assignment_todo_prompts,
+                user_prompt,
+                canvas_assigmnet_todo.CanvasAssignmentTodoSchema,
+            )
+
+            # If validated, add to Microsoft Todo
+            if not todo_check.satisfied:
+                logger.debug(
+                    f"Assignment {assignment['id']} is not satisfied for Todo, skipping"
+                )
+                continue
+
+            ms_api = MicrosoftGraphAPI()
+
+            # Get the Microsoft Todo list ID by displayName "📕 Homework"
+            todo_lists = ms_api.list_tasks_lists()
+
+            todo_list_id = None
+
+            for todo_list in todo_lists:
+                if todo_list["displayName"] == "📕 Homework":
+                    todo_list_id = todo_list["id"]
+                    break
+
+            if todo_list_id is None:
+                logger.error("Todo list not found")
+                continue
+
+            # Create a new task in Microsoft Todo
+            ms_api.create_todo_task(
+                title=todo_check.name,
+                list_id=todo_list_id,
+                due_date=todo_check.task_due,
+            )
+            logger.success(f"Added assignment {assignment['id']} to Microsoft Todo")
+        except Exception as e:
+            logger.error(
+                f"Error processing Todo for assignment {assignment['id']}: {e}"
+            )
 
         logger.success(f"Assignment {assignment['id']} has been sent to Discord")
 

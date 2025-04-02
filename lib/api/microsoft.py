@@ -75,3 +75,85 @@ class MicrosoftGraphAPI:
             raise Exception("Error fetching emails")
 
         return response.json()["value"]
+
+    def create_todo_task(
+        self,
+        list_id: str,  # The ID of the task list
+        title: str,
+        due_date: str = None,
+        body: str = None,
+    ) -> dict:
+        """Create a new task in Microsoft To Do
+
+        Args:
+            title: Title of the task
+            due_date: Due date in ISO 8601 format
+            body: Optional body/description of the task
+
+        Returns:
+            dict: Created task data
+        """
+        url = f"{self.ms_base_url}/me/todo/lists/{list_id}/tasks"
+
+        task_data = {"title": title, "status": "notStarted"}
+
+        if due_date:
+            task_data["dueDateTime"] = {
+                "dateTime": due_date,
+                "timeZone": "Asia/Hong_Kong",
+            }
+
+        if body:
+            task_data["body"] = {"content": body, "contentType": "text"}
+
+        response = self.session.post(url, json=task_data)
+
+        if response.status_code != 201:
+            raise Exception(f"Error creating task: {response.text}")
+
+        return response.json()
+
+    def list_tasks(self, list_id: str) -> list[dict]:
+        """List all tasks in a specific list in Microsoft To Do
+
+        Args:
+            list_id: ID of the task list
+
+        Returns:
+            list[dict]: List of task dictionaries containing:
+                - id: Task ID
+                - title: Task title
+                - status: Task status
+                - dueDateTime: Due date if set
+                - body: Description if set
+        """
+        url = f"{self.ms_base_url}/me/todo/lists/{list_id}/tasks"
+
+        response = self.session.get(url)
+
+        if response.status_code != 200:
+            raise Exception(f"Error listing tasks: {response.text}")
+
+        # Simplify task data structure
+        return response.json().get("value", [])
+
+    def list_tasks_lists(self) -> list[dict]:
+        """List all tasks in Microsoft To Do
+
+        Returns:
+            list[dict]: List of task dictionaries containing:
+                - id: Task ID
+                - title: Task title
+                - status: Task status
+                - dueDateTime: Due date if set
+                - body: Description if set
+        """
+        url = f"{self.ms_base_url}/me/todo/lists"
+
+        response = self.session.get(url)
+
+        if response.status_code != 200:
+            raise Exception(f"Error listing tasks: {response.text}")
+
+        # Simplify task data structure
+        return response.json().get("value", [])

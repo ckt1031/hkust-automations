@@ -4,6 +4,8 @@ import requests
 
 from lib.env import getenv
 
+MSFT_REDIRECT_URI = "http://localhost:53682"
+
 
 def get_me_info(token: str):
     url = "https://graph.microsoft.com/v1.0/me"
@@ -36,7 +38,7 @@ def get_own_app_private_graph_token() -> str:
 
     payload = {
         "grant_type": "refresh_token",
-        "REDIRECT_URL": "https://login.microsoftonline.com/common/oauth2/nativeclient",
+        "REDIRECT_URL": MSFT_REDIRECT_URI,
         "CLIENT_ID": client_id,
         "CLIENT_SECRET": client_secret,
         "refresh_token": refresh_token,
