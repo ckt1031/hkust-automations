@@ -27,7 +27,7 @@ def notify_letter_grade_change():
         key = grade_data["crseTakenTerm"] + "-" + courseCode
 
         if grade_letter == "":
-            logger.warning(f"{courseCode} has no grade, skipping")
+            logger.debug(f"{courseCode} has no grade, skipping")
             continue
 
         if store.get(key) is not None and store[key] == grade_letter:
