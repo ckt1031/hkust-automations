@@ -34,10 +34,12 @@ def notify_canvas_new_assignments():
             logger.debug(f"Assignment {assignment['id']} has submissions, skipping")
             continue
 
-        # Check submission_types, if only ["none"] then skip
-        if assignment["submission_types"] == ["none"]:
+        # Check submission_types, if only ["none"] or only ["on_paper"] then skip
+        if assignment["submission_types"] == ["none"] or assignment[
+            "submission_types"
+        ] == ["on_paper"]:
             logger.debug(
-                f"Assignment {assignment['id']} has no submission types, skipping"
+                f"Assignment {assignment['id']} has no uploadable submission types, skipping"
             )
             continue
 
