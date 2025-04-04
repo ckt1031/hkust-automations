@@ -38,9 +38,8 @@ Your task is to extracting key information, prioritizing urgency and importance,
 
 - Use third-person perspective for the summary.
 
-- Use markdown links with the format [Link Text](<URL>) for important links, not the URL itself.
-    - Wrap the URL in angle brackets (<>) and keep it in a single line.
-    - Example: [Link Text](<https://www.example.com>)
+- Use markdown links with the format [Link Text](URL) for important links, not the URL itself.
+    - Example: [Link Text](https://www.example.com)
     - Use descriptive link text, not the URL itself.
 
 - Email Address Formatting:

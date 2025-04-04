@@ -17,6 +17,25 @@ from lib.prompts.email_summary import EmailSummarySchema, email_summary_prompt
 from lib.utils import check_if_arg_exists
 
 
+def wrap_all_markdown_link(text: str) -> str:
+    """
+    Wrap the text with markdown link format.
+
+    Args:
+        text (str): The text to wrap.
+
+    Returns:
+        str: The wrapped text.
+    """
+    import re
+
+    return re.sub(
+        r"(\[.*?\]\()(.*?)(\))",
+        lambda m: f"{m.group(1)}<{m.group(2)}>{m.group(3)}",
+        text,
+    )
+
+
 def split_text_and_send_to_discord(text: str, webhook_url: str):
     headers_to_split_on = [
         ("##", "Header 2"),
@@ -120,19 +139,29 @@ def summarize_outlook():
     )
 
     if llm_response.available:
-        summaries = [
+        categorized_summaries_data = [
             [llm_response.info_summary, webhook_url_info],
             [llm_response.event_summary, webhook_url_events],
             [llm_response.opportunities_summary, webhook_url_program],
         ]
 
-        for summary_data in summaries:
-            if len(summary_data[0]) == 0:
+        for data in categorized_summaries_data:
+            summary = data[0]
+            webhook_url = data[1]
+
+            # Skip if the summary is empty
+            if summary is None or len(summary) == 0:
+                logger.warning("Summary is empty, skipping")
                 continue
+
+            # Process the summary text
+            summary = wrap_all_markdown_link(summary)
 
             # Send the summary to Discord if not in debug mode
             if not is_debug:
-                split_text_and_send_to_discord(summary_data[0].strip(), summary_data[1])
+                split_text_and_send_to_discord(summary.strip(), webhook_url)
+
+                logger.success("Discord webhook sent successfully")
 
         # Save debug summaries to local txt files
         if is_debug:
@@ -145,11 +174,9 @@ def summarize_outlook():
 {llm_response.opportunities_summary.strip()}
             """
             with open("./debug/email_summary.txt", "w") as f:
-                f.write(text.strip())
+                f.write(wrap_all_markdown_link(text.strip()))
 
             logger.success("Debug summaries saved to debug_email_summary.txt")
-
-        # logger.success("Email summary sent to Discord")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in checking_emails:
