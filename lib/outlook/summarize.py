@@ -130,9 +130,6 @@ def summarize_outlook():
             if len(summary_data[0]) == 0:
                 continue
 
-            # if summary_data[0].startswith("{"):
-            #     raise ValueError("Response is not a valid string content")
-
             # Send the summary to Discord if not in debug mode
             if not is_debug:
                 split_text_and_send_to_discord(summary_data[0].strip(), summary_data[1])
@@ -140,11 +137,11 @@ def summarize_outlook():
         # Save debug summaries to local txt files
         if is_debug:
             text = f"""
--- Info Summary Debugging ---
-{llm_response.info_summary.strip()}
--- Event Summary Debugging ---
-{llm_response.event_summary.strip()}
--- Opportunities Summary Debugging ---
+========== Info Summary Debugging ==========\n\n
+{llm_response.info_summary.strip()}\n\n
+========== Event Summary Debugging ==========\n\n
+{llm_response.event_summary.strip()}\n\n
+========== Opportunities Summary Debugging ==========\n\n
 {llm_response.opportunities_summary.strip()}
             """
             with open("./debug/email_summary.txt", "w") as f:
