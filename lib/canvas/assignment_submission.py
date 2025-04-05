@@ -4,8 +4,8 @@ from loguru import logger
 
 from lib.api.canvas import get_all_assignments_from_all_courses
 from lib.api.discord import send_discord_webhook
+from lib.api.onedrive import get_store_with_datetime, save_store_with_datetime
 from lib.env import getenv
-from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 
 
 def get_assignment_submissions():

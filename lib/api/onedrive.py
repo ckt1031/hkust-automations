@@ -1,31 +1,10 @@
 import json
 from datetime import datetime
 
-import requests
 from loguru import logger
 
+from lib.api.microsoft import MicrosoftGraphAPI
 from lib.env import getenv
-from lib.microsoft_tokens import get_own_app_private_graph_token
-
-
-def drive_api(method="GET", path="", data=None):
-    url = f"https://graph.microsoft.com/v1.0/me/drive/root:/{path}:/content"
-
-    headers = {
-        "Accept": "application/json",
-        "Authorization": f"Bearer {get_own_app_private_graph_token()}",
-        "Content-Type": "application/json",
-    }
-
-    response = requests.request(
-        method,
-        url,
-        headers=headers,
-        data=data,
-        timeout=10,
-    )
-
-    return response
 
 
 def get_store(path: str) -> dict[str, str]:
@@ -33,7 +12,9 @@ def get_store(path: str) -> dict[str, str]:
 
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
-    response = drive_api(method="GET", path=f"{base_folder}/{path}")
+    response = MicrosoftGraphAPI().request_drive_content(
+        method="GET", path=f"{base_folder}/{path}"
+    )
 
     if response.status_code == 404:
         logger.debug(f"Store file not found: {path}, returning default")
@@ -50,7 +31,7 @@ def get_store(path: str) -> dict[str, str]:
 def save_store(path: str, d: dict | list):
     base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
 
-    response = drive_api(
+    response = MicrosoftGraphAPI().request_drive_content(
         method="PUT",
         path=f"{base_folder}/{path}",
         data=json.dumps(d),

@@ -8,9 +8,9 @@ from langchain_text_splitters import (
 from loguru import logger
 
 from lib.api.discord import send_discord_webhook
+from lib.api.onedrive import get_store_with_datetime, save_store_with_datetime
 from lib.api.openai import generate_schema
 from lib.env import getenv
-from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.outlook.extractor import EmailExtractor
 from lib.outlook.store import prune_email_store
 from lib.prompts.email_summary import EmailSummarySchema, email_summary_prompt

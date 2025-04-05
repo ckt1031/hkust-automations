@@ -1,15 +1,16 @@
 from datetime import datetime, timedelta
+from functools import cache
 
 import requests
 from pytz import timezone
 
-from lib.microsoft_tokens import get_own_app_private_graph_token
+from lib.env import getenv
 
 
 class MicrosoftGraphAPI:
     def __init__(self):
         self.ms_base_url = "https://graph.microsoft.com/v1.0"
-        self.access_token = get_own_app_private_graph_token()
+        self.access_token = self.get_access_token()
 
         self.session = requests.Session()
         self.session.headers.update(
@@ -18,6 +19,35 @@ class MicrosoftGraphAPI:
                 "Content-Type": "application/json",
             }
         )
+
+    @cache
+    def get_access_token(self) -> str:
+        client_id = getenv("MICROSOFT_CLIENT_ID")
+        client_secret = getenv("MICROSOFT_CLIENT_SECRET")
+        refresh_token = getenv("MICROSOFT_REFRESH_TOKEN")
+
+        if not refresh_token or not client_id or not client_secret:
+            raise Exception(
+                "Microsoft refresh token, client ID, or client secret is not set"
+            )
+
+        MSFT_REDIRECT_URI = "http://localhost:53682"
+        url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+
+        payload = {
+            "grant_type": "refresh_token",
+            "REDIRECT_URL": MSFT_REDIRECT_URI,
+            "CLIENT_ID": client_id,
+            "CLIENT_SECRET": client_secret,
+            "refresh_token": refresh_token,
+        }
+
+        response = requests.post(url, data=payload, timeout=5)
+
+        if response.status_code != 200:
+            raise Exception("Error getting Microsoft access token: " + response.text)
+
+        return response.json()["access_token"]
 
     def get_inbox_folder_id(self):
         url = f"{self.ms_base_url}/me/mailFolders/inbox"
@@ -75,6 +105,24 @@ class MicrosoftGraphAPI:
             raise Exception("Error fetching emails")
 
         return response.json()["value"]
+
+    def request_drive_content(self, method="GET", path="", data=None):
+        url = f"https://graph.microsoft.com/v1.0/me/drive/root:/{path}:/content"
+
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+
+        response = self.session.request(
+            method,
+            url,
+            headers=headers,
+            data=data,
+            timeout=10,
+        )
+
+        return response
 
     def create_todo_task(
         self,

@@ -1,9 +1,9 @@
 from loguru import logger
 
 from lib.api.discord import send_discord_webhook
+from lib.api.onedrive import get_store, save_store
 from lib.api.usthing import get_course_grades
 from lib.env import getenv
-from lib.onedrive_store import get_store, save_store
 
 
 def notify_letter_grade_change():

@@ -4,9 +4,9 @@ from loguru import logger
 
 from lib.api.canvas import get_courses, get_discussion_topics
 from lib.api.discord import send_discord_webhook
+from lib.api.onedrive import get_store_with_datetime, save_store_with_datetime
 from lib.api.openai import generate_chat_completion
 from lib.env import getenv
-from lib.onedrive_store import get_store_with_datetime, save_store_with_datetime
 from lib.prompts.summary import summary_prompt
 from lib.utils import process_html_to_text
 
