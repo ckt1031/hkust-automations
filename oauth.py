@@ -82,17 +82,12 @@ def get_fresh_oauth_token() -> str:
 
     scopes = [
         "email",
-        "Files.Read",
-        "Files.Read.All",
-        "Files.ReadWrite",
-        "Files.ReadWrite.All",
-        "Mail.Read",
-        "Mail.Read.Shared",
-        "Mail.ReadBasic",
-        "Mail.ReadBasic.Shared",
-        "offline_access",
-        "openid",
         "profile",
+        "offline_access", # Required for refresh token
+        "openid", # Required for ID token
+        "Files.Read",
+        "Files.ReadWrite",
+        "Mail.Read",
         "Tasks.Read",
         "Tasks.ReadWrite",
     ]
