@@ -6,12 +6,12 @@ from lib.env import getenv
 openai_client = OpenAI(
     api_key=getenv("OPENAI_API_KEY"),
     base_url=getenv("OPENAI_API_BASE_URL", "https://api.openai.com/v1"),
-    extra_headers={
-        "HTTP-Referer": "HKUST Automations",  # Site URL for rankings on openrouter.ai.
-        "X-Title": "https://github.com/ckt1031/hkust-automations",  # Site title for rankings on openrouter.ai.
-    },
 )
 
+extra_headers = {
+    "HTTP-Referer": "HKUST Automations",  # Site URL for rankings on openrouter.ai.
+    "X-Title": "https://github.com/ckt1031/hkust-automations",  # Site title for rankings on openrouter.ai.
+}
 model = getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
 
@@ -24,6 +24,7 @@ def generate_schema(system_message: str, user_message: str, schema):
         ],
         response_format=schema,
         temperature=0.5,
+        extra_headers=extra_headers,
     )
 
     res = completion.choices[0].message
@@ -49,6 +50,7 @@ def generate_chat_completion(system_message: str, user_message: str) -> str:
         stream=False,
         model=model,
         temperature=0.5,
+        extra_headers=extra_headers,
     )
 
     content = chat_completion.choices[0].message.content
