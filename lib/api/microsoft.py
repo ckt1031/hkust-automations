@@ -59,14 +59,16 @@ class MicrosoftGraphAPI:
 
         return response.json()["id"]
 
-    def fetch_replies(self, conversation_id):
+    def fetch_replies(self, conversation_id: str, limit: 500) -> list[dict]:
         url = f"{self.ms_base_url}/me/mailFolders/inbox/messages"
 
         params = [
-            ("$top", "500"),
             ("$select", "sender,subject,receivedDateTime,uniqueBody"),
             ("$filter", f"conversationId eq '{conversation_id}'"),
         ]
+
+        if limit:
+            params.append(("$top", str(limit)))
 
         response = self.session.get(url, params=params)
 
@@ -78,7 +80,7 @@ class MicrosoftGraphAPI:
 
         return data
 
-    def fetch_emails(self):
+    def fetch_emails(self, limit=500) -> list[dict]:
         inbox_id = self.get_inbox_folder_id()
 
         url = f"{self.ms_base_url}/me/mailFolders/{inbox_id}/messages"
@@ -89,7 +91,6 @@ class MicrosoftGraphAPI:
         )
 
         params = [
-            ("$top", "500"),
             ("$select", "sender,subject,receivedDateTime,uniqueBody,conversationId"),
             ("$orderby", "receivedDateTime desc"),
             ("$filter", f"receivedDateTime ge {date_filter_yesterday.isoformat()}"),
@@ -98,6 +99,9 @@ class MicrosoftGraphAPI:
                 "SingleValueExtendedProperties($filter=(Id eq 'String 0x1042'))",
             ),
         ]
+
+        if limit:
+            params.append(("$top", str(limit)))
 
         response = self.session.get(url, params=params)
 
