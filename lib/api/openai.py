@@ -6,6 +6,10 @@ from lib.env import getenv
 openai_client = OpenAI(
     api_key=getenv("OPENAI_API_KEY"),
     base_url=getenv("OPENAI_API_BASE_URL", "https://api.openai.com/v1"),
+    extra_headers={
+        "HTTP-Referer": "HKUST Automations",  # Site URL for rankings on openrouter.ai.
+        "X-Title": "https://github.com/ckt1031/hkust-automations",  # Site title for rankings on openrouter.ai.
+    },
 )
 
 model = getenv("OPENAI_API_MODEL", "gpt-4o-mini")
