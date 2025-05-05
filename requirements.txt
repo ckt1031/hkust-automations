@@ -3,7 +3,7 @@ loguru==0.7.3
 python-dotenv==1.0.1
 html2text==2024.2.26
 requests==2.32.3
-openai==1.68.2
+openai==1.77.0
 pydantic~=2.10.3
 cachetools~=5.5.1
 pytz~=2025.1
