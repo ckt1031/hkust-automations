@@ -83,8 +83,8 @@ def get_fresh_refresh_token() -> str:
     scopes = [
         "email",
         "profile",
-        "offline_access", # Required for refresh token
-        "openid", # Required for ID token
+        "offline_access",  # Required for refresh token
+        "openid",  # Required for ID token
         "Files.Read",
         "Files.ReadWrite",
         "Mail.Read",
