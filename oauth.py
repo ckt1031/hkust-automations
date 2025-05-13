@@ -67,7 +67,7 @@ def start_http_server():
     return True
 
 
-def get_fresh_oauth_token() -> str:
+def get_fresh_refresh_token() -> str:
     """Get a fresh OAuth token by opening browser and listening on a port."""
     global auth_code
     global code_received_event
@@ -146,7 +146,7 @@ def get_fresh_oauth_token() -> str:
 
 if __name__ == "__main__":
     try:
-        token = get_fresh_oauth_token()
-        print("OAuth Token:", token)
+        token = get_fresh_refresh_token()
+        print("Refresh Token:", token)
     except Exception as e:
         print("Error:", e)
