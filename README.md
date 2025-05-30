@@ -18,11 +18,4 @@ We have to use the Microsoft Graph API to access the emails. To do this, we need
 6. Go to "API permissions" and add the following permissions:
     - `Mail.Read`
     - `Mail.Read.Shared`
-    - `User.Read` 
-
-## Setting Up Canvas Instructor API
-
-1. Go to <https://canvas.ust.hk/profile/settings>
-2. Scroll down to "Approved Integrations" and click on "New Access Token"
-3. Fill in the details and click "Generate Token"
-4. Copy the token and save to `.env` file based on the [.env.example](.env.example) file
+    - `User.Read`
