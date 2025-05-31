@@ -56,9 +56,7 @@ def split_text_and_send_to_discord(text: str, webhook_url: str):
     result = text_splitter.split_documents(result)
 
     for split in result:
-        send_discord_webhook(
-            webhook_url, message=split.page_content, username="HKUST Email"
-        )
+        send_discord_webhook(webhook_url, message=split.page_content, username="Email")
 
 
 def summarize_outlook():

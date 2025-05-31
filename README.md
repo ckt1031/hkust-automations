@@ -1,8 +1,8 @@
-# HKUST Automations
+# Outlook Summarizer
 
-A set of automations to simplify daily tasks.
+Summarize your Outlook emails with AI to Discord with separated types, like information, event, etc.
 
-We currently support pushing information to Discord via webhooks, other platforms can be added in the future.
+Very useful for school students who have a lot of emails to read.
 
 ## Setting Up Microsoft Email Summarization
 

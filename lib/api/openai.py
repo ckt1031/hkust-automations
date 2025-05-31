@@ -9,8 +9,8 @@ openai_client = OpenAI(
 )
 
 extra_headers = {
-    "HTTP-Referer": "https://github.com/ckt1031/hkust-automations",  # Site URL for rankings on openrouter.ai.
-    "X-Title": "HKUST Automations",  # Site title for rankings on openrouter.ai.
+    "HTTP-Referer": "https://github.com/ckt1031/outlook-summarizer",  # Site URL for rankings on openrouter.ai.
+    "X-Title": "Outlook Summarizer",  # Site title for rankings on openrouter.ai.
 }
 model = getenv("OPENAI_API_MODEL", "gpt-4o-mini")
 
