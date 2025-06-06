@@ -40,7 +40,9 @@ Your task is to extracting key information, prioritizing urgency and importance,
 
 - Use markdown links with the format [Link Text](URL) for important links, not the URL itself.
     - Example: [Link Text](https://www.example.com)
-    - Use descriptive link text, not the URL itself.
+    - Use descriptive link text, You must not use the URL itself as the link text.
+    - [https://www.example.com](https://www.example.com) is prohibited.
+    - [Example Site](https://www.example.com) is allowed.
 
 - Email Address Formatting:
     - Present email addresses directly as plain text, without using mailto: links or Markdown link formatting.

@@ -1,4 +1,3 @@
-from loguru import logger
 from openai import OpenAI
 
 from lib.env import getenv
@@ -39,25 +38,3 @@ def generate_schema(system_message: str, user_message: str, schema):
     schema.model_validate(res.parsed)
 
     return res.parsed
-
-
-def generate_chat_completion(system_message: str, user_message: str) -> str:
-    chat_completion = openai_client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": system_message.strip()},
-            {"role": "user", "content": user_message.strip()},
-        ],
-        stream=False,
-        model=model,
-        temperature=0.5,
-        extra_headers=extra_headers,
-    )
-
-    content = chat_completion.choices[0].message.content
-
-    if content is None:
-        raise ValueError("OpenAI API did not return any content")
-
-    logger.debug(f"Called OpenAI API with model: {model}")
-
-    return content

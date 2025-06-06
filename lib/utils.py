@@ -1,9 +1,56 @@
 import re
-import sys
 import urllib.parse
 
 from html2text import HTML2Text
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 from loguru import logger
+
+from lib.api.discord import send_discord_webhook
+
+
+def wrap_all_markdown_link(text: str) -> str:
+    """
+    Wrap the text with markdown link format.
+
+    Args:
+        text (str): The text to wrap.
+
+    Returns:
+        str: The wrapped text.
+    """
+    import re
+
+    return re.sub(
+        r"(\[.*?\]\()(.*?)(\))",
+        lambda m: f"{m.group(1)}<{m.group(2)}>{m.group(3)}",
+        text,
+    )
+
+
+def split_text_and_send_to_discord(text: str, webhook_url: str):
+    headers_to_split_on = [
+        ("##", "Header 2"),
+        ("###", "Header 3"),
+    ]
+    markdown_splitter = MarkdownHeaderTextSplitter(
+        strip_headers=False,
+        headers_to_split_on=headers_to_split_on,
+    )
+    result = markdown_splitter.split_text(text)
+
+    chunk_size = 1900
+    chunk_overlap = 100
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
+
+    result = text_splitter.split_documents(result)
+
+    for split in result:
+        send_discord_webhook(webhook_url, message=split.page_content, username="Email")
 
 
 def remove_excessive_new_lines(text: str) -> str:
@@ -62,10 +109,3 @@ def process_html_to_text(html: str) -> str:
     final_text = convert_safelinks_from_text(final_text)
 
     return final_text
-
-
-def check_if_arg_exists(arg: str) -> bool:
-    """
-    Check if the argument exists in the command line arguments.
-    """
-    return arg in sys.argv

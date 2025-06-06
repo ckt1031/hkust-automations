@@ -1,62 +1,15 @@
 import textwrap
 from datetime import datetime, timezone
 
-from langchain_text_splitters import (
-    MarkdownHeaderTextSplitter,
-    RecursiveCharacterTextSplitter,
-)
 from loguru import logger
 
-from lib.api.discord import send_discord_webhook
 from lib.api.onedrive import get_store_with_datetime, save_store_with_datetime
 from lib.api.openai import generate_schema
 from lib.env import getenv
 from lib.outlook.extractor import EmailExtractor
 from lib.outlook.store import prune_email_store
 from lib.prompts.email_summary import EmailSummarySchema, email_summary_prompt
-from lib.utils import check_if_arg_exists
-
-
-def wrap_all_markdown_link(text: str) -> str:
-    """
-    Wrap the text with markdown link format.
-
-    Args:
-        text (str): The text to wrap.
-
-    Returns:
-        str: The wrapped text.
-    """
-    import re
-
-    return re.sub(
-        r"(\[.*?\]\()(.*?)(\))",
-        lambda m: f"{m.group(1)}<{m.group(2)}>{m.group(3)}",
-        text,
-    )
-
-
-def split_text_and_send_to_discord(text: str, webhook_url: str):
-    headers_to_split_on = [
-        ("##", "Header 2"),
-        ("###", "Header 3"),
-    ]
-    markdown_splitter = MarkdownHeaderTextSplitter(
-        strip_headers=False,
-        headers_to_split_on=headers_to_split_on,
-    )
-    result = markdown_splitter.split_text(text)
-
-    chunk_size = 1900
-    chunk_overlap = 100
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap
-    )
-
-    result = text_splitter.split_documents(result)
-
-    for split in result:
-        send_discord_webhook(webhook_url, message=split.page_content, username="Email")
+from lib.utils import split_text_and_send_to_discord, wrap_all_markdown_link
 
 
 def summarize_outlook():
@@ -84,14 +37,11 @@ def summarize_outlook():
 
     checking_emails = []
 
-    # Is Debugging
-    is_debug = check_if_arg_exists("--debug")
-
     # Check if some email is checked
     for email in emails:
         checked = email["id"] in store
 
-        if checked and not is_debug:
+        if checked:
             logger.debug(
                 f"Email {email['id']} ({email['subject']}) was checked, skipping"
             )
@@ -155,33 +105,16 @@ def summarize_outlook():
             # Process the summary text
             summary = wrap_all_markdown_link(summary)
 
-            # Send the summary to Discord if not in debug mode
-            if not is_debug:
-                split_text_and_send_to_discord(summary.strip(), webhook_url)
+            # Send the summary to Discord
+            split_text_and_send_to_discord(summary.strip(), webhook_url)
 
-                logger.success("Discord webhook sent successfully")
-
-        # Save debug summaries to local txt files
-        if is_debug:
-            text = f"""
-========== Info Summary Debugging ==========\n\n
-{llm_response.info_summary.strip()}\n\n
-========== Event Summary Debugging ==========\n\n
-{llm_response.event_summary.strip()}\n\n
-========== Opportunities Summary Debugging ==========\n\n
-{llm_response.opportunities_summary.strip()}
-            """
-            with open("./debug/email_summary.txt", "w") as f:
-                f.write(wrap_all_markdown_link(text.strip()))
-
-            logger.success("Debug summaries saved to debug_email_summary.txt")
+            logger.success("Discord webhook sent successfully")
 
     # Mark and save database after all actions to prevent missing emails if the program crashes
     for email in checking_emails:
         store[email["id"]] = datetime.now(tz=timezone.utc)
 
-    # Save the email store only if not in debug mode
-    if not is_debug:
-        save_store_with_datetime(store_path, store)
+    # Save the email store
+    save_store_with_datetime(store_path, store)
 
     logger.success(f"{len(checking_emails)} Outlook emails are checked")
