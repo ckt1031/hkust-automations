@@ -2,7 +2,7 @@ langchain_text_splitters==0.3.8
 loguru==0.7.3
 python-dotenv==1.1.0
 html2text==2025.4.15
-requests==2.32.3
+requests==2.32.4
 openai==1.84.0
 pydantic~=2.10.3
 cachetools~=5.5.1
