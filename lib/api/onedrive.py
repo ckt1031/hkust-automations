@@ -4,16 +4,15 @@ from datetime import datetime
 from loguru import logger
 
 from lib.api.microsoft import MicrosoftGraphAPI
-from lib.env import getenv
+
+ONEDRIVE_STORE_FOLDER = "Data"
 
 
 def get_store(path: str) -> dict[str, str]:
     default = {}
 
-    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
-
     response = MicrosoftGraphAPI().request_drive_content(
-        method="GET", path=f"{base_folder}/{path}"
+        method="GET", path=f"{ONEDRIVE_STORE_FOLDER}/{path}"
     )
 
     if response.status_code == 404:
@@ -29,11 +28,9 @@ def get_store(path: str) -> dict[str, str]:
 
 
 def save_store(path: str, d: dict | list):
-    base_folder = getenv("ONEDRIVE_STORE_FOLDER", "Programs/Information-Push")
-
     response = MicrosoftGraphAPI().request_drive_content(
         method="PUT",
-        path=f"{base_folder}/{path}",
+        path=f"{ONEDRIVE_STORE_FOLDER}/{path}",
         data=json.dumps(d),
     )
 
