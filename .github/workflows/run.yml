@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "*/10 * * * *"
 
+permissions:
+  contents: read
+
 jobs:
   tasks:
     name: Tasks
@@ -29,7 +32,6 @@ jobs:
           OPENAI_API_BASE_URL: ${{ secrets.OPENAI_API_BASE_URL }}
           OPENAI_API_MODEL: ${{ secrets.OPENAI_API_MODEL }}
 
-          DISCORD_USER_ID: ${{ secrets.DISCORD_USER_ID }}
           DISCORD_WEBHOOK_EMAIL_INFO: ${{ secrets.DISCORD_WEBHOOK_EMAIL_INFO }}
           DISCORD_WEBHOOK_EMAIL_EVENT: ${{ secrets.DISCORD_WEBHOOK_EMAIL_EVENT }}
           DISCORD_WEBHOOK_EMAIL_PROGRAM: ${{ secrets.DISCORD_WEBHOOK_EMAIL_PROGRAM }}
